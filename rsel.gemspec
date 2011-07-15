@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name = "RSel"
+  s.name = "rsel"
   s.version = "0.0.1"
   s.summary = "Runs Selenium tests from FitNesse"
   s.description = <<-EOS
