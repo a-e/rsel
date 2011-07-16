@@ -1,6 +1,8 @@
 require File.join(File.dirname(__FILE__), 'selenium')
 require File.join(File.dirname(__FILE__), 'exceptions')
 
+require 'xpath'
+
 # NOTE: Function names beginning with these words are forbidden:
 #
 # - check
@@ -153,8 +155,14 @@ module Rsel
     #   | Type | Dale | into | First name | field |
     #
     def type_into_field(text, locator)
-      @selenium.type(get_locator(locator, textFieldLocators), text)
-      return true
+      field_xpath = XPath::HTML.field(locator)
+      begin
+        @selenium.type("xpath=#{field_xpath}", text)
+      rescue
+        raise LocatorNotFound, "Could not find field with locator '#{locator}'"
+      else
+        return true
+      end
     end
 
 
@@ -172,12 +180,16 @@ module Rsel
     #   | Click link | Logout |
     #
     def click_link(locator)
+      link_xpath = XPath::HTML.link(locator).to_s
       begin
-        @selenium.click(get_locator(locator, linkLocators))
+        @selenium.click("xpath=#{link_xpath}")
       rescue
-        @selenium.click("Link=#{locator}")
+        raise LocatorNotFound, "Could not find link with locator '#{locator}'"
+      else
+        return true
       end
     end
+
 
     # Press a button.
     #
@@ -189,21 +201,58 @@ module Rsel
     #   | Click button | Login |
     #
     def click_button(locator)
-      @selenium.click(get_locator(locator, buttonLocators))
+      button_xpath = XPath::HTML.button(locator).to_s
+      begin
+        @selenium.click("xpath=#{button_xpath}")
+      rescue
+        raise LocatorNotFound, "Could not find button with locator '#{locator}'"
+      else
+        return true
+      end
     end
 
-    # Check or uncheck a checkbox.
+
+    # Enable (check) a checkbox.
     #
     # @param [String] locator
-    #   Label, id, or name of the checkbox to click
+    #   Label, id, or name of the checkbox to check
     #
     # @example
-    #   | Click | Send me spam | checkbox |
-    #   | Click checkbox | Send me spam |
+    #   | Enable | Send me spam | checkbox |
+    #   | Enable checkbox | Send me spam |
     #
-    def click_checkbox(locator)
-      @selenium.click(get_locator(locator, checkboxLocators))
+    def enable_checkbox(locator)
+      checkbox_xpath = XPath::HTML.checkbox(locator)
+      begin
+        @selenium.check("xpath=#{checkbox_xpath}")
+      rescue
+        raise LocatorNotFound, "Could not find checkbox with locator '#{locator}'"
+      else
+        return true
+      end
     end
+
+
+    # Disable (uncheck) a checkbox.
+    #
+    # @param [String] locator
+    #   Label, id, or name of the checkbox to uncheck
+    #
+    # @example
+    #   | Disable | Send me spam | checkbox |
+    #   | Disable checkbox | Send me spam |
+    #
+    def disable_checkbox(locator)
+      checkbox_xpath = XPath::HTML.checkbox(locator)
+      begin
+        @selenium.uncheck("xpath=#{checkbox_xpath}")
+      rescue
+        raise LocatorNotFound, "Could not find checkbox with locator '#{locator}'"
+      else
+        return true
+      end
+    end
+
 
     # Click on an image.
     #
@@ -217,6 +266,7 @@ module Rsel
     def click_image(locator)
       @selenium.click(get_locator(locator, imageLocators))
     end
+
 
     # Click on a radiobutton.
     #
