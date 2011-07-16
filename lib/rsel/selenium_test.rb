@@ -48,6 +48,7 @@ module Rsel
       begin
         @selenium.start
       rescue
+        # TODO: Find a way to make the test abort here
         raise SeleniumNotRunning, "Could not start Selenium."
       else
         return true
@@ -80,8 +81,9 @@ module Rsel
     #   | Visit | /software |
     #
     def visit(path_or_url)
-      @selenium.open(path_or_url)
-      return true
+      return_error_status do
+        @selenium.open(path_or_url)
+      end
     end
 
     # Click the Back button to navigate to the previous page.
@@ -90,8 +92,9 @@ module Rsel
     #   | Click back |
     #
     def click_back
-      @selenium.go_back
-      return true
+      return_error_status do
+        @selenium.go_back
+      end
     end
 
     # Reload the current page.
@@ -100,8 +103,9 @@ module Rsel
     #   | refresh page |
     #
     def refresh_page
-      @selenium.refresh
-      return true
+      return_error_status do
+        @selenium.refresh
+      end
     end
 
 
@@ -121,6 +125,7 @@ module Rsel
       return @selenium.is_text_present(text)
     end
 
+
     # Ensure that the current page has the given title text.
     #
     # @param [String] title
@@ -131,11 +136,7 @@ module Rsel
     #   | Should see | Our Homepage | title |
     #
     def should_see_title(title)
-      if @selenium.get_title == title then
-        return true
-      else
-        return false
-      end
+      return (@selenium.get_title == title)
     end
 
 
@@ -143,7 +144,7 @@ module Rsel
     # Entering text
     # ----------------------------------------
 
-    # Type a value into the given field
+    # Type a value into the given field.
     #
     # @param [String] text
     #   What to type into the field
@@ -155,14 +156,19 @@ module Rsel
     #   | Type | Dale | into | First name | field |
     #
     def type_into_field(text, locator)
-      field_xpath = XPath::HTML.field(locator)
-      begin
-        @selenium.type("xpath=#{field_xpath}", text)
-      rescue
-        raise LocatorNotFound, "Could not find field with locator '#{locator}'"
-      else
-        return true
+      return_error_status do
+        @selenium.type("xpath=#{XPath::HTML.field(locator)}", text)
       end
+    end
+
+
+    # Fill in a field with the given text.
+    #
+    # @example
+    #   | Fill in | First name | with | Eric |
+    #
+    def fill_in_with(locator, text)
+      type_into_field(text, locator)
     end
 
 
@@ -180,13 +186,8 @@ module Rsel
     #   | Click link | Logout |
     #
     def click_link(locator)
-      link_xpath = XPath::HTML.link(locator).to_s
-      begin
-        @selenium.click("xpath=#{link_xpath}")
-      rescue
-        raise LocatorNotFound, "Could not find link with locator '#{locator}'"
-      else
-        return true
+      return_error_status do
+        @selenium.click("xpath=#{XPath::HTML.link(locator)}")
       end
     end
 
@@ -201,13 +202,8 @@ module Rsel
     #   | Click button | Login |
     #
     def click_button(locator)
-      button_xpath = XPath::HTML.button(locator).to_s
-      begin
-        @selenium.click("xpath=#{button_xpath}")
-      rescue
-        raise LocatorNotFound, "Could not find button with locator '#{locator}'"
-      else
-        return true
+      return_error_status do
+        @selenium.click("xpath=#{XPath::HTML.button(locator)}")
       end
     end
 
@@ -222,13 +218,8 @@ module Rsel
     #   | Enable checkbox | Send me spam |
     #
     def enable_checkbox(locator)
-      checkbox_xpath = XPath::HTML.checkbox(locator)
-      begin
-        @selenium.check("xpath=#{checkbox_xpath}")
-      rescue
-        raise LocatorNotFound, "Could not find checkbox with locator '#{locator}'"
-      else
-        return true
+      return_error_status do
+        @selenium.check("xpath=#{XPath::HTML.checkbox(locator)}")
       end
     end
 
@@ -243,13 +234,8 @@ module Rsel
     #   | Disable checkbox | Send me spam |
     #
     def disable_checkbox(locator)
-      checkbox_xpath = XPath::HTML.checkbox(locator)
-      begin
-        @selenium.uncheck("xpath=#{checkbox_xpath}")
-      rescue
-        raise LocatorNotFound, "Could not find checkbox with locator '#{locator}'"
-      else
-        return true
+      return_error_status do
+        @selenium.uncheck("xpath=#{XPath::HTML.checkbox(locator)}")
       end
     end
 
@@ -277,7 +263,9 @@ module Rsel
     #   | Click | female | radio |
     #   | Click radio | female |
     def click_radio(locator)
-      @selenium.click(get_locator(locator, radioLocators))
+      return_error_status do
+        @selenium.click("xpath=#{XPath::HTML.radio_button(locator)}")
+      end
     end
 
 
@@ -316,8 +304,9 @@ module Rsel
     #   | select | Tall | from dropdown | Height |
     #
     def select_from_dropdown(value, locator)
-      # TODO: Provide xpaths for locator
-      @selenium.select(locator, value)
+      return_error_status do
+        @selenium.select("xpath=#{XPath::HTML.select(locator)}", value)
+      end
     end
 
 
@@ -334,6 +323,7 @@ module Rsel
       @selenium.submit(get_locator(locator, formLocators))
     end
 
+
     # ----------------------------------------
     # Miscellaneous
     # ----------------------------------------
@@ -341,25 +331,46 @@ module Rsel
     # Maximize the browser window. May not work in some browsers.
     #
     # @example
-    #   | maximize window |
+    #   | maximize browser |
     #
-    def maximize_window
+    def maximize_browser
       @selenium.window_maximize
+      return true
     end
 
     # Wait some number of seconds for the current page request to finish.
     #
     # @example
-    #   | page reloads in less than | 10 | seconds |
+    #   | Page loads in | 10 | seconds or less |
     #
-    def page_reloads_in_less_than_seconds(seconds)
-      return @selenium.wait_for_page_to_load(seconds + "000")
+    def page_loads_in_seconds_or_less(seconds)
+      return_error_status do
+        @selenium.wait_for_page_to_load(seconds + "000")
+      end
     end
 
 
     # ----------------------------------------
     # Helper functions
     # ----------------------------------------
+
+    # Execute the given block, and return false if it raises an exception.
+    # Otherwise, return true.
+    #
+    # @example
+    #   return_error_status do
+    #     # some code that might raise an exception
+    #   end
+    #
+    def return_error_status(&block)
+      begin
+        yield
+      rescue
+        return false
+      else
+        return true
+      end
+    end
 
     def capitalizeEachWord(str)
       return str.gsub(/^[a-z]|\s+[a-z]/) { |a| a.upcase }
@@ -389,39 +400,6 @@ module Rsel
       possibleCaptions[4] = ' ' + capitalizeEachWord(caption)
       possibleCaptions[5] = capitalizeEachWord(caption) + ' '
       return possibleCaptions
-    end
-
-    def textFieldLocators
-      [
-        "xpath=//input[@type='text' and @name='{0}']",
-        "xpath=//input[@type='text' and @title='{0}']",
-        "xpath=//input[@type='password' and @name='{0}']",
-        "xpath=//textarea[@name='{0}']",
-        "xpath=//input[@type='text' and @id='{0}']",
-        "xpath=//input[@type='password' and @id='{0}']",
-        "xpath=//textarea[@id='{0}']",
-      ]
-    end
-
-    def buttonLocators
-      [
-        "xpath=//input[@type='submit' and @name='{0}']",
-        "xpath=//input[@type='button' and @name='{0}']",
-        "xpath=//input[@type='submit' and @value='{0}']",
-        "xpath=//input[@type='button' and @value='{0}']",
-        "xpath=//input[@type='submit' and @id='{0}']",
-        "xpath=//input[@type='button' and @id='{0}']",
-      ]
-    end
-
-    def checkboxLocators
-      [
-        "xpath=//input[@type='checkbox' and @name='{0}']",
-        "xpath=//span[@id='{0}']/span/button",
-        "xpath=//span[@type='checkbox' and @id='{0}']/span/button",
-        "xpath=//input[@type='checkbox' and @label[text()='{0}']]",
-        "xpath=//input[@type='checkbox' and @id=(//label[text()='{0}']/@for)]",
-      ]
     end
 
     #added 7/1/08 -Dale; bug fix 7/7
