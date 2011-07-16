@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/a-e/rsel"
   s.platform = Gem::Platform::RUBY
 
+  s.add_dependency 'xpath'
   s.add_development_dependency 'yard'
 
   s.files = `git ls-files`.split("\n")

@@ -326,7 +326,7 @@ module Rsel
           end
         end
       end
-      raise "No Locator Found"
+      raise LocatorNotFound, "Could not find locator '#{caption}'"
     end
 
     # possible variations on the caption to look for
