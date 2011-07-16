@@ -6,6 +6,8 @@ via [Ruby](http://ruby-lang.org).
 
 It is still a work in progress.
 
+[Full documentation is on rdoc.info](http://rdoc.info/github/a-e/rsel/master/frames).
+
 
 Copyright
 ---------
