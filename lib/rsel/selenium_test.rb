@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), 'selenium')
+require File.join(File.dirname(__FILE__), 'exceptions')
 
 # NOTE: Function names beginning with these words are forbidden:
 #
@@ -12,9 +13,6 @@ require File.join(File.dirname(__FILE__), 'selenium')
 # This is because the above words are keywords in Slim script tables; if
 # the first cell of a script table begins with any of these words, Slim tries
 # to apply special handling to them, which usually doesn't do what you want.
-
-class LocatorNotFound < RuntimeError; end
-class SeleniumNotRunning < RuntimeError; end
 
 module Rsel
   class SeleniumTest
