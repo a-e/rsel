@@ -72,6 +72,9 @@ module Rsel
 
     # Load an absolute URL or a relative path in the browser.
     #
+    # @param [String] path_or_url
+    #   Relative path or absolute URL to load
+    #
     # @example
     #   | Visit | http://www.automation-excellence.com |
     #   | Visit | /software |
@@ -81,7 +84,7 @@ module Rsel
       return true
     end
 
-    # Click the browser's "Back" button.
+    # Click the Back button to navigate to the previous page.
     #
     # @example
     #   | Click back |
@@ -91,7 +94,11 @@ module Rsel
       return true
     end
 
-    # Sample Call-> |RefreshPage|
+    # Reload the current page.
+    #
+    # @example
+    #   | refresh page |
+    #
     def refresh_page
       @selenium.refresh
       return true
@@ -104,6 +111,9 @@ module Rsel
 
     # Ensure that the given text appears on the current page.
     #
+    # @param [String] text
+    #   Plain text that should be visible on the current page
+    #
     # @example
     #   | Should see | Welcome, Marcus |
     #
@@ -112,6 +122,9 @@ module Rsel
     end
 
     # Ensure that the current page has the given title text.
+    #
+    # @param [String] title
+    #   Text of the page title that you expect to see
     #
     # @example
     #   | Should see title | Our Homepage |
@@ -153,6 +166,9 @@ module Rsel
 
     # Click on a link.
     #
+    # @param [String] locator
+    #   Link text, or the id, name, or href of the anchor element
+    #
     # @example
     #   | Click | Logout | link |
     #   | Click link | Logout |
@@ -167,6 +183,9 @@ module Rsel
 
     # Press a button.
     #
+    # @param [String] locator
+    #   Button text, or the id or name of the button/submit element
+    #
     # @example
     #   | Click | Login | button |
     #   | Click button | Login |
@@ -176,6 +195,9 @@ module Rsel
     end
 
     # Check or uncheck a checkbox.
+    #
+    # @param [String] locator
+    #   Label, id, or name of the checkbox to click
     #
     # @example
     #   | Click | Send me spam | checkbox |
@@ -187,6 +209,9 @@ module Rsel
 
     # Click on an image.
     #
+    # @param [String] locator
+    #   The id, src, title, or href of the image to click on
+    #
     # @example
     #   | Click | colorado.png | image |
     #   | Click image | colorado.png |
@@ -196,6 +221,9 @@ module Rsel
     end
 
     # Click on a radiobutton.
+    #
+    # @param [String] locator
+    #   Label, id, or name of the radiobutton to click
     #
     # @example
     #   | Click | female | radio |
@@ -210,12 +238,15 @@ module Rsel
     # Waiting
     # ----------------------------------------
 
-    # Wait a certain number of seconds before continuing
+    # Pause for a certain number of seconds.
+    #
+    # @param [String, Int] seconds
+    #   How many seconds to pause
     #
     # @example
-    #   | Wait | 5 | seconds |
+    #   | Pause | 5 | seconds |
     #
-    def wait_seconds(seconds)
+    def pause_seconds(seconds)
       sleep seconds.to_i
       return true
     end
@@ -225,14 +256,32 @@ module Rsel
     # Form stuff
     # ----------------------------------------
 
-    #added 7/7 -Dale (parm[0] is menu, parm[1] is value)
-    # Sample Call-> |UserSelects|my menu|Option|value=40|
+    # Select a value from a dropdown/combo box.
+    #
+    # @param [String] value
+    #   The value to choose from the dropdown
+    # @param [String] locator
+    #   Dropdown locator
+    #
+    # @example
+    #   | select | Tall | from | Height | dropdown |
+    #   | select | Tall | from dropdown | Height |
+    #
     def select_from_dropdown(value, locator)
+      # TODO: Provide xpaths for locator
       @selenium.select(locator, value)
     end
 
-    #added 7/8 -Dale (use form name or form action for parameter)
-    # Sample Call-> |UserSubmitsForm|My form name|
+
+    # Submit the form with the given name.
+    #
+    # @param [String] locator
+    #   Form id, name or action
+    #
+    # @example
+    #   | submit form | place_order |
+    #   | submit | place_order | form |
+    #
     def submit_form(locator)
       @selenium.submit(get_locator(locator, formLocators))
     end
@@ -241,25 +290,32 @@ module Rsel
     # Miscellaneous
     # ----------------------------------------
 
-    #maximize works in IE but not firefox -Dale
-    # Sample Call-> |WindowMaximize|
+    # Maximize the browser window. May not work in some browsers.
+    #
+    # @example
+    #   | maximize window |
+    #
     def maximize_window
       @selenium.window_maximize
     end
 
-    # Sample Call-> |PageReloadsInLessThan|30|Seconds|
+    # Wait some number of seconds for the current page request to finish.
+    #
+    # @example
+    #   | page reloads in less than | 10 | seconds |
+    #
     def page_reloads_in_less_than_seconds(seconds)
       return @selenium.wait_for_page_to_load(seconds + "000")
-    end
-
-    def capitalizeEachWord(str)
-      return str.gsub(/^[a-z]|\s+[a-z]/) { |a| a.upcase }
     end
 
 
     # ----------------------------------------
     # Helper functions
     # ----------------------------------------
+
+    def capitalizeEachWord(str)
+      return str.gsub(/^[a-z]|\s+[a-z]/) { |a| a.upcase }
+    end
 
     def get_locator(caption, possibleFormats)
       possibleCaptions = getPossibleCaptions(caption)
