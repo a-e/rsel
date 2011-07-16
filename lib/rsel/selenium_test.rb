@@ -3,21 +3,27 @@ require File.join(File.dirname(__FILE__), 'exceptions')
 
 require 'xpath'
 
-# NOTE: Function names beginning with these words are forbidden:
-#
-# - check
-# - ensure
-# - reject
-# - note
-# - show
-# - start
-#
-# This is because the above words are keywords in Slim script tables; if
-# the first cell of a script table begins with any of these words, Slim tries
-# to apply special handling to them, which usually doesn't do what you want.
-
 module Rsel
+
+  # Main Selenium-test class.
+  #
+  # @example
+  #   !| script | selenium test | http://www.example.com/ |
+  #
+  # NOTE: Function names beginning with these words are forbidden:
+  #
+  # - check
+  # - ensure
+  # - reject
+  # - note
+  # - show
+  # - start
+  #
+  # This is because the above words are keywords in Slim script tables; if
+  # the first cell of a script table begins with any of these words, Slim tries
+  # to apply special handling to them, which usually doesn't do what you want.
   class SeleniumTest
+
     # Start up a test, connecting to the given Selenium server and opening
     # a browser.
     #
