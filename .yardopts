@@ -1,0 +1,6 @@
+--readme docs/index.md
+--markup markdown
+--no-highlight
+lib/rsel/selenium_test.rb
+-
+docs/*.md
