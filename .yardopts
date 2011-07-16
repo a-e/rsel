@@ -1,6 +1,7 @@
 --readme docs/index.md
 --markup markdown
 --no-highlight
-lib/rsel/selenium_test.rb
+--exclude lib/rsel/selenium.rb
+lib/rsel/*.rb
 -
 docs/*.md
