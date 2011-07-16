@@ -13,8 +13,8 @@ require File.join(File.dirname(__FILE__), 'selenium')
 # the first cell of a script table begins with any of these words, Slim tries
 # to apply special handling to them, which usually doesn't do what you want.
 
-class LocatorNotFound < Exception; end
-class SeleniumNotRunning < Exception; end
+class LocatorNotFound < RuntimeError; end
+class SeleniumNotRunning < RuntimeError; end
 
 module Rsel
   class SeleniumTest
