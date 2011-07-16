@@ -1,5 +1,21 @@
 require File.join(File.dirname(__FILE__), 'selenium')
 
+# NOTE: Function names beginning with these words are forbidden:
+#
+# - check
+# - ensure
+# - reject
+# - note
+# - show
+# - start
+#
+# This is because the above words are keywords in Slim script tables; if
+# the first cell of a script table begins with any of these words, Slim tries
+# to apply special handling to them, which usually doesn't do what you want.
+
+class LocatorNotFound < Exception; end
+class SeleniumNotRunning < Exception; end
+
 module Rsel
   class SeleniumTest
     # Start up a test, connecting to the given Selenium server and opening
@@ -20,14 +36,29 @@ module Rsel
     #
     def initialize(url, server='localhost', port='4444', browser='*firefox')
       @selenium = Selenium::SeleniumDriver.new(server, port, browser, url)
-      @selenium.start
-      return true
     end
+
+
+    # Start the Selenium session.
+    #
+    # @example
+    #   | Open browser |
+    #
+    def open_browser
+      begin
+        @selenium.start
+      rescue
+        raise SeleniumNotRunning, "Could not start Selenium."
+      else
+        return true
+      end
+    end
+
 
     # Close the browser window
     #
     # @example
-    #   | close browser |
+    #   | Close browser |
     #
     def close_browser
       @selenium.stop
@@ -39,26 +70,31 @@ module Rsel
     # Navigation
     # ----------------------------------------
 
-    # Load a URL in the browser. The URL may be absolute or relative.
+    # Load an absolute URL or a relative path in the browser.
     #
     # @example
-    #   | visit | http://www.automation-excellence.com |
-    #   | visit | /software |
+    #   | Visit | http://www.automation-excellence.com |
+    #   | Visit | /software |
     #
-    def visit(url)
-      @selenium.open(url)
+    def visit(path_or_url)
+      @selenium.open(path_or_url)
       return true
     end
 
-    #this is intermittent in IE, works fine in firefox -Dale
-    # Sample Call-> |ClickBack|
-    def click_back(params)
+    # Click the browser's "Back" button.
+    #
+    # @example
+    #   | Click back |
+    #
+    def click_back
       @selenium.go_back
+      return true
     end
 
     # Sample Call-> |RefreshPage|
     def refresh_page
       @selenium.refresh
+      return true
     end
 
 
@@ -69,7 +105,7 @@ module Rsel
     # Ensure that the given text appears on the current page.
     #
     # @example
-    #   | should see | Welcome, Marcus |
+    #   | Should see | Welcome, Marcus |
     #
     def should_see(text)
       return @selenium.is_text_present(text)
@@ -78,8 +114,8 @@ module Rsel
     # Ensure that the current page has the given title text.
     #
     # @example
-    #   | should see title | Our Homepage |
-    #   | should see | Our Homepage | title |
+    #   | Should see title | Our Homepage |
+    #   | Should see | Our Homepage | title |
     #
     def should_see_title(title)
       if @selenium.get_title == title then
@@ -102,8 +138,8 @@ module Rsel
     #   Locator string for the field you want to type into
     #
     # @example
-    #   | type | Dale | into field | First name |
-    #   | type | Dale | into | First name | field |
+    #   | Type | Dale | into field | First name |
+    #   | Type | Dale | into | First name | field |
     #
     def type_into_field(text, locator)
       @selenium.type(get_locator(locator, textFieldLocators), text)
@@ -118,8 +154,8 @@ module Rsel
     # Click on a link.
     #
     # @example
-    #   | click | Logout | link |
-    #   | click link | Logout |
+    #   | Click | Logout | link |
+    #   | Click link | Logout |
     #
     def click_link(locator)
       begin
@@ -132,8 +168,8 @@ module Rsel
     # Press a button.
     #
     # @example
-    #   | click | Login | button |
-    #   | click button | Login |
+    #   | Click | Login | button |
+    #   | Click button | Login |
     #
     def click_button(locator)
       @selenium.click(get_locator(locator, buttonLocators))
@@ -142,8 +178,8 @@ module Rsel
     # Check or uncheck a checkbox.
     #
     # @example
-    #   | click | Send me spam | checkbox |
-    #   | click checkbox | Send me spam |
+    #   | Click | Send me spam | checkbox |
+    #   | Click checkbox | Send me spam |
     #
     def click_checkbox(locator)
       @selenium.click(get_locator(locator, checkboxLocators))
@@ -152,8 +188,8 @@ module Rsel
     # Click on an image.
     #
     # @example
-    #   | click | colorado.png | image |
-    #   | click image | colorado.png |
+    #   | Click | colorado.png | image |
+    #   | Click image | colorado.png |
     #
     def click_image(locator)
       @selenium.click(get_locator(locator, imageLocators))
@@ -162,8 +198,8 @@ module Rsel
     # Click on a radiobutton.
     #
     # @example
-    #   | click | female | radio |
-    #   | click radio | female |
+    #   | Click | female | radio |
+    #   | Click radio | female |
     def click_radio(locator)
       @selenium.click(get_locator(locator, radioLocators))
     end
@@ -177,10 +213,11 @@ module Rsel
     # Wait a certain number of seconds before continuing
     #
     # @example
-    #   | wait | 5 | seconds |
+    #   | Wait | 5 | seconds |
     #
     def wait_seconds(seconds)
       sleep seconds.to_i
+      return true
     end
 
 
@@ -217,12 +254,6 @@ module Rsel
 
     def capitalizeEachWord(str)
       return str.gsub(/^[a-z]|\s+[a-z]/) { |a| a.upcase }
-    end
-
-    #there may be a better way but I want to be able to insert comments now -Dale
-    # Sample Call-> |Comment|this is a comment|
-    def comment(*ignore_cells)
-      return
     end
 
 
