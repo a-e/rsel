@@ -213,6 +213,15 @@ module Rsel
       end
     end
 
+    # Alias for {#click_link}.
+    #
+    # @example
+    #   | Follow | Logout |
+    #
+    def follow(locator)
+      click_link(locator)
+    end
+
 
     # Press a button.
     #
@@ -227,6 +236,15 @@ module Rsel
       return_error_status do
         @selenium.click("xpath=#{XPath::HTML.button(locator)}")
       end
+    end
+
+    # Alias for {#click_button}
+    #
+    # @example
+    #   | Press | Search |
+    #
+    def press(locator)
+      click_button(locator)
     end
 
 

@@ -31,7 +31,7 @@ If you're using Bundler, you may need to use:
 Next, put this in your `SeleniumTests.SetUp` page:
 
     !| import |
-    | Rsel |
+    | Rsel    |
 
 Finally, add your tests to subpages of `SeleniumTests`. For instance, your
 `SeleniumTests.LoginTest` might look like this:
