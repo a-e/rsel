@@ -82,7 +82,8 @@ module Rsel
     # Load an absolute URL or a relative path in the browser.
     #
     # @param [String] path_or_url
-    #   Relative path or absolute URL to load
+    #   Relative path or absolute URL to load. Absolute URLs must be in the
+    #   same domain as the URL that was passed to {#initialize}.
     #
     # @example
     #   | Visit | http://www.automation-excellence.com |
@@ -94,6 +95,7 @@ module Rsel
       end
     end
 
+
     # Click the Back button to navigate to the previous page.
     #
     # @example
@@ -104,6 +106,7 @@ module Rsel
         @selenium.go_back
       end
     end
+
 
     # Reload the current page.
     #
@@ -215,6 +218,7 @@ module Rsel
       end
     end
 
+
     # Alias for {#click_link}.
     #
     # @example
@@ -239,6 +243,7 @@ module Rsel
         @selenium.click("xpath=#{XPath::HTML.button(locator)}")
       end
     end
+
 
     # Alias for {#click_button}
     #

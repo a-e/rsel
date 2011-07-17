@@ -55,3 +55,17 @@ relative path, during the course of your test, call `Visit`:
 See the `SeleniumTest` class documentation for a full list of available methods
 and how to use them.
 
+
+TODO
+----
+
+- Consider using the more Rubyesque [selenium-client](https://github.com/ph7/selenium-client)
+  gem instead of packaging `selenium.rb` into this project
+- Pass better error messages back to FitNesse. It seems that Slim script tables
+  only support true/false results, with no clear way to report on what went
+  wrong (aside from raising an exception, which even then curiously does not
+  mark the step as failed)
+- Find a way to abort a test if something goes catastrophically wrong (such as
+  being unable to connect to the Selenium server)
+
+
