@@ -1,7 +1,7 @@
-require File.join(File.dirname(__FILE__), 'selenium')
 require File.join(File.dirname(__FILE__), 'exceptions')
 
 require 'xpath'
+require 'selenium/client'
 
 module Rsel
 
@@ -42,7 +42,12 @@ module Rsel
     #
     def initialize(url, server='localhost', port='4444', browser='*firefox')
       @url = url
-      @selenium = Selenium::SeleniumDriver.new(server, port, browser, url)
+      @browser = Selenium::Client::Driver.new(
+        :server => server,
+        :port => port,
+        :browser => browser,
+        :url => url,
+        :timeout_in_second => 60)
     end
 
 
@@ -54,7 +59,7 @@ module Rsel
     #
     def open_browser
       begin
-        @selenium.start
+        @browser.start_new_browser_session
       rescue
         # TODO: Find a way to make the test abort here
         raise SeleniumNotRunning, "Could not start Selenium."
@@ -70,7 +75,7 @@ module Rsel
     #   | Close browser |
     #
     def close_browser
-      @selenium.stop
+      @browser.close_current_browser_session
       return true
     end
 
@@ -91,7 +96,7 @@ module Rsel
     #
     def visit(path_or_url)
       return_error_status do
-        @selenium.open(path_or_url)
+        @browser.open(path_or_url)
       end
     end
 
@@ -103,7 +108,7 @@ module Rsel
     #
     def click_back
       return_error_status do
-        @selenium.go_back
+        @browser.go_back
       end
     end
 
@@ -115,7 +120,7 @@ module Rsel
     #
     def refresh_page
       return_error_status do
-        @selenium.refresh
+        @browser.refresh
       end
     end
 
@@ -126,7 +131,7 @@ module Rsel
     #   | maximize browser |
     #
     def maximize_browser
-      @selenium.window_maximize
+      @browser.window_maximize
       return true
     end
 
@@ -144,7 +149,7 @@ module Rsel
     #   | Should see | Welcome, Marcus |
     #
     def should_see(text)
-      return @selenium.is_text_present(text)
+      return @browser.text?(text)
     end
 
 
@@ -158,7 +163,7 @@ module Rsel
     #   | Should see | Our Homepage | title |
     #
     def should_see_title(title)
-      return (@selenium.get_title == title)
+      return (@browser.get_title == title)
     end
 
 
@@ -179,7 +184,7 @@ module Rsel
     #
     def type_into_field(text, locator)
       return_error_status do
-        @selenium.type("xpath=#{XPath::HTML.field(locator)}", text)
+        @browser.type("xpath=#{XPath::HTML.field(locator)}", text)
       end
     end
 
@@ -214,7 +219,7 @@ module Rsel
     #
     def click_link(locator)
       return_error_status do
-        @selenium.click("xpath=#{XPath::HTML.link(locator)}")
+        @browser.click("xpath=#{XPath::HTML.link(locator)}")
       end
     end
 
@@ -240,7 +245,7 @@ module Rsel
     #
     def click_button(locator)
       return_error_status do
-        @selenium.click("xpath=#{XPath::HTML.button(locator)}")
+        @browser.click("xpath=#{XPath::HTML.button(locator)}")
       end
     end
 
@@ -266,7 +271,7 @@ module Rsel
     #
     def enable_checkbox(locator)
       return_error_status do
-        @selenium.check("xpath=#{XPath::HTML.checkbox(locator)}")
+        @browser.check("xpath=#{XPath::HTML.checkbox(locator)}")
       end
     end
 
@@ -282,7 +287,7 @@ module Rsel
     #
     def disable_checkbox(locator)
       return_error_status do
-        @selenium.uncheck("xpath=#{XPath::HTML.checkbox(locator)}")
+        @browser.uncheck("xpath=#{XPath::HTML.checkbox(locator)}")
       end
     end
 
@@ -298,7 +303,7 @@ module Rsel
     #
     def click_radio(locator)
       return_error_status do
-        @selenium.click("xpath=#{XPath::HTML.radio_button(locator)}")
+        @browser.click("xpath=#{XPath::HTML.radio_button(locator)}")
       end
     end
 
@@ -314,7 +319,7 @@ module Rsel
     #
     def click_image(locator)
       return_error_status do
-        @selenium.click(get_locator(locator, imageLocators))
+        @browser.click(get_locator(locator, imageLocators))
       end
     end
 
@@ -348,7 +353,7 @@ module Rsel
     #
     def page_loads_in_seconds_or_less(seconds)
       return_error_status do
-        @selenium.wait_for_page_to_load("#{seconds}000")
+        @browser.wait_for_page_to_load("#{seconds}000")
       end
     end
 
@@ -370,7 +375,7 @@ module Rsel
     #
     def select_from_dropdown(value, locator)
       return_error_status do
-        @selenium.select("xpath=#{XPath::HTML.select(locator)}", value)
+        @browser.select("xpath=#{XPath::HTML.select(locator)}", value)
       end
     end
 
@@ -385,7 +390,7 @@ module Rsel
     #   | submit | place_order | form |
     #
     def submit_form(locator)
-      @selenium.submit(get_locator(locator, formLocators))
+      @browser.submit(get_locator(locator, formLocators))
     end
 
 
@@ -426,7 +431,7 @@ module Rsel
         possibleFormats.each do |possibleFormat|
           locator = possibleFormat.sub('{0}', possibleCaption)
           puts "possible locator: " + locator
-          if @selenium.is_element_present(locator)
+          if @browser.is_element_present(locator)
             return locator
           end
         end

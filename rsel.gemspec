@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
 
   s.add_dependency 'xpath'
+  s.add_dependency 'selenium-client'
   s.add_development_dependency 'yard'
 
   s.files = `git ls-files`.split("\n")
