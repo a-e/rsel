@@ -41,11 +41,13 @@ module Rsel
     #   | script | selenium test | http://site.to.test/ | 192.168.0.3 | 4445 |
     #
     def initialize(url, server='localhost', port='4444', browser='*firefox')
+      @url = url
       @selenium = Selenium::SeleniumDriver.new(server, port, browser, url)
     end
 
 
-    # Start the session and open a browser window.
+    # Start the session and open a browser to the URL defined at the start of
+    # the test.
     #
     # @example
     #   | Open browser |
@@ -57,7 +59,7 @@ module Rsel
         # TODO: Find a way to make the test abort here
         raise SeleniumNotRunning, "Could not start Selenium."
       else
-        return true
+        visit @url
       end
     end
 
