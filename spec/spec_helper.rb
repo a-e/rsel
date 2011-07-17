@@ -1,5 +1,6 @@
 require 'rspec'
 require 'rsel'
+require 'selenium/client'
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test', 'app'))
 
@@ -12,5 +13,15 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test', 'app'))
 #
 RSpec.configure do |config|
   config.include Rsel
+
+  # Create a Selenium Driver instance to use for each test
+  config.prepend_before(:each) do
+    @browser = Selenium::Client::Driver.new \
+      :host => 'localhost',
+      :port => 4444,
+      :browser => '*firefox',
+      :timeout_in_seconds => 10,
+      :url => 'http://localhost:4567'
+  end
 end
 
