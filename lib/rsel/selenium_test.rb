@@ -22,10 +22,10 @@ module Rsel
   # This is because the above words are keywords in Slim script tables; if
   # the first cell of a script table begins with any of these words, Slim tries
   # to apply special handling to them, which usually doesn't do what you want.
+  #
   class SeleniumTest
 
-    # Start up a test, connecting to the given Selenium server and opening
-    # a browser.
+    # Initialize a test, connecting to the given Selenium server.
     #
     # @param [String] url
     #   Full URL, including http://, of the system under test
@@ -45,7 +45,7 @@ module Rsel
     end
 
 
-    # Start the Selenium session.
+    # Start the session and open a browser window.
     #
     # @example
     #   | Open browser |
@@ -62,7 +62,7 @@ module Rsel
     end
 
 
-    # Close the browser window
+    # Stop the session and close the browser window.
     #
     # @example
     #   | Close browser |
@@ -74,7 +74,7 @@ module Rsel
 
 
     # ----------------------------------------
-    # Navigation
+    # Browsing
     # ----------------------------------------
 
     # Load an absolute URL or a relative path in the browser.
@@ -112,6 +112,17 @@ module Rsel
       return_error_status do
         @selenium.refresh
       end
+    end
+
+
+    # Maximize the browser window. May not work in some browsers.
+    #
+    # @example
+    #   | maximize browser |
+    #
+    def maximize_browser
+      @selenium.window_maximize
+      return true
     end
 
 
@@ -155,7 +166,7 @@ module Rsel
     # @param [String] text
     #   What to type into the field
     # @param [String] locator
-    #   Locator string for the field you want to type into
+    #   Label, name, or id of the field you want to type into
     #
     # @example
     #   | Type | Dale | into field | First name |
@@ -169,6 +180,11 @@ module Rsel
 
 
     # Fill in a field with the given text.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the field you want to type into
+    # @param [String] text
+    #   What to type into the field
     #
     # @example
     #   | Fill in | First name | with | Eric |
@@ -185,7 +201,7 @@ module Rsel
     # Click on a link.
     #
     # @param [String] locator
-    #   Link text, or the id, name, or href of the anchor element
+    #   Link text or id of the anchor element
     #
     # @example
     #   | Click | Logout | link |
@@ -201,7 +217,7 @@ module Rsel
     # Press a button.
     #
     # @param [String] locator
-    #   Button text, or the id or name of the button/submit element
+    #   Button text, value, or id of the button
     #
     # @example
     #   | Click | Login | button |
@@ -217,7 +233,7 @@ module Rsel
     # Enable (check) a checkbox.
     #
     # @param [String] locator
-    #   Label, id, or name of the checkbox to check
+    #   Label, value, or id of the checkbox to check
     #
     # @example
     #   | Enable | Send me spam | checkbox |
@@ -233,7 +249,7 @@ module Rsel
     # Disable (uncheck) a checkbox.
     #
     # @param [String] locator
-    #   Label, id, or name of the checkbox to uncheck
+    #   Label, value, or id of the checkbox to uncheck
     #
     # @example
     #   | Disable | Send me spam | checkbox |
@@ -242,6 +258,22 @@ module Rsel
     def disable_checkbox(locator)
       return_error_status do
         @selenium.uncheck("xpath=#{XPath::HTML.checkbox(locator)}")
+      end
+    end
+
+
+    # Click on a radio button.
+    #
+    # @param [String] locator
+    #   Label, id, or name of the radio button to click
+    #
+    # @example
+    #   | Click | female | radio |
+    #   | Click radio | female |
+    #
+    def click_radio(locator)
+      return_error_status do
+        @selenium.click("xpath=#{XPath::HTML.radio_button(locator)}")
       end
     end
 
@@ -256,24 +288,10 @@ module Rsel
     #   | Click image | colorado.png |
     #
     def click_image(locator)
-      @selenium.click(get_locator(locator, imageLocators))
-    end
-
-
-    # Click on a radiobutton.
-    #
-    # @param [String] locator
-    #   Label, id, or name of the radiobutton to click
-    #
-    # @example
-    #   | Click | female | radio |
-    #   | Click radio | female |
-    def click_radio(locator)
       return_error_status do
-        @selenium.click("xpath=#{XPath::HTML.radio_button(locator)}")
+        @selenium.click(get_locator(locator, imageLocators))
       end
     end
-
 
 
     # ----------------------------------------
@@ -294,6 +312,22 @@ module Rsel
     end
 
 
+    # Wait some number of seconds for the current page request to finish.
+    # Fails if the page does not finish loading within the specified time.
+    #
+    # @param [String, Int] seconds
+    #   How long to wait for before timing out
+    #
+    # @example
+    #   | Page loads in | 10 | seconds or less |
+    #
+    def page_loads_in_seconds_or_less(seconds)
+      return_error_status do
+        @selenium.wait_for_page_to_load("#{seconds}000")
+      end
+    end
+
+
     # ----------------------------------------
     # Form stuff
     # ----------------------------------------
@@ -303,7 +337,7 @@ module Rsel
     # @param [String] value
     #   The value to choose from the dropdown
     # @param [String] locator
-    #   Dropdown locator
+    #   Label, name, or id of the dropdown
     #
     # @example
     #   | select | Tall | from | Height | dropdown |
@@ -331,32 +365,6 @@ module Rsel
 
 
     # ----------------------------------------
-    # Miscellaneous
-    # ----------------------------------------
-
-    # Maximize the browser window. May not work in some browsers.
-    #
-    # @example
-    #   | maximize browser |
-    #
-    def maximize_browser
-      @selenium.window_maximize
-      return true
-    end
-
-    # Wait some number of seconds for the current page request to finish.
-    #
-    # @example
-    #   | Page loads in | 10 | seconds or less |
-    #
-    def page_loads_in_seconds_or_less(seconds)
-      return_error_status do
-        @selenium.wait_for_page_to_load(seconds + "000")
-      end
-    end
-
-
-    # ----------------------------------------
     # Helper functions
     # ----------------------------------------
 
@@ -377,6 +385,11 @@ module Rsel
         return true
       end
     end
+
+
+    # -------------------------------------------
+    # TODO: Clean up / refactor the stuff below
+    # -------------------------------------------
 
     def capitalizeEachWord(str)
       return str.gsub(/^[a-z]|\s+[a-z]/) { |a| a.upcase }
@@ -406,31 +419,6 @@ module Rsel
       possibleCaptions[4] = ' ' + capitalizeEachWord(caption)
       possibleCaptions[5] = capitalizeEachWord(caption) + ' '
       return possibleCaptions
-    end
-
-    #added 7/1/08 -Dale; bug fix 7/7
-    def radioLocators
-      [
-        "xpath=//input[@type='radio' and @name='{0}']",
-        "xpath=//input[@type='radio' and @id='{0}']",
-        "xpath=//input[@type='radio' and @label[text()='{0}']]",
-        "xpath=//input[@type='radio' and @id=(//label[text()=' {0}']/@for)]",
-        "xpath=//input[@type='radio' and @id=(//label[text()='{0} ']/@for)]",
-        "xpath=//input[@type='radio' and @id=(//label[text()='{0}']/@for)]",
-      ]
-    end
-
-    # added 2nd and 3rd xpaths because leading or trailing space may exist for the text of links
-    # added title and class 7/9 -Dale
-    def linkLocators
-      [
-        "xpath=//a[text()='{0}']",
-        "xpath=//a[text()=' {0}']",
-        "xpath=//a[text()='{0} ']",
-        "xpath=//a[@href='{0}']",
-        "xpath=//a[@title='{0}']",
-        "xpath=//a[@class='{0}']",
-      ]
     end
 
     # added to verify image elements -Dale
@@ -512,7 +500,6 @@ module Rsel
       return retval
     end
 
-
     ####################################################
     #DEBUG - all functions after this point are in a debug state - Dale
     ####################################################
@@ -546,16 +533,6 @@ module Rsel
     def OpenURLOnWindow(selenium,params)
       selenium.open_window(params[0],params[1])
     end
-
-
-    #def GetAllLinks(selenium,params)
-    #   return selenium.get_all_links
-    #end
-
-    #def GetTitle(selenium,params)
-    #    return selenium.get_title
-    #    #return get_string_array("getAllLinks", [])
-    #end
 
   end
 end
