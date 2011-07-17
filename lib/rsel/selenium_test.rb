@@ -1,5 +1,6 @@
 require File.join(File.dirname(__FILE__), 'exceptions')
 
+require 'rubygems'
 require 'xpath'
 require 'selenium/client'
 
@@ -40,14 +41,13 @@ module Rsel
     #   | script | selenium test | http://site.to.test/ |
     #   | script | selenium test | http://site.to.test/ | 192.168.0.3 | 4445 |
     #
-    def initialize(url, server='localhost', port='4444', browser='*firefox')
+    def initialize(url, host='localhost', port='4444', browser='*firefox')
       @url = url
       @browser = Selenium::Client::Driver.new(
-        :server => server,
+        :host => host,
         :port => port,
         :browser => browser,
-        :url => url,
-        :timeout_in_second => 60)
+        :url => url)
     end
 
 
@@ -208,6 +208,23 @@ module Rsel
     # Clicking things
     # ----------------------------------------
 
+    # Click on a link or button, and wait for a page to load.
+    #
+    # @param [String] locator
+    #   Text, value or id of the link or button to click
+    #
+    # @example
+    #   | Click | Next   |
+    #   | Click | Logout |
+    #
+    def click(locator)
+      return_error_status do
+        @browser.click("xpath=#{XPath::HTML.link_or_button(locator)}",
+                       :wait_for => :page)
+      end
+    end
+
+
     # Click on a link.
     #
     # @param [String] locator
@@ -219,7 +236,8 @@ module Rsel
     #
     def click_link(locator)
       return_error_status do
-        @browser.click("xpath=#{XPath::HTML.link(locator)}")
+        @browser.click("xpath=#{XPath::HTML.link(locator)}",
+                      :wait_for => :page)
       end
     end
 
@@ -245,7 +263,8 @@ module Rsel
     #
     def click_button(locator)
       return_error_status do
-        @browser.click("xpath=#{XPath::HTML.button(locator)}")
+        @browser.click("xpath=#{XPath::HTML.button(locator)}",
+                      :wait_for => :page)
       end
     end
 
@@ -406,7 +425,7 @@ module Rsel
     #     # some code that might raise an exception
     #   end
     #
-    def return_error_status(&block)
+    def return_error_status
       begin
         yield
       rescue
