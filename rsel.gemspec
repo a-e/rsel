@@ -13,8 +13,16 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'xpath'
   s.add_dependency 'selenium-client'
+
+  s.add_development_dependency 'rake', '0.8.7'
+  s.add_development_dependency 'sinatra'
+  s.add_development_dependency 'mongrel'
   s.add_development_dependency 'yard'
+  s.add_development_dependency 'rspec', '>= 2.2.0'
 
   s.files = `git ls-files`.split("\n")
+  # Don't include .jar files in distribution
+  s.files.reject! { |f| f =~ /.jar$/ }
+
   s.require_path = 'lib'
 end
