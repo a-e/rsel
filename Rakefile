@@ -1,6 +1,7 @@
 require 'rake'
 require 'net/http'
 require 'selenium/rake/tasks'
+require 'rspec/core/rake_task'
 
 ROOT_DIR = File.expand_path(File.dirname(__FILE__))
 TEST_APP = File.join(ROOT_DIR, 'test', 'app.rb')
@@ -35,3 +36,20 @@ Selenium::Rake::RemoteControlStopTask.new do |rc|
   rc.wait_until_stopped = true
 end
 
+desc "Run spec tests"
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.pattern = 'spec/**/*_spec.rb'
+  t.rspec_opts = ['--color', '--format doc']
+end
+
+desc "Start Selenium-RC and testapp servers, run tests, then stop servers"
+task :test do
+  begin
+    Rake::Task['testapp:start'].invoke
+    Rake::Task['selenium:rc:start'].invoke
+    Rake::Task['spec'].invoke
+  ensure
+    Rake::Task['selenium:rc:stop'].invoke
+    Rake::Task['testapp:stop'].invoke
+  end
+end

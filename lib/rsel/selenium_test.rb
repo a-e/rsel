@@ -50,6 +50,8 @@ module Rsel
         :url => url)
     end
 
+    attr_reader :url, :browser
+
 
     # Start the session and open a browser to the URL defined at the start of
     # the test.
