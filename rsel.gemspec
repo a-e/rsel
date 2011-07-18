@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'xpath'
 
-  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rake', '0.8.7'
   s.add_development_dependency 'sinatra'
   s.add_development_dependency 'mongrel'
   s.add_development_dependency 'yard'
@@ -21,5 +21,8 @@ Gem::Specification.new do |s|
 
 
   s.files = `git ls-files`.split("\n")
+  # Don't include .jar files in distribution
+  s.files.reject! { |f| f =~ /.jar$/ }
+
   s.require_path = 'lib'
 end
