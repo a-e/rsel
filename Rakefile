@@ -6,6 +6,7 @@ require 'rspec/core/rake_task'
 ROOT_DIR = File.expand_path(File.dirname(__FILE__))
 TEST_APP = File.join(ROOT_DIR, 'test', 'app.rb')
 SELENIUM_RC_JAR = File.join(ROOT_DIR, 'test', 'server', 'selenium-server-1.0.3-SNAPSHOT-standalone.jar')
+SELENIUM_RC_LOG = File.join(ROOT_DIR, 'selenium-rc.log')
 
 namespace 'testapp' do
   desc "Start the test webapp in the background"
@@ -17,7 +18,12 @@ namespace 'testapp' do
   desc "Stop the test webapp"
   task :stop do
     puts "Stopping the test webapp"
-    Net::HTTP.get('localhost', '/shutdown', 8070)
+    begin
+      Net::HTTP.get('localhost', '/shutdown', 8070)
+    rescue EOFError
+      # This is expected
+      puts "Test webapp stopped."
+    end
   end
 end
 
@@ -27,6 +33,7 @@ Selenium::Rake::RemoteControlStartTask.new do |rc|
   rc.background = true
   rc.timeout_in_seconds = 60
   rc.wait_until_up_and_running = true
+  rc.log_to = SELENIUM_RC_LOG
 end
 
 Selenium::Rake::RemoteControlStopTask.new do |rc|
