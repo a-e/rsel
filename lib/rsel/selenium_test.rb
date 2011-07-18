@@ -155,6 +155,19 @@ module Rsel
     end
 
 
+    # Ensure that the given text does not appear on the current page.
+    #
+    # @param [String] text
+    #   Plain text that should not be visible on the current page
+    #
+    # @example
+    #   | Should not see | Take a hike |
+    #
+    def should_not_see(text)
+      return !@browser.text?(text)
+    end
+
+
     # Ensure that the current page has the given title text.
     #
     # @param [String] title
@@ -162,10 +175,22 @@ module Rsel
     #
     # @example
     #   | Should see title | Our Homepage |
-    #   | Should see | Our Homepage | title |
     #
     def should_see_title(title)
       return (@browser.get_title == title)
+    end
+
+
+    # Ensure that the current page does not have the given title text.
+    #
+    # @param [String] title
+    #   Text of the page title that you should not see
+    #
+    # @example
+    #   | Should not see title | Someone else's homepage |
+    #
+    def should_not_see_title(title)
+      return !(@browser.get_title == title)
     end
 
 
