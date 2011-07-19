@@ -8,7 +8,7 @@ own steps, built up from the low-level ones provided by Rsel.
 It's pretty easy to do this by subclassing `SeleniumTest` and adding your own
 methods to it. Create a sibling directory to your `FitNesseRoot`, named
 something like `custom_rsel`, then create a Ruby file in there. The Ruby file
-can be called whatever you want' it's most logical to name it after your
+can be called whatever you want--it's most logical to name it after your
 application:
 
 - `FitNesseRoot`
@@ -48,9 +48,9 @@ you might define one:
         #   | Login as | admin | with password | letmein |
         #
         def login_as_with_password(username, password)
-          fill_in_with "Username", username
-          fill_in_with "Password", password
-          press "Login"
+          fill_in_with("Username", username)
+          fill_in_with("Password", password)
+          press("Login")
         end
 
       end
