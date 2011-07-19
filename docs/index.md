@@ -7,5 +7,6 @@ you to use a natural English syntax to write web application tests.
 
 - [Installation & Configuration](install.md)
 - [Usage](usage.md)
+- [Customization](custom.md)
 - [To-do list](todo.md)
 

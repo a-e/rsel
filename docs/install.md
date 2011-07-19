@@ -7,10 +7,10 @@ To install RSel from a gem:
 
 If you have the following test hierarchy:
 
-- FitNesseRoot
-  - SeleniumTests
-    - SetUp
-    - LoginTest
+- `FitNesseRoot`
+  - `SeleniumTests`
+    - `SetUp`
+    - `LoginTest`
 
 You should define the requisite `rubyslim` options in the `SeleniumTests` page content:
 

@@ -46,5 +46,5 @@ driver frowns upon it.)
 See the `SeleniumTest` class documentation for a full list of available methods
 and how to use them.
 
-Next: [To-do list](todo.md)
+Next: [Customization](custom.md)
 
