@@ -60,8 +60,8 @@ describe Rsel::SeleniumTest do
     end
   end
 
-  context "text fields" do
-    context "type into or fill in field" do
+  context "text field" do
+    context "type into or fill in" do
       it "passes when a text field with the given label exists" do
         @st.type_into_field("Eric", "First name").should == true
         @st.fill_in_with("Last name", "Pierce").should == true
@@ -94,8 +94,8 @@ describe Rsel::SeleniumTest do
 
   end
 
-  context "dropdowns" do
-    context "select from a dropdown" do
+  context "dropdown" do
+    context "select" do
       it "passes when a value exists in a dropdown" do
         @st.select_from_dropdown("Tall", "Height").should == true
         @st.select_from_dropdown("Medium", "Weight").should == true
@@ -111,13 +111,13 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "verify the contents of a dropdown" do
+    context "verify" do
       # TODO
     end
   end
 
   context "navigation" do
-    context "visit a page" do
+    context "visit" do
       it "passes when the page exists" do
         @st.visit("/about").should == true
       end
@@ -153,7 +153,7 @@ describe Rsel::SeleniumTest do
       end
 
       it "fails when a link does not exist" do
-        @st.click_link("Bogus link").should == false
+        @st.follow("Bogus link").should == false
       end
     end
   end
