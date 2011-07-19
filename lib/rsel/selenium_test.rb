@@ -148,9 +148,9 @@ module Rsel
     #   Plain text that should be visible on the current page
     #
     # @example
-    #   | Should see | Welcome, Marcus |
+    #   | See | Welcome, Marcus |
     #
-    def should_see(text)
+    def see(text)
       return @browser.text?(text)
     end
 
@@ -161,9 +161,9 @@ module Rsel
     #   Plain text that should not be visible on the current page
     #
     # @example
-    #   | Should not see | Take a hike |
+    #   | Do not see | Take a hike |
     #
-    def should_not_see(text)
+    def do_not_see(text)
       return !@browser.text?(text)
     end
 
@@ -174,9 +174,9 @@ module Rsel
     #   Text of the page title that you expect to see
     #
     # @example
-    #   | Should see title | Our Homepage |
+    #   | See title | Our Homepage |
     #
-    def should_see_title(title)
+    def see_title(title)
       return (@browser.get_title == title)
     end
 
@@ -187,9 +187,9 @@ module Rsel
     #   Text of the page title that you should not see
     #
     # @example
-    #   | Should not see title | Someone else's homepage |
+    #   | Do not see title | Someone else's homepage |
     #
-    def should_not_see_title(title)
+    def do_not_see_title(title)
       return !(@browser.get_title == title)
     end
 
@@ -228,6 +228,39 @@ module Rsel
     #
     def fill_in_with(locator, text)
       type_into_field(text, locator)
+    end
+
+
+    # Verify that a text field contains the given text.
+    # The field may include additional text, as long as the
+    # expected value is in there somewhere.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the field you want to inspect
+    # @param [String] text
+    #   Text to expect in the field
+    #
+    # @example
+    #   | Field | First name | contains | Eric |
+    #
+    def field_contains(locator, text)
+      @browser.field("xpath=#{XPath::HTML.field(locator)}").include?(text)
+    end
+
+
+    # Verify that a text field's value equals the given text.
+    # The value must match exactly.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the field you want to inspect
+    # @param [String] text
+    #   Text to expect in the field
+    #
+    # @example
+    #   | Field | First name | equals | Eric |
+    #
+    def field_equals(locator, text)
+      @browser.field("xpath=#{XPath::HTML.field(locator)}") == text
     end
 
 
