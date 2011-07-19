@@ -34,6 +34,61 @@ describe Rsel::SeleniumTest do
         end
       end
     end
+
+    context "disable" do
+      context "passes when" do
+        it "checkbox with the given label is present" do
+          @st.disable_checkbox("I like cheese").should be_true
+          @st.disable_checkbox("I like salami").should be_true
+        end
+      end
+      context "fails when" do
+        it "checkbox with the given label is absent" do
+          @st.disable_checkbox("I dislike bacon").should be_false
+          @st.disable_checkbox("I like broccoli").should be_false
+        end
+      end
+    end
+
+    context "is enabled" do
+      context "passes when" do
+        it "checkbox with the given label exists and is checked" do
+          @st.enable_checkbox("I like cheese").should be_true
+          @st.checkbox_is_enabled("I like cheese").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "checkbox with the given label exists but is unchecked" do
+          @st.disable_checkbox("I like cheese").should be_true
+          @st.checkbox_is_enabled("I like cheese").should be_false
+        end
+
+        it "checkbox with the given label does not exist" do
+          @st.checkbox_is_enabled("I dislike bacon").should be_false
+        end
+      end
+    end
+
+    context "is disabled" do
+      context "passes when" do
+        it "checkbox with the given label exists and is unchecked" do
+          @st.disable_checkbox("I like cheese").should be_true
+          @st.checkbox_is_disabled("I like cheese").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "checkbox with the given label exists but is checked" do
+          @st.enable_checkbox("I like cheese").should be_true
+          @st.checkbox_is_disabled("I like cheese").should be_false
+        end
+
+        it "checkbox with the given label does not exist" do
+          @st.checkbox_is_disabled("I dislike bacon").should be_false
+        end
+      end
+    end
   end
 
 

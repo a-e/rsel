@@ -12,8 +12,6 @@ Some additional step methods needed:
 
 - dropdown_includes
 - dropdown_equals
-- checkbox_enabled
-- checkbox_disabled
 - radio_enabled
 - radio_disabled
 

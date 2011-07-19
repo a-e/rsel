@@ -371,6 +371,44 @@ module Rsel
     end
 
 
+    # Verify that a given checkbox is enabled (checked)
+    #
+    # @param [String] locator
+    #   Label, value, or id of the checkbox to inspect
+    #
+    # @example
+    #   | Checkbox is enabled | send me spam |
+    #
+    def checkbox_is_enabled(locator)
+      begin
+        enabled = @browser.checked?("xpath=#{XPath::HTML.checkbox(locator)}")
+      rescue
+        return false
+      else
+        return enabled
+      end
+    end
+
+
+    # Verify that a given checkbox is disabled (unchecked)
+    #
+    # @param [String] locator
+    #   Label, value, or id of the checkbox to inspect
+    #
+    # @example
+    #   | Checkbox is disabled | send me spam |
+    #
+    def checkbox_is_disabled(locator)
+      begin
+        enabled = @browser.checked?("xpath=#{XPath::HTML.checkbox(locator)}")
+      rescue
+        return false
+      else
+        return !enabled
+      end
+    end
+
+
     # Click on a radio button.
     #
     # @param [String] locator
