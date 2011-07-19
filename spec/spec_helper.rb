@@ -6,6 +6,16 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test', 'app'))
 
 RSpec.configure do |config|
   config.include Rsel
+
+  config.before(:all) do
+    @st = Rsel::SeleniumTest.new('http://localhost:8070/')
+    @st.open_browser
+  end
+
+  config.after(:all) do
+    @st.close_browser
+  end
+
 end
 
 
