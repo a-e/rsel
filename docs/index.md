@@ -59,8 +59,6 @@ and how to use them.
 TODO
 ----
 
-- Consider using the more Rubyesque [selenium-client](https://github.com/ph7/selenium-client)
-  gem instead of packaging `selenium.rb` into this project
 - Pass better error messages back to FitNesse. It seems that Slim script tables
   only support true/false results, with no clear way to report on what went
   wrong (aside from raising an exception, which even then curiously does not

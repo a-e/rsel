@@ -6,6 +6,10 @@ describe Rsel::SeleniumTest do
     @st.open_browser
   end
 
+  before(:each) do
+    @st.visit('/')
+  end
+
   after(:all) do
     @st.close_browser
   end
@@ -104,6 +108,52 @@ describe Rsel::SeleniumTest do
 
       it "fails when no such dropdown exists" do
         @st.select_from_dropdown("Over easy", "Eggs").should == false
+      end
+    end
+
+    context "verify the contents of a dropdown" do
+      # TODO
+    end
+  end
+
+  context "navigation" do
+    context "visit a page" do
+      it "passes when the page exists" do
+        @st.visit("/about").should == true
+      end
+
+      it "fails when the page does not exist" do
+        @st.visit("/bad/path").should == false
+      end
+    end
+
+    context "reload the current page" do
+      # TODO
+    end
+
+    context "go back to the previous page" do
+      it "passes and loads the correct URL" do
+        @st.visit("/about")
+        @st.visit("/")
+        @st.click_back.should == true
+        @st.should_see_title("About this site").should == true
+      end
+
+      #it "fails when there is no previous page in the history" do
+        # TODO: No obvious way to test this, since everything is running in the
+        # same session
+      #end
+    end
+
+    context "clicking a link" do
+      it "passes and loads the correct page when a link exists" do
+        @st.click_link("About this site").should == true
+        @st.should_see_title("About this site").should == true
+        @st.should_see("This site is really cool").should == true
+      end
+
+      it "fails when a link does not exist" do
+        @st.click_link("Bogus link").should == false
       end
     end
   end

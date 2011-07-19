@@ -455,7 +455,9 @@ module Rsel
     def return_error_status
       begin
         yield
-      rescue
+      rescue => e
+        #puts e.message
+        #puts e.backtrace
         return false
       else
         return true
