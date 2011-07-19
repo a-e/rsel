@@ -42,7 +42,7 @@ Finally, add your tests to subpages of `SeleniumTests`. For instance, your
     | Fill in       | Password | with | beckett       |
     | Click button  | Log in                          |
     | Page loads in | 5        | seconds or less      |
-    | Should see    | Logged in as castle             |
+    | See           | Logged in as castle             |
     | Close browser                                   |
 
 The URL you provide in the first line of the table will be the default URL used
