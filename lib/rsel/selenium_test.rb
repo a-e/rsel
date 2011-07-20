@@ -263,7 +263,7 @@ module Rsel
     #
     def click(locator)
       return_error_status do
-        @browser.click(xpath('link_or_button', locator), :wait_for => :page)
+        @browser.click(xpath('link_or_button', locator))
       end
     end
 
@@ -279,7 +279,7 @@ module Rsel
     #
     def click_link(locator)
       return_error_status do
-        @browser.click(xpath('link', locator), :wait_for => :page)
+        @browser.click(xpath('link', locator))
       end
     end
 
@@ -305,7 +305,7 @@ module Rsel
     #
     def click_button(locator)
       return_error_status do
-        @browser.click(xpath('button', locator), :wait_for => :page)
+        @browser.click(xpath('button', locator))
       end
     end
 
