@@ -199,7 +199,7 @@ module Rsel
     #
     def type_into_field(text, locator)
       return_error_status do
-        @browser.type("xpath=#{XPath::HTML.field(locator)}", text)
+        @browser.type(xpath('field', locator), text)
       end
     end
 
@@ -232,7 +232,7 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text)
-      @browser.field("xpath=#{XPath::HTML.field(locator)}").include?(text)
+      @browser.field(xpath('field', locator)).include?(text)
     end
 
 
@@ -248,7 +248,7 @@ module Rsel
     #   | Field | First name | equals | Eric |
     #
     def field_equals(locator, text)
-      @browser.field("xpath=#{XPath::HTML.field(locator)}") == text
+      @browser.field(xpath('field', locator)) == text
     end
 
 
@@ -263,8 +263,7 @@ module Rsel
     #
     def click(locator)
       return_error_status do
-        @browser.click("xpath=#{XPath::HTML.link_or_button(locator)}",
-                       :wait_for => :page)
+        @browser.click(xpath('link_or_button', locator), :wait_for => :page)
       end
     end
 
@@ -280,8 +279,7 @@ module Rsel
     #
     def click_link(locator)
       return_error_status do
-        @browser.click("xpath=#{XPath::HTML.link(locator)}",
-                      :wait_for => :page)
+        @browser.click(xpath('link', locator), :wait_for => :page)
       end
     end
 
@@ -307,8 +305,7 @@ module Rsel
     #
     def click_button(locator)
       return_error_status do
-        @browser.click("xpath=#{XPath::HTML.button(locator)}",
-                      :wait_for => :page)
+        @browser.click(xpath('button', locator), :wait_for => :page)
       end
     end
 
@@ -334,7 +331,7 @@ module Rsel
     #
     def enable_checkbox(locator)
       return_error_status do
-        @browser.check("xpath=#{XPath::HTML.checkbox(locator)}")
+        @browser.check(xpath('checkbox', locator))
       end
     end
 
@@ -350,7 +347,7 @@ module Rsel
     #
     def disable_checkbox(locator)
       return_error_status do
-        @browser.uncheck("xpath=#{XPath::HTML.checkbox(locator)}")
+        @browser.uncheck(xpath('checkbox', locator))
       end
     end
 
@@ -366,7 +363,7 @@ module Rsel
     #
     def checkbox_is_enabled(locator)
       begin
-        enabled = @browser.checked?("xpath=#{XPath::HTML.checkbox(locator)}")
+        enabled = @browser.checked?(xpath('checkbox', locator))
       rescue
         return false
       else
@@ -385,7 +382,7 @@ module Rsel
     #
     def checkbox_is_disabled(locator)
       begin
-        enabled = @browser.checked?("xpath=#{XPath::HTML.checkbox(locator)}")
+        enabled = @browser.checked?(xpath('checkbox', locator))
       rescue
         return false
       else
@@ -405,7 +402,7 @@ module Rsel
     #
     def select_radio(locator)
       return_error_status do
-        @browser.click("xpath=#{XPath::HTML.radio_button(locator)}")
+        @browser.click(xpath('radio_button', locator))
       end
     end
 
@@ -445,7 +442,7 @@ module Rsel
     #
     def select_from_dropdown(value, locator)
       return_error_status do
-        @browser.select("xpath=#{XPath::HTML.select(locator)}", value)
+        @browser.select(xpath('select', locator), value)
       end
     end
 
@@ -498,6 +495,26 @@ module Rsel
       else
         return true
       end
+    end
+
+    # Return a Selenium-style xpath for the given locator.
+    #
+    # @param [String] kind
+    #   What kind of locator you're using (link, button, checkbox, field etc.).
+    #   This must correspond to a method name in `XPath::HTML`.
+    # @param [String] locator
+    #   Name, id, value, label or whatever locator the `XPath::HTML.<kind>`
+    #   method accepts.
+    #
+    # @example
+    #   xpath('link', 'Log in')
+    #   xpath('button', 'Submit')
+    #   xpath('field', 'First name')
+    #
+    def xpath(kind, locator)
+      # Doing explicit string-join here, so it'll work with older versions
+      # of the XPath module that don't have `Union#to_s` defined.
+      "xpath=" + XPath::HTML.send(kind, locator).to_xpaths.join(' | ')
     end
 
   end
