@@ -432,22 +432,6 @@ module Rsel
     end
 
 
-    # Click on an image.
-    #
-    # @param [String] locator
-    #   The id, src, title, or href of the image to click on
-    #
-    # @example
-    #   | Click | colorado.png | image |
-    #   | Click image | colorado.png |
-    #
-    def click_image(locator)
-      return_error_status do
-        @browser.click(get_locator(locator, imageLocators))
-      end
-    end
-
-
     # Select a value from a dropdown/combo box.
     #
     # @param [String] value
@@ -463,20 +447,6 @@ module Rsel
       return_error_status do
         @browser.select("xpath=#{XPath::HTML.select(locator)}", value)
       end
-    end
-
-
-    # Submit the form with the given name.
-    #
-    # @param [String] locator
-    #   Form id, name or action
-    #
-    # @example
-    #   | submit form | place_order |
-    #   | submit | place_order | form |
-    #
-    def submit_form(locator)
-      @browser.submit(get_locator(locator, formLocators))
     end
 
 
@@ -528,113 +498,6 @@ module Rsel
       else
         return true
       end
-    end
-
-
-    # TODO: Clean up / refactor the stuff below
-
-    def capitalizeEachWord(str)
-      return str.gsub(/^[a-z]|\s+[a-z]/) { |a| a.upcase }
-    end
-
-    def get_locator(caption, possibleFormats)
-      possibleCaptions = getPossibleCaptions(caption)
-      possibleCaptions.each do |possibleCaption|
-        possibleFormats.each do |possibleFormat|
-          locator = possibleFormat.sub('{0}', possibleCaption)
-          puts "possible locator: " + locator
-          if @browser.is_element_present(locator)
-            return locator
-          end
-        end
-      end
-      raise LocatorNotFound, "Could not find locator '#{caption}'"
-    end
-
-    # possible variations on the caption to look for
-    def getPossibleCaptions(caption)
-      possibleCaptions = Array.new
-      possibleCaptions[0] = caption
-      possibleCaptions[1] = ' ' + caption
-      possibleCaptions[2] = caption + ' '
-      possibleCaptions[3] = capitalizeEachWord(caption)
-      possibleCaptions[4] = ' ' + capitalizeEachWord(caption)
-      possibleCaptions[5] = capitalizeEachWord(caption) + ' '
-      return possibleCaptions
-    end
-
-    def imageLocators
-      [
-        "xpath=//img[@alt='{0}']",
-        "xpath=//img[@title='{0}']",
-        "xpath=//img[@id='{0}']",
-        "xpath=//img[@href='{0}']",
-        "xpath=//img[@src='{0}']",
-        "xpath=//input[@type='image' and @src='{0}']",
-        "xpath=//input[@type='image' and @id='{0}']",
-        "xpath=//input[@type='image' and @alt='{0}']",
-      ]
-    end
-
-    def formLocators
-      [
-        "xpath=//form[@action='{0}']",
-        "xpath=//form[@class='{0}']",
-        "xpath=//form[@name='{0}']",
-        "xpath=//form[@legend[text()='{0}']]",
-      ]
-    end
-
-    def dragdropLocators
-      [
-        "xpath=//div[@id='{0}']",
-        "xpath=//img[@alt='{0}']",
-        "xpath=//img[@src='{0}']",
-      ]
-    end
-
-    # Sample Call-> |UserDrags|slider name|AndDrops|-10, 0|
-    def UserDragsAndDrops(selenium,params)
-      selenium.drag_and_drop(get_locator(selenium,params[0],dragdropLocators), params[1])
-    end
-
-    # Sample Call-> |VerifyText|my image|
-    def VerifyImage(selenium,params)
-        if selenium.is_element_present(get_locator(selenium,params[0],imageLocators)) then
-          return "right"
-        else
-          return "wrong"
-        end
-    end
-
-    # Sample Call-> |WaitUpTo|30|SecondsToVerifyImage|my image|
-    def WaitUpToSecondsToVerifyImage(selenium,params)
-      count=0
-      retval = "wrong"
-      while (count<params[0].to_i)
-        if selenium.is_element_present(get_locator(selenium,params[1],imageLocators)) then
-          retval = "right"
-          break
-        end
-        sleep 1
-        count=count+1
-      end
-      return retval
-    end
-
-    # Sample Call-> |WaitUpTo|30|SecondsToVerifyText|my text|
-    def WaitUpToSecondsToVerifyText(selenium,params)
-      count=0
-      retval = "wrong"
-      while (count<params[0].to_i)
-        if selenium.is_text_present(params[1]) then
-          retval = "right"
-          break
-        end
-        sleep 1
-        count=count+1
-      end
-      return retval
     end
 
   end

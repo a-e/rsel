@@ -1,7 +1,7 @@
 Customization
 -------------
 
-RSel provides only the most basic imperative navigational steps and
+Rsel provides only the most basic imperative navigational steps and
 verification. For real-world testing, you will most likely want to define your
 own steps, built up from the low-level ones provided by Rsel.
 
@@ -83,5 +83,5 @@ for interacting with webpages and performing verifications. If `SeleniumTest`
 itself does not provide the methods you need, you can use the `@browser`
 attribute directly.
 
-Next: [To-do list](todo.md)
+Next: [Development](development.md)
 

@@ -21,8 +21,8 @@ it up like this:
 
     $ java -jar selenium-server-standalone-x.x.x.jar
 
-By default, the server runs on port 4444, and this is the port that RSel uses
-unless you tell it otherwise. RSel also assumes that you're running
+By default, the server runs on port 4444, and this is the port that Rsel uses
+unless you tell it otherwise. Rsel also assumes that you're running
 selenium-server on your localhost (that is, the same host where FitNesse is
 running); if you need to use a different host or port number, pass those as
 arguments to the first line of the table. For example, if you are running

@@ -1,7 +1,7 @@
 Installation & Configuration
 ----------------------------
 
-To install RSel from a gem:
+To install Rsel from a gem:
 
     $ gem install rsel
 

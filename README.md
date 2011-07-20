@@ -1,7 +1,7 @@
-RSel
+Rsel
 ====
 
-RSel connects [FitNesse](http://fitnesse.org) to [Selenium](http://seleniumhq.org)
+Rsel connects [FitNesse](http://fitnesse.org) to [Selenium](http://seleniumhq.org)
 via [Ruby](http://ruby-lang.org).
 
 It is still a work in progress.

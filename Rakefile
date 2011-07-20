@@ -49,14 +49,27 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = ['--color', '--format doc']
 end
 
-desc "Start Selenium-RC and testapp servers, run tests, then stop servers"
-task :test do
-  begin
+namespace 'servers' do
+  desc "Start the Selenium and testapp servers"
+  task :start do
     Rake::Task['testapp:start'].invoke
     Rake::Task['selenium:rc:start'].invoke
-    Rake::Task['spec'].invoke
-  ensure
+  end
+
+  desc "Stop the Selenium and testapp servers"
+  task :stop do
     Rake::Task['selenium:rc:stop'].invoke
     Rake::Task['testapp:stop'].invoke
   end
 end
+
+desc "Start Selenium and testapp servers, run tests, then stop servers"
+task :test do
+  begin
+    Rake::Task['servers:start'].invoke
+    Rake::Task['spec'].invoke
+  ensure
+    Rake::Task['servers:stop'].invoke
+  end
+end
+

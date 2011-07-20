@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.version = "0.0.1"
   s.summary = "Runs Selenium tests from FitNesse"
   s.description = <<-EOS
-    RSel provides a Slim fixture for running Selenium tests, with
+    Rsel provides a Slim fixture for running Selenium tests, with
     step methods written in Ruby.
   EOS
   s.authors = ["Marcus French", "Dale Straw", "Eric Pierce"]
