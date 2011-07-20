@@ -75,5 +75,13 @@ You'll use:
 This will ensure that the `MyAppTest` class will be used for evaluating the
 steps contained in that table.
 
+It's worth noting that the `SeleniumTest` class (and hence any derived classes)
+have a `@browser` attribute referring to the underlying `Selenium::Client::Driver`
+instance, which includes
+[a wealth of methods](http://rdoc.info/github/ph7/selenium-client/master/Selenium/Client/Driver)
+for interacting with webpages and performing verifications. If `SeleniumTest`
+itself does not provide the methods you need, you can use the `@browser`
+attribute directly.
+
 Next: [To-do list](todo.md)
 

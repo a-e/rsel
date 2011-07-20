@@ -30,7 +30,7 @@ module Rsel
     #
     # @param [String] url
     #   Full URL, including http://, of the system under test
-    # @param [String] server
+    # @param [String] host
     #   IP address or hostname where selenium-server is running
     # @param [String] port
     #   Port number of selenium-server
@@ -81,10 +81,6 @@ module Rsel
       return true
     end
 
-
-    # ----------------------------------------
-    # Browsing
-    # ----------------------------------------
 
     # Load an absolute URL or a relative path in the browser.
     #
@@ -138,10 +134,6 @@ module Rsel
     end
 
 
-    # ----------------------------------------
-    # Verification
-    # ----------------------------------------
-
     # Ensure that the given text appears on the current page.
     #
     # @param [String] text
@@ -193,10 +185,6 @@ module Rsel
       return !(@browser.get_title == title)
     end
 
-
-    # ----------------------------------------
-    # Entering text
-    # ----------------------------------------
 
     # Type a value into the given field.
     #
@@ -263,10 +251,6 @@ module Rsel
       @browser.field("xpath=#{XPath::HTML.field(locator)}") == text
     end
 
-
-    # ----------------------------------------
-    # Clicking things
-    # ----------------------------------------
 
     # Click on a link or button, and wait for a page to load.
     #
@@ -371,13 +355,14 @@ module Rsel
     end
 
 
-    # Verify that a given checkbox is enabled (checked)
+    # Verify that a given checkbox or radiobutton is enabled (checked)
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
     #
     # @example
     #   | Checkbox is enabled | send me spam |
+    #   | Checkbox | send me spam | is enabled |
     #
     def checkbox_is_enabled(locator)
       begin
@@ -390,7 +375,7 @@ module Rsel
     end
 
 
-    # Verify that a given checkbox is disabled (unchecked)
+    # Verify that a given checkbox or radiobutton is disabled (unchecked)
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
@@ -409,19 +394,41 @@ module Rsel
     end
 
 
-    # Click on a radio button.
+    # Select a radio button.
     #
     # @param [String] locator
-    #   Label, id, or name of the radio button to click
+    #   Label, id, or name of the radio button to select
     #
     # @example
-    #   | Click | female | radio |
-    #   | Click radio | female |
+    #   | Select | female | radio |
+    #   | Select radio | female |
     #
-    def click_radio(locator)
+    def select_radio(locator)
       return_error_status do
         @browser.click("xpath=#{XPath::HTML.radio_button(locator)}")
       end
+    end
+
+
+    # Alias for {#checkbox_is_disabled}
+    #
+    # @example
+    #   | Radio is disabled | medium |
+    #   | Radio | medium | is disabled |
+    #
+    def radio_is_disabled(locator)
+      checkbox_is_disabled(locator)
+    end
+
+
+    # Alias for {#checkbox_is_enabled}
+    #
+    # @example
+    #   | Radio is enabled | medium |
+    #   | Radio | medium | is enabled |
+    #
+    def radio_is_enabled(locator)
+      checkbox_is_enabled(locator)
     end
 
 
@@ -440,44 +447,6 @@ module Rsel
       end
     end
 
-
-    # ----------------------------------------
-    # Waiting
-    # ----------------------------------------
-
-    # Pause for a certain number of seconds.
-    #
-    # @param [String, Int] seconds
-    #   How many seconds to pause
-    #
-    # @example
-    #   | Pause | 5 | seconds |
-    #
-    def pause_seconds(seconds)
-      sleep seconds.to_i
-      return true
-    end
-
-
-    # Wait some number of seconds for the current page request to finish.
-    # Fails if the page does not finish loading within the specified time.
-    #
-    # @param [String, Int] seconds
-    #   How long to wait for before timing out
-    #
-    # @example
-    #   | Page loads in | 10 | seconds or less |
-    #
-    def page_loads_in_seconds_or_less(seconds)
-      return_error_status do
-        @browser.wait_for_page_to_load("#{seconds}000")
-      end
-    end
-
-
-    # ----------------------------------------
-    # Form stuff
-    # ----------------------------------------
 
     # Select a value from a dropdown/combo box.
     #
@@ -511,9 +480,35 @@ module Rsel
     end
 
 
-    # ----------------------------------------
-    # Helper functions
-    # ----------------------------------------
+    # Pause for a certain number of seconds.
+    #
+    # @param [String, Int] seconds
+    #   How many seconds to pause
+    #
+    # @example
+    #   | Pause | 5 | seconds |
+    #
+    def pause_seconds(seconds)
+      sleep seconds.to_i
+      return true
+    end
+
+
+    # Wait some number of seconds for the current page request to finish.
+    # Fails if the page does not finish loading within the specified time.
+    #
+    # @param [String, Int] seconds
+    #   How long to wait for before timing out
+    #
+    # @example
+    #   | Page loads in | 10 | seconds or less |
+    #
+    def page_loads_in_seconds_or_less(seconds)
+      return_error_status do
+        @browser.wait_for_page_to_load("#{seconds}000")
+      end
+    end
+
 
     # Execute the given block, and return false if it raises an exception.
     # Otherwise, return true.
@@ -536,9 +531,7 @@ module Rsel
     end
 
 
-    # -------------------------------------------
     # TODO: Clean up / refactor the stuff below
-    # -------------------------------------------
 
     def capitalizeEachWord(str)
       return str.gsub(/^[a-z]|\s+[a-z]/) { |a| a.upcase }
@@ -570,7 +563,6 @@ module Rsel
       return possibleCaptions
     end
 
-    # added to verify image elements -Dale
     def imageLocators
       [
         "xpath=//img[@alt='{0}']",
@@ -584,7 +576,6 @@ module Rsel
       ]
     end
 
-    #added 7/8 -Dale
     def formLocators
       [
         "xpath=//form[@action='{0}']",
@@ -594,7 +585,6 @@ module Rsel
       ]
     end
 
-    # added 7/8 -Dale
     def dragdropLocators
       [
         "xpath=//div[@id='{0}']",
@@ -603,7 +593,6 @@ module Rsel
       ]
     end
 
-    #added 7/8 -Dale (use locator and offset e.g., "+70, -300"
     # Sample Call-> |UserDrags|slider name|AndDrops|-10, 0|
     def UserDragsAndDrops(selenium,params)
       selenium.drag_and_drop(get_locator(selenium,params[0],dragdropLocators), params[1])
@@ -633,7 +622,6 @@ module Rsel
       return retval
     end
 
-    #added return value for text found or not - 6/26/08
     # Sample Call-> |WaitUpTo|30|SecondsToVerifyText|my text|
     def WaitUpToSecondsToVerifyText(selenium,params)
       count=0
@@ -647,40 +635,6 @@ module Rsel
         count=count+1
       end
       return retval
-    end
-
-    ####################################################
-    #DEBUG - all functions after this point are in a debug state - Dale
-    ####################################################
-
-    def ChooseOKNextConfirmation(selenium,params)
-        selenium.choose_ok_on_next_confirmation
-    end
-    def ChooseCancelNextConfirmation(selenium,params)
-        selenium.choose_cancel_on_next_confirmation
-    end
-
-    #-need to add functionality to select window before closing
-    def CloseWindow(selenium,params)
-        selenium.close
-    end
-
-    def SelectWindow(selenium,params)
-        windowIDs=selenium.get_all_window_ids()
-        windowIDs.each{|id| puts "id="+id}
-        windowNames=selenium.get_all_window_names()
-        windowNames.each{|name| puts "name="+name}
-        windowTitles=selenium.get_all_window_titles()
-        windowTitles.each{|title| puts "title="+title}
-        selenium.select_window(params[0])
-    end
-
-    def FocusWindow(selenium,params)
-      selenium.window_focus()
-    end
-
-    def OpenURLOnWindow(selenium,params)
-      selenium.open_window(params[0],params[1])
     end
 
   end
