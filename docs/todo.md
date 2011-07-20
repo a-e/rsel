@@ -12,6 +12,4 @@ Some additional step methods needed:
 
 - dropdown_includes
 - dropdown_equals
-- radio_enabled
-- radio_disabled
 
