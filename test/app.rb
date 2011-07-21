@@ -21,6 +21,10 @@ class TestApp < Sinatra::Base
     erb :form
   end
 
+  get '/thanks' do
+    erb :thanks
+  end
+
   # Allow shutting down the app with a request
   get '/shutdown' do
     Process.kill('KILL', Process.pid)
