@@ -186,6 +186,34 @@ module Rsel
     end
 
 
+    # Ensure that a link exists on the page.
+    #
+    # @param [String] locator
+    #   Text or id of the link, or image alt text
+    #
+    # @example
+    #   | Link | Logout | exists |
+    #   | Link exists | Logout |
+    #
+    def link_exists(locator)
+      return @browser.element?(xpath('link', locator))
+    end
+
+
+    # Ensure that a button exists on the page.
+    #
+    # @param [String] locator
+    #   Text, value, or id of the button
+    #
+    # @example
+    #   | Button | Search | exists |
+    #   | Button exists | Search |
+    #
+    def button_exists(locator)
+      return @browser.element?(xpath('button', locator))
+    end
+
+
     # Type a value into the given field.
     #
     # @param [String] text
@@ -271,7 +299,7 @@ module Rsel
     # Click on a link.
     #
     # @param [String] locator
-    #   Link text or id of the anchor element
+    #   Text or id of the link, or image alt text
     #
     # @example
     #   | Click | Logout | link |
@@ -289,7 +317,7 @@ module Rsel
     # Press a button.
     #
     # @param [String] locator
-    #   Button text, value, or id of the button
+    #   Text, value, or id of the button
     #
     # @example
     #   | Click | Search | button |
@@ -297,6 +325,7 @@ module Rsel
     #   | Press | Login |
     #
     def click_button(locator)
+      # TODO: Make this fail when the button is disabled
       return_error_status do
         @browser.click(xpath('button', locator))
       end

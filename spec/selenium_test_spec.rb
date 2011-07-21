@@ -210,6 +210,13 @@ describe Rsel::SeleniumTest do
         # same session
       #end
     end
+  end
+
+
+  context "links" do
+    before(:each) do
+      @st.visit('/').should be_true
+    end
 
     describe "#click_link" do
       it "passes and loads the correct page when a link exists" do
@@ -220,6 +227,63 @@ describe Rsel::SeleniumTest do
 
       it "fails when a link does not exist" do
         @st.click_link("Bogus link").should be_false
+      end
+    end
+
+    describe "#link_exists" do
+      context "passes when" do
+        it "link with the given text exists" do
+          @st.link_exists("About this site").should be_true
+          @st.link_exists("Form test").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "no such link exists" do
+          @st.link_exists("Welcome").should be_false
+          @st.link_exists("Don't click here").should be_false
+        end
+      end
+    end
+  end
+
+
+  context "buttons" do
+    before(:each) do
+      @st.visit('/form').should be_true
+    end
+
+    describe "#click_button" do
+      context "passes when" do
+        it "button exists and is enabled" do
+          @st.click_button("Submit person form").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "button does not exist" do
+          @st.click_button("No such button").should be_false
+        end
+
+        it "button exists but is disabled" do
+          # TODO
+        end
+      end
+    end
+
+    describe "#button_exists" do
+      context "passes when" do
+        it "button with the given text exists" do
+          @st.button_exists("Submit person form").should be_true
+          @st.button_exists("Save preferences").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "no such button exists" do
+          @st.button_exists("Apple").should be_false
+          @st.button_exists("Big Red").should be_false
+        end
       end
     end
   end
