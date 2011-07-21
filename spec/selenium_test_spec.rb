@@ -1,22 +1,22 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require File.expand_path(File.dirname(__FILE__) + "/spec_helper")
 
 describe Rsel::SeleniumTest do
-  context 'initialization' do
+  context "initialization" do
     before(:each) do
-      @st.visit('/')
+      @st.visit("/")
     end
 
     it "sets correct default configuration" do
-      @st.url.should == 'http://localhost:8070/'
-      @st.browser.host.should == 'localhost'
+      @st.url.should == "http://localhost:8070/"
+      @st.browser.host.should == "localhost"
       @st.browser.port.should == 4444
     end
   end
 
 
-  context 'checkbox' do
+  context "checkbox" do
     before(:each) do
-      @st.visit('/form').should be_true
+      @st.visit("/form").should be_true
     end
 
     describe "#enable_checkbox" do
@@ -92,9 +92,9 @@ describe Rsel::SeleniumTest do
   end
 
 
-  context 'dropdown' do
+  context "dropdowns" do
     before(:each) do
-      @st.visit('/form').should be_true
+      @st.visit("/form").should be_true
     end
 
     context "#select_from_dropdown" do
@@ -174,9 +174,9 @@ describe Rsel::SeleniumTest do
   end
 
 
-  context 'navigation' do
+  context "navigation" do
     before(:each) do
-      @st.visit('/').should be_true
+      @st.visit("/").should be_true
     end
 
     describe "#visit" do
@@ -215,7 +215,7 @@ describe Rsel::SeleniumTest do
 
   context "links" do
     before(:each) do
-      @st.visit('/').should be_true
+      @st.visit("/").should be_true
     end
 
     describe "#click_link" do
@@ -250,7 +250,7 @@ describe Rsel::SeleniumTest do
 
   context "buttons" do
     before(:each) do
-      @st.visit('/form').should be_true
+      @st.visit("/form").should be_true
     end
 
     describe "#click_button" do
@@ -289,9 +289,9 @@ describe Rsel::SeleniumTest do
   end
 
 
-  context 'text field' do
+  context "fields" do
     before(:each) do
-      @st.visit('/form').should be_true
+      @st.visit("/form").should be_true
     end
 
     describe "#type_into_field" do
@@ -359,50 +359,50 @@ describe Rsel::SeleniumTest do
   end
 
 
-  context 'visibility' do
+  context "visibility" do
     before(:each) do
-      @st.visit('/').should be_true
+      @st.visit("/").should be_true
     end
 
     describe "#see" do
       context "passes when" do
         it "text is present" do
-          @st.see('Welcome').should be_true
-          @st.see('This is a Sinatra webapp').should be_true
+          @st.see("Welcome").should be_true
+          @st.see("This is a Sinatra webapp").should be_true
         end
       end
 
       context "fails when" do
         it "text is absent" do
-          @st.see('Nonexistent').should be_false
-          @st.see('Some bogus text').should be_false
+          @st.see("Nonexistent").should be_false
+          @st.see("Some bogus text").should be_false
         end
       end
 
       it "is case-sensitive" do
-        @st.see('Sinatra webapp').should be_true
-        @st.see('sinatra Webapp').should be_false
+        @st.see("Sinatra webapp").should be_true
+        @st.see("sinatra Webapp").should be_false
       end
     end
 
     describe "#do_not_see" do
       context "passes when" do
         it "text is absent" do
-          @st.do_not_see('Nonexistent').should be_true
-          @st.do_not_see('Some bogus text').should be_true
+          @st.do_not_see("Nonexistent").should be_true
+          @st.do_not_see("Some bogus text").should be_true
         end
       end
 
       context "fails when" do
         it "fails when test is present" do
-          @st.do_not_see('Welcome').should be_false
-          @st.do_not_see('This is a Sinatra webapp').should be_false
+          @st.do_not_see("Welcome").should be_false
+          @st.do_not_see("This is a Sinatra webapp").should be_false
         end
       end
 
       it "is case-sensitive" do
-        @st.do_not_see('Sinatra webapp').should be_false
-        @st.do_not_see('sinatra Webapp').should be_true
+        @st.do_not_see("Sinatra webapp").should be_false
+        @st.do_not_see("sinatra Webapp").should be_true
       end
     end
   end

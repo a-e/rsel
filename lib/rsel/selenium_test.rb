@@ -195,6 +195,8 @@ module Rsel
     #   | Link | Logout | exists |
     #   | Link exists | Logout |
     #
+    # @since 0.0.2
+    #
     def link_exists(locator)
       return @browser.element?(xpath('link', locator))
     end
@@ -208,6 +210,8 @@ module Rsel
     # @example
     #   | Button | Search | exists |
     #   | Button exists | Search |
+    #
+    # @since 0.0.2
     #
     def button_exists(locator)
       return @browser.element?(xpath('button', locator))
@@ -455,6 +459,8 @@ module Rsel
     # @example
     #   | Dropdown | Height | includes | Tall |
     #
+    # @since 0.0.2
+    #
     def dropdown_includes(locator, option)
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
@@ -472,6 +478,8 @@ module Rsel
     #
     # @example
     #   | Dropdown | Height | equals | Tall |
+    #
+    # @since 0.0.2
     #
     def dropdown_equals(locator, option)
       begin
@@ -533,6 +541,7 @@ module Rsel
         return true
       end
     end
+
 
     # Return a Selenium-style xpath for the given locator.
     #
