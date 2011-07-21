@@ -7,9 +7,7 @@ To-do list
   mark the step as failed)
 - Find a way to abort a test if something goes catastrophically wrong (such as
   being unable to connect to the Selenium server)
-
-Some additional step methods needed:
-
-- dropdown_includes
-- dropdown_equals
+- Verify the presence of images, links, buttons, checkboxes, etc.
+- Click on images
+- Support scoping qualifiers (somewhat like Kelp does)
 

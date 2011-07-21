@@ -398,20 +398,59 @@ module Rsel
     end
 
 
-    # Select a value from a dropdown/combo box.
+    # Select an option from a dropdown/combo box.
     #
-    # @param [String] value
-    #   The value to choose from the dropdown
+    # @param [String] option
+    #   The option to choose from the dropdown
     # @param [String] locator
     #   Label, name, or id of the dropdown
     #
     # @example
-    #   | select | Tall | from | Height | dropdown |
-    #   | select | Tall | from dropdown | Height |
+    #   | Select | Tall | from | Height | dropdown |
+    #   | Select | Tall | from dropdown | Height |
     #
-    def select_from_dropdown(value, locator)
+    def select_from_dropdown(option, locator)
       return_error_status do
-        @browser.select(xpath('select', locator), value)
+        @browser.select(xpath('select', locator), option)
+      end
+    end
+
+
+    # Check whether an option exists in a dropdown/combo box.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the dropdown
+    # @param [String] option
+    #   The option to look for
+    #
+    # @example
+    #   | Dropdown | Height | includes | Tall |
+    #
+    def dropdown_includes(locator, option)
+      dropdown = XPath::HTML.select(locator)
+      opt = dropdown[XPath::HTML.option(option)]
+      opt_str = opt.to_xpaths.join(' | ')
+      return @browser.element?("xpath=#{opt_str}")
+    end
+
+
+    # Check whether an option is currently selected in a dropdown/combo box.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the dropdown
+    # @param [String] option
+    #   The option you expect to be selected
+    #
+    # @example
+    #   | Dropdown | Height | equals | Tall |
+    #
+    def dropdown_equals(locator, option)
+      begin
+        selected = @browser.get_selected_label(xpath('select', locator))
+      rescue
+        return false
+      else
+        return selected == option
       end
     end
 

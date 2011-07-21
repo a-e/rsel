@@ -19,7 +19,7 @@ describe Rsel::SeleniumTest do
       @st.visit('/form').should be_true
     end
 
-    context "enable" do
+    describe "#enable_checkbox" do
       context "passes when" do
         it "checkbox with the given label is present" do
           @st.enable_checkbox("I like cheese").should be_true
@@ -35,7 +35,7 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "disable" do
+    describe "#disable_checkbox" do
       context "passes when" do
         it "checkbox with the given label is present" do
           @st.disable_checkbox("I like cheese").should be_true
@@ -50,7 +50,7 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "is enabled" do
+    describe "#checkbox_is_enabled" do
       context "passes when" do
         it "checkbox with the given label exists and is checked" do
           @st.enable_checkbox("I like cheese").should be_true
@@ -70,7 +70,7 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "is disabled" do
+    describe "#checkbox_is_disabled" do
       context "passes when" do
         it "checkbox with the given label exists and is unchecked" do
           @st.disable_checkbox("I like cheese").should be_true
@@ -97,16 +97,16 @@ describe Rsel::SeleniumTest do
       @st.visit('/form').should be_true
     end
 
-    context "select" do
+    context "#select_from_dropdown" do
       context "passes when" do
-        it "value exists in a dropdown" do
+        it "option exists in the dropdown" do
           @st.select_from_dropdown("Tall", "Height").should be_true
           @st.select_from_dropdown("Medium", "Weight").should be_true
         end
       end
 
       context "fails when" do
-        it "dropdown exists, but the value doesn't" do
+        it "dropdown exists, but the option doesn't" do
           @st.select_from_dropdown("Giant", "Height").should be_false
           @st.select_from_dropdown("Obese", "Weight").should be_false
         end
@@ -117,8 +117,59 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "verify" do
-      # TODO
+    context "#dropdown_includes" do
+      context "passes when" do
+        it "option exists in the dropdown" do
+          @st.dropdown_includes("Height", "Tall").should be_true
+          @st.dropdown_includes("Weight", "Medium").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "dropdown exists, but the option doesn't" do
+          @st.dropdown_includes("Height", "Giant").should be_false
+          @st.dropdown_includes("Weight", "Obese").should be_false
+        end
+
+        it "no such dropdown exists" do
+          @st.dropdown_includes("Eggs", "Over easy").should be_false
+        end
+      end
+    end
+
+    context "#dropdown_equals" do
+      context "passes when" do
+        it "option is selected in the dropdown" do
+          @st.select_from_dropdown("Short", "Height")
+          @st.dropdown_equals("Height", "Short").should be_true
+
+          @st.select_from_dropdown("Average", "Height")
+          @st.dropdown_equals("Height", "Average").should be_true
+
+          @st.select_from_dropdown("Tall", "Height")
+          @st.dropdown_equals("Height", "Tall").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "dropdown exists, but the option is not selected" do
+          @st.select_from_dropdown("Short", "Height")
+          @st.dropdown_equals("Height", "Average").should be_false
+          @st.dropdown_equals("Height", "Tall").should be_false
+
+          @st.select_from_dropdown("Average", "Height")
+          @st.dropdown_equals("Height", "Short").should be_false
+          @st.dropdown_equals("Height", "Tall").should be_false
+
+          @st.select_from_dropdown("Tall", "Height")
+          @st.dropdown_equals("Height", "Short").should be_false
+          @st.dropdown_equals("Height", "Average").should be_false
+        end
+
+        it "no such dropdown exists" do
+          @st.dropdown_equals("Eggs", "Over easy").should be_false
+        end
+      end
     end
   end
 
@@ -128,7 +179,7 @@ describe Rsel::SeleniumTest do
       @st.visit('/').should be_true
     end
 
-    context "visit" do
+    describe "#visit" do
       context "passes when" do
         it "page exists" do
           @st.visit("/about").should be_true
@@ -146,7 +197,7 @@ describe Rsel::SeleniumTest do
       # TODO
     end
 
-    context "go back to the previous page" do
+    describe "#click_back" do
       it "passes and loads the correct URL" do
         @st.visit("/about")
         @st.visit("/")
@@ -160,7 +211,7 @@ describe Rsel::SeleniumTest do
       #end
     end
 
-    context "clicking a link" do
+    describe "#click_link" do
       it "passes and loads the correct page when a link exists" do
         @st.click_link("About this site").should be_true
         @st.see_title("About this site").should be_true
@@ -168,7 +219,7 @@ describe Rsel::SeleniumTest do
       end
 
       it "fails when a link does not exist" do
-        @st.follow("Bogus link").should be_false
+        @st.click_link("Bogus link").should be_false
       end
     end
   end
@@ -179,7 +230,7 @@ describe Rsel::SeleniumTest do
       @st.visit('/form').should be_true
     end
 
-    context "type into or fill in" do
+    describe "#type_into_field" do
       context "passes when" do
         it "text field with the given label exists" do
           @st.type_into_field("Eric", "First name").should be_true
@@ -210,7 +261,7 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "should contain" do
+    describe "#field_contains" do
       context "passes when" do
         it "textarea contains the text" do
           @st.fill_in_with("Life story", "Blah dee blah")
@@ -226,7 +277,7 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "should equal" do
+    describe "#field_equals" do
       context "passes when" do
         it "textarea equals the text" do
           @st.fill_in_with("Life story", "Blah dee blah")
@@ -249,7 +300,7 @@ describe Rsel::SeleniumTest do
       @st.visit('/').should be_true
     end
 
-    context "should see" do
+    describe "#see" do
       context "passes when" do
         it "text is present" do
           @st.see('Welcome').should be_true
@@ -270,7 +321,7 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "should not see" do
+    describe "#do_not_see" do
       context "passes when" do
         it "text is absent" do
           @st.do_not_see('Nonexistent').should be_true
