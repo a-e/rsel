@@ -114,7 +114,7 @@ module Rsel
     # Reload the current page.
     #
     # @example
-    #   | refresh page |
+    #   | Refresh page |
     #
     def refresh_page
       return_error_status do
@@ -126,7 +126,7 @@ module Rsel
     # Maximize the browser window. May not work in some browsers.
     #
     # @example
-    #   | maximize browser |
+    #   | Maximize browser |
     #
     def maximize_browser
       @browser.window_maximize
@@ -276,22 +276,14 @@ module Rsel
     # @example
     #   | Click | Logout | link |
     #   | Click link | Logout |
+    #   | Follow | Logout |
     #
     def click_link(locator)
       return_error_status do
         @browser.click(xpath('link', locator))
       end
     end
-
-
-    # Alias for {#click_link}.
-    #
-    # @example
-    #   | Follow | Logout |
-    #
-    def follow(locator)
-      click_link(locator)
-    end
+    alias_method :follow, :click_link
 
 
     # Press a button.
@@ -300,24 +292,16 @@ module Rsel
     #   Button text, value, or id of the button
     #
     # @example
-    #   | Click | Login | button |
-    #   | Click button | Login |
+    #   | Click | Search | button |
+    #   | Click button | Search |
+    #   | Press | Login |
     #
     def click_button(locator)
       return_error_status do
         @browser.click(xpath('button', locator))
       end
     end
-
-
-    # Alias for {#click_button}
-    #
-    # @example
-    #   | Press | Search |
-    #
-    def press(locator)
-      click_button(locator)
-    end
+    alias_method :press, :click_button
 
 
     # Enable (check) a checkbox.
@@ -360,6 +344,8 @@ module Rsel
     # @example
     #   | Checkbox is enabled | send me spam |
     #   | Checkbox | send me spam | is enabled |
+    #   | Radio is enabled | medium |
+    #   | Radio | medium | is enabled |
     #
     def checkbox_is_enabled(locator)
       begin
@@ -370,6 +356,7 @@ module Rsel
         return enabled
       end
     end
+    alias_method :radio_is_enabled, :checkbox_is_enabled
 
 
     # Verify that a given checkbox or radiobutton is disabled (unchecked)
@@ -379,6 +366,9 @@ module Rsel
     #
     # @example
     #   | Checkbox is disabled | send me spam |
+    #   | Checkbox | send me spam | is disabled |
+    #   | Radio is disabled | medium |
+    #   | Radio | medium | is disabled |
     #
     def checkbox_is_disabled(locator)
       begin
@@ -389,6 +379,7 @@ module Rsel
         return !enabled
       end
     end
+    alias_method :radio_is_disabled, :checkbox_is_disabled
 
 
     # Select a radio button.
@@ -404,28 +395,6 @@ module Rsel
       return_error_status do
         @browser.click(xpath('radio_button', locator))
       end
-    end
-
-
-    # Alias for {#checkbox_is_disabled}
-    #
-    # @example
-    #   | Radio is disabled | medium |
-    #   | Radio | medium | is disabled |
-    #
-    def radio_is_disabled(locator)
-      checkbox_is_disabled(locator)
-    end
-
-
-    # Alias for {#checkbox_is_enabled}
-    #
-    # @example
-    #   | Radio is enabled | medium |
-    #   | Radio | medium | is enabled |
-    #
-    def radio_is_enabled(locator)
-      checkbox_is_enabled(locator)
     end
 
 
