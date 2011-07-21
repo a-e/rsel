@@ -11,3 +11,4 @@ To-do list
 - Click on images
 - Support scoping qualifiers (somewhat like Kelp does)
 
+Next: [History](history.md)

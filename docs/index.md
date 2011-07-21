@@ -10,4 +10,5 @@ you to use a natural English syntax to write web application tests.
 - [Customization](custom.md)
 - [Development](development.md)
 - [To-do list](todo.md)
+- [History](history.md)
 
