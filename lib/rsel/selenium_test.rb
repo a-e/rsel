@@ -523,7 +523,7 @@ module Rsel
     #
     def page_loads_in_seconds_or_less(seconds)
       return_error_status do
-        @browser.wait_for_page_to_load("#{seconds}000")
+        @browser.wait_for_page_to_load(seconds)
       end
     end
 
