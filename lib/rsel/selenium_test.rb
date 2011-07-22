@@ -510,6 +510,7 @@ module Rsel
       sleep seconds.to_i
       return true
     end
+    alias_method :pause_secs, :pause_seconds
 
 
     # Wait some number of seconds for the current page request to finish.
