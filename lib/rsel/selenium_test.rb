@@ -68,6 +68,8 @@ module Rsel
       else
         visit @url
       end
+      # Make Selenium highlight elements whenever it locates them
+      @browser.highlight_located_element = true
     end
 
 
@@ -337,7 +339,8 @@ module Rsel
     alias_method :press, :click_button
 
 
-    # Enable (check) a checkbox.
+    # Enable (check) a checkbox by clicking on it.
+    # If the checkbox is already enabled, do nothing.
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to check
@@ -347,13 +350,15 @@ module Rsel
     #   | Enable checkbox | Send me spam |
     #
     def enable_checkbox(locator)
+      return true if checkbox_is_enabled(locator)
       return_error_status do
-        @browser.check(xpath('checkbox', locator))
+        @browser.click(xpath('checkbox', locator))
       end
     end
 
 
-    # Disable (uncheck) a checkbox.
+    # Disable (uncheck) a checkbox by clicking on it.
+    # If the checkbox is already disabled, do nothing.
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to uncheck
@@ -363,8 +368,9 @@ module Rsel
     #   | Disable checkbox | Send me spam |
     #
     def disable_checkbox(locator)
+      return true if checkbox_is_disabled(locator)
       return_error_status do
-        @browser.uncheck(xpath('checkbox', locator))
+        @browser.click(xpath('checkbox', locator))
       end
     end
 
