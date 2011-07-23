@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "rsel"
-  s.version = "0.0.2"
+  s.version = "0.0.3.dev"
   s.summary = "Runs Selenium tests from FitNesse"
   s.description = <<-EOS
     Rsel provides a Slim fixture for running Selenium tests, with
@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
 
   s.add_dependency 'rubyslim-unofficial'
-  s.add_dependency 'xpath'
+  s.add_dependency 'xpath', '>= 0.1.4'
   s.add_dependency 'selenium-client'
 
   s.add_development_dependency 'rake', '0.8.7'

@@ -192,15 +192,18 @@ module Rsel
     #
     # @param [String] locator
     #   Text or id of the link, or image alt text
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Link | Logout | exists |
     #   | Link exists | Logout |
+    #   | Link | Logout | exists | !{within:header} |
     #
     # @since 0.0.2
     #
-    def link_exists(locator)
-      return @browser.element?(xpath('link', locator))
+    def link_exists(locator, options={})
+      return @browser.element?(xpath('link', locator, options))
     end
 
 
@@ -208,15 +211,33 @@ module Rsel
     #
     # @param [String] locator
     #   Text, value, or id of the button
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Button | Search | exists |
     #   | Button exists | Search |
+    #   | Button | Search | exists | !{within:members} |
     #
     # @since 0.0.2
     #
-    def button_exists(locator)
-      return @browser.element?(xpath('button', locator))
+    def button_exists(locator, options={})
+      return @browser.element?(xpath('button', locator, options))
+    end
+
+
+    # Ensure that a table row with the given cell values exists.
+    #
+    # @param [String] cells
+    #   Comma-separated cell values you expect to see
+    #
+    # @example
+    #   | Row exists | First, Middle, Last, Email |
+    #   | Row | First, Middle, Last, Email | exists |
+    #
+    def row_exists(cells)
+      row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
+      return @browser.element?("xpath=#{row.to_s}")
     end
 
 
@@ -226,14 +247,17 @@ module Rsel
     #   What to type into the field
     # @param [String] locator
     #   Label, name, or id of the field you want to type into
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Type | Dale | into field | First name |
     #   | Type | Dale | into | First name | field |
+    #   | Type | Dale | into | First name | field | !{within:contact} |
     #
-    def type_into_field(text, locator)
+    def type_into_field(text, locator, options={})
       return_error_status do
-        @browser.type(xpath('field', locator), text)
+        @browser.type(xpath('field', locator, options), text)
       end
     end
 
@@ -306,15 +330,18 @@ module Rsel
     #
     # @param [String] locator
     #   Text or id of the link, or image alt text
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Click | Logout | link |
     #   | Click link | Logout |
     #   | Follow | Logout |
+    #   | Click | Logout | link | !{within:header} |
     #
-    def click_link(locator)
+    def click_link(locator, options={})
       return_error_status do
-        @browser.click(xpath('link', locator))
+        @browser.click(xpath('link', locator, options))
       end
     end
     alias_method :follow, :click_link
@@ -324,16 +351,18 @@ module Rsel
     #
     # @param [String] locator
     #   Text, value, or id of the button
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Click | Search | button |
     #   | Click button | Search |
     #   | Press | Login |
     #
-    def click_button(locator)
+    def click_button(locator, options={})
       # TODO: Make this fail when the button is disabled
       return_error_status do
-        @browser.click(xpath('button', locator))
+        @browser.click(xpath('button', locator, options))
       end
     end
     alias_method :press, :click_button
@@ -344,15 +373,17 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to check
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Enable | Send me spam | checkbox |
     #   | Enable checkbox | Send me spam |
     #
-    def enable_checkbox(locator)
+    def enable_checkbox(locator, options={})
       return true if checkbox_is_enabled(locator)
       return_error_status do
-        @browser.click(xpath('checkbox', locator))
+        @browser.click(xpath('checkbox', locator, options))
       end
     end
 
@@ -362,15 +393,17 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to uncheck
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Disable | Send me spam | checkbox |
     #   | Disable checkbox | Send me spam |
     #
-    def disable_checkbox(locator)
+    def disable_checkbox(locator, options={})
       return true if checkbox_is_disabled(locator)
       return_error_status do
-        @browser.click(xpath('checkbox', locator))
+        @browser.click(xpath('checkbox', locator, options))
       end
     end
 
@@ -379,6 +412,8 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Checkbox is enabled | send me spam |
@@ -386,9 +421,9 @@ module Rsel
     #   | Radio is enabled | medium |
     #   | Radio | medium | is enabled |
     #
-    def checkbox_is_enabled(locator)
+    def checkbox_is_enabled(locator, options={})
       begin
-        enabled = @browser.checked?(xpath('checkbox', locator))
+        enabled = @browser.checked?(xpath('checkbox', locator, options))
       rescue
         return false
       else
@@ -402,6 +437,8 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Checkbox is disabled | send me spam |
@@ -409,9 +446,9 @@ module Rsel
     #   | Radio is disabled | medium |
     #   | Radio | medium | is disabled |
     #
-    def checkbox_is_disabled(locator)
+    def checkbox_is_disabled(locator, options={})
       begin
-        enabled = @browser.checked?(xpath('checkbox', locator))
+        enabled = @browser.checked?(xpath('checkbox', locator, options))
       rescue
         return false
       else
@@ -425,14 +462,16 @@ module Rsel
     #
     # @param [String] locator
     #   Label, id, or name of the radio button to select
+    # @param [Hash] options
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Select | female | radio |
     #   | Select radio | female |
     #
-    def select_radio(locator)
+    def select_radio(locator, options={})
       return_error_status do
-        @browser.click(xpath('radio_button', locator))
+        @browser.click(xpath('radio_button', locator, options))
       end
     end
 
@@ -470,7 +509,7 @@ module Rsel
     def dropdown_includes(locator, option)
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
-      opt_str = opt.to_xpaths.join(' | ')
+      opt_str = opt.to_s
       return @browser.element?("xpath=#{opt_str}")
     end
 
@@ -549,24 +588,38 @@ module Rsel
     end
 
 
-    # Return a Selenium-style xpath for the given locator.
+    # Return a Selenium-style xpath generated by calling `XPath::HTML.<kind>`
+    # with the given `arg`.
     #
     # @param [String] kind
     #   What kind of locator you're using (link, button, checkbox, field etc.).
     #   This must correspond to a method name in `XPath::HTML`.
-    # @param [String] locator
-    #   Name, id, value, label or whatever locator the `XPath::HTML.<kind>`
-    #   method accepts.
+    # @param [String] arg
+    #   Argument accepted by `XPath::HTML.<kind>`. Usually a locator, but may
+    #   be something else depending on the method you're calling.
+    # @param [Hash] options
+    #   Additional options to restrict the scope of matching elements
+    # @option options [String] :within
+    #   Restrict scope to elements having this name or id, matching `locator`
+    #   only if it's contained within an element with this name or id.
     #
     # @example
     #   xpath('link', 'Log in')
     #   xpath('button', 'Submit')
     #   xpath('field', 'First name')
+    #   xpath('table_row', ['First', 'Last'])
     #
-    def xpath(kind, locator)
-      # Doing explicit string-join here, so it'll work with older versions
-      # of the XPath module that don't have `Union#to_s` defined.
-      "xpath=" + XPath::HTML.send(kind, locator).to_xpaths.join(' | ')
+    def xpath(kind, locator, options={})
+      loc_xp = XPath::HTML.send(kind, locator)
+      if options[:within]
+        parent = options[:within]
+        scope = XPath.descendant[
+          XPath.attr(:id).equals(parent) | XPath.attr(:name).equals(parent)]
+        result = scope[loc_xp].to_s
+      else
+        result = loc_xp.to_s
+      end
+      return "xpath=#{result}"
     end
 
   end

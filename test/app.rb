@@ -21,6 +21,10 @@ class TestApp < Sinatra::Base
     erb :form
   end
 
+  get '/table' do
+    erb :table
+  end
+
   get '/thanks' do
     erb :thanks
   end

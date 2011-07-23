@@ -219,14 +219,24 @@ describe Rsel::SeleniumTest do
     end
 
     describe "#click_link" do
-      it "passes and loads the correct page when a link exists" do
-        @st.click_link("About this site").should be_true
-        @st.see_title("About this site").should be_true
-        @st.see("This site is really cool").should be_true
+      context "passes when" do
+        it "link exists" do
+          @st.click_link("About this site").should be_true
+        end
+
+        it "link exists within scope" do
+          @st.click_link("About this site", :within => "header").should be_true
+        end
       end
 
-      it "fails when a link does not exist" do
-        @st.click_link("Bogus link").should be_false
+      context "fails when" do
+        it "link does not exist" do
+          @st.click_link("Bogus link").should be_false
+        end
+
+        it "link exists, but within different scope" do
+          @st.click_link("About this site", :within => "footer").should be_false
+        end
       end
     end
 
@@ -236,12 +246,24 @@ describe Rsel::SeleniumTest do
           @st.link_exists("About this site").should be_true
           @st.link_exists("Form test").should be_true
         end
+
+        it "link with the given text exists within scope" do
+          @st.link_exists("About this site", :within => "header").should be_true
+          @st.link_exists("Form test", :within => "footer").should be_true
+          @st.link_exists("Table test", :within => "footer").should be_true
+        end
       end
 
       context "fails when" do
         it "no such link exists" do
           @st.link_exists("Welcome").should be_false
           @st.link_exists("Don't click here").should be_false
+        end
+
+        it "link exists, but within different scope" do
+          @st.link_exists("About this site", :within => "footer").should be_false
+          @st.link_exists("Form test", :within => "header").should be_false
+          @st.link_exists("Table test", :within => "header").should be_false
         end
       end
     end
@@ -258,11 +280,19 @@ describe Rsel::SeleniumTest do
         it "button exists and is enabled" do
           @st.click_button("Submit person form").should be_true
         end
+
+        it "button exists within scope" do
+          @st.click_button("Submit person form", :within => "person_form").should be_true
+        end
       end
 
       context "fails when" do
         it "button does not exist" do
           @st.click_button("No such button").should be_false
+        end
+
+        it "button exists, but within different scope" do
+          @st.click_button("Submit person form", :within => "spouse_form").should be_false
         end
 
         it "button exists but is disabled" do
@@ -277,12 +307,22 @@ describe Rsel::SeleniumTest do
           @st.button_exists("Submit person form").should be_true
           @st.button_exists("Save preferences").should be_true
         end
+
+        it "button with the given text exists within scope" do
+          @st.button_exists("Submit person form", :within => "person_form").should be_true
+          @st.button_exists("Submit spouse form", :within => "spouse_form").should be_true
+        end
       end
 
       context "fails when" do
         it "no such button exists" do
           @st.button_exists("Apple").should be_false
           @st.button_exists("Big Red").should be_false
+        end
+
+        it "button exists, but within different scope" do
+          @st.button_exists("Submit spouse form", :within => "person_form").should be_false
+          @st.button_exists("Submit person form", :within => "spouse_form").should be_false
         end
       end
     end
@@ -315,12 +355,21 @@ describe Rsel::SeleniumTest do
           @st.type_into_field("Blah blah blah", "biography").should be_true
           @st.fill_in_with("biography", "Jibber jabber").should be_true
         end
+
+        it "text field with the given label exists within scope" do
+          @st.type_into_field("Eric", "First name", :within => 'person_form').should be_true
+          @st.type_into_field("Andrea", "First name", :within => 'spouse_form').should be_true
+        end
       end
 
       context "fails when" do
         it "no field with the given label or id exists" do
           @st.type_into_field("Matthew", "Middle name").should be_false
           @st.fill_in_with("middle_name", "Matthew").should be_false
+        end
+
+        it "field exists, but within different scope" do
+          @st.type_into_field("Long story", "Life story", :within => 'spouse_form').should be_false
         end
       end
     end
@@ -407,5 +456,44 @@ describe Rsel::SeleniumTest do
     end
   end
 
+
+  context "tables" do
+    before(:each) do
+      @st.visit("/table").should be_true
+    end
+
+    describe "#row_exists" do
+      context "passes when" do
+        it "full row of headings exists" do
+          @st.row_exists("First name, Last name, Nickname, Email").should be_true
+        end
+
+        it "partial row of headings exists" do
+          @st.row_exists("First name, Last name").should be_true
+          @st.row_exists("Nickname, Email").should be_true
+        end
+
+        it "full row of cells exists" do
+          @st.row_exists("Eric, Pierce, epierce, epierce@example.com").should be_true
+        end
+
+        it "partial row of cells exists" do
+          @st.row_exists("Eric, Pierce").should be_true
+          @st.row_exists("epierce, epierce@example.com").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "no row exists" do
+          @st.row_exists("Middle name, Maiden name, Email").should be_false
+        end
+
+        it "cell values are not consecutive" do
+          @st.row_exists("First name, Email").should be_false
+          @st.row_exists("Eric, epierce").should be_false
+        end
+      end
+    end
+  end
 end
 
