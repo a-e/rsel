@@ -20,72 +20,111 @@ describe Rsel::SeleniumTest do
     end
 
     describe "#enable_checkbox" do
-      context "passes when" do
-        it "checkbox with the given label is present" do
-          @st.enable_checkbox("I like cheese").should be_true
-          @st.enable_checkbox("I like salami").should be_true
-        end
-      end
+      context "checkbox with label" do
+        context "passes when" do
+          it "is present" do
+            @st.enable_checkbox("I like cheese").should be_true
+            @st.enable_checkbox("I like salami").should be_true
+          end
 
-      context "fails when" do
-        it "checkbox with the given label is absent" do
-          @st.enable_checkbox("I dislike bacon").should be_false
-          @st.enable_checkbox("I like broccoli").should be_false
+          it "is present within scope" do
+            @st.enable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
+            @st.enable_checkbox("I like salami", :within => "salami_checkbox").should be_true
+          end
+        end
+
+        context "fails when" do
+          it "is absent" do
+            @st.enable_checkbox("I dislike bacon").should be_false
+            @st.enable_checkbox("I like broccoli").should be_false
+          end
+
+          it "exists, but not within scope" do
+            @st.enable_checkbox("I like cheese", :within => "salami_checkbox").should be_false
+            @st.enable_checkbox("I like salami", :within => "cheese_checkbox").should be_false
+          end
         end
       end
     end
 
     describe "#disable_checkbox" do
-      context "passes when" do
-        it "checkbox with the given label is present" do
-          @st.disable_checkbox("I like cheese").should be_true
-          @st.disable_checkbox("I like salami").should be_true
+      context "checkbox with label" do
+        context "passes when" do
+          it "is present" do
+            @st.disable_checkbox("I like cheese").should be_true
+            @st.disable_checkbox("I like salami").should be_true
+          end
+
+          it "is present within scope" do
+            @st.disable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
+            @st.disable_checkbox("I like salami", :within => "preferences_form").should be_true
+          end
         end
-      end
-      context "fails when" do
-        it "checkbox with the given label is absent" do
-          @st.disable_checkbox("I dislike bacon").should be_false
-          @st.disable_checkbox("I like broccoli").should be_false
+
+        context "fails when" do
+          it "is absent" do
+            @st.disable_checkbox("I dislike bacon").should be_false
+            @st.disable_checkbox("I like broccoli").should be_false
+          end
+
+          it "exists, but not within scope" do
+            @st.disable_checkbox("I like cheese", :within => "salami_checkbox").should be_false
+            @st.disable_checkbox("I like salami", :within => "cheese_checkbox").should be_false
+          end
         end
       end
     end
 
     describe "#checkbox_is_enabled" do
-      context "passes when" do
-        it "checkbox with the given label exists and is checked" do
-          @st.enable_checkbox("I like cheese").should be_true
-          @st.checkbox_is_enabled("I like cheese").should be_true
-        end
-      end
+      context "checkbox with label" do
+        context "passes when" do
+          it "exists and is checked" do
+            @st.enable_checkbox("I like cheese").should be_true
+            @st.checkbox_is_enabled("I like cheese").should be_true
+          end
 
-      context "fails when" do
-        it "checkbox with the given label exists but is unchecked" do
-          @st.disable_checkbox("I like cheese").should be_true
-          @st.checkbox_is_enabled("I like cheese").should be_false
+          it "exists within scope and is checked" do
+            @st.enable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
+            @st.checkbox_is_enabled("I like cheese", :within => "cheese_checkbox").should be_true
+          end
         end
 
-        it "checkbox with the given label does not exist" do
-          @st.checkbox_is_enabled("I dislike bacon").should be_false
+        context "fails when" do
+          it "exists but is unchecked" do
+            @st.disable_checkbox("I like cheese").should be_true
+            @st.checkbox_is_enabled("I like cheese").should be_false
+          end
+
+          it "exists and is checked, but not within scope" do
+            @st.enable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
+            @st.checkbox_is_enabled("I like cheese", :within => "salami_checkbox").should be_false
+          end
+
+          it "does not exist" do
+            @st.checkbox_is_enabled("I dislike bacon").should be_false
+          end
         end
       end
     end
 
     describe "#checkbox_is_disabled" do
-      context "passes when" do
-        it "checkbox with the given label exists and is unchecked" do
-          @st.disable_checkbox("I like cheese").should be_true
-          @st.checkbox_is_disabled("I like cheese").should be_true
-        end
-      end
-
-      context "fails when" do
-        it "checkbox with the given label exists but is checked" do
-          @st.enable_checkbox("I like cheese").should be_true
-          @st.checkbox_is_disabled("I like cheese").should be_false
+      context "checkbox with label" do
+        context "passes when" do
+          it "exists and is unchecked" do
+            @st.disable_checkbox("I like cheese").should be_true
+            @st.checkbox_is_disabled("I like cheese").should be_true
+          end
         end
 
-        it "checkbox with the given label does not exist" do
-          @st.checkbox_is_disabled("I dislike bacon").should be_false
+        context "fails when" do
+          it "exists but is checked" do
+            @st.enable_checkbox("I like cheese").should be_true
+            @st.checkbox_is_disabled("I like cheese").should be_false
+          end
+
+          it "does not exist" do
+            @st.checkbox_is_disabled("I dislike bacon").should be_false
+          end
         end
       end
     end
@@ -234,7 +273,7 @@ describe Rsel::SeleniumTest do
           @st.click_link("Bogus link").should be_false
         end
 
-        it "link exists, but within different scope" do
+        it "link exists, but not within scope" do
           @st.click_link("About this site", :within => "footer").should be_false
         end
       end
@@ -260,7 +299,7 @@ describe Rsel::SeleniumTest do
           @st.link_exists("Don't click here").should be_false
         end
 
-        it "link exists, but within different scope" do
+        it "link exists, but not within scope" do
           @st.link_exists("About this site", :within => "footer").should be_false
           @st.link_exists("Form test", :within => "header").should be_false
           @st.link_exists("Table test", :within => "header").should be_false
@@ -291,7 +330,7 @@ describe Rsel::SeleniumTest do
           @st.click_button("No such button").should be_false
         end
 
-        it "button exists, but within different scope" do
+        it "button exists, but not within scope" do
           @st.click_button("Submit person form", :within => "spouse_form").should be_false
         end
 
@@ -320,7 +359,7 @@ describe Rsel::SeleniumTest do
           @st.button_exists("Big Red").should be_false
         end
 
-        it "button exists, but within different scope" do
+        it "button exists, but not within scope" do
           @st.button_exists("Submit spouse form", :within => "person_form").should be_false
           @st.button_exists("Submit person form", :within => "spouse_form").should be_false
         end
@@ -368,7 +407,7 @@ describe Rsel::SeleniumTest do
           @st.fill_in_with("middle_name", "Matthew").should be_false
         end
 
-        it "field exists, but within different scope" do
+        it "field exists, but not within scope" do
           @st.type_into_field("Long story", "Life story", :within => 'spouse_form').should be_false
         end
       end

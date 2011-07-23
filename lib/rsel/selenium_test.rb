@@ -381,7 +381,7 @@ module Rsel
     #   | Enable checkbox | Send me spam |
     #
     def enable_checkbox(locator, options={})
-      return true if checkbox_is_enabled(locator)
+      return true if checkbox_is_enabled(locator, options)
       return_error_status do
         @browser.click(xpath('checkbox', locator, options))
       end
@@ -401,7 +401,7 @@ module Rsel
     #   | Disable checkbox | Send me spam |
     #
     def disable_checkbox(locator, options={})
-      return true if checkbox_is_disabled(locator)
+      return true if checkbox_is_disabled(locator, options)
       return_error_status do
         @browser.click(xpath('checkbox', locator, options))
       end
@@ -422,8 +422,9 @@ module Rsel
     #   | Radio | medium | is enabled |
     #
     def checkbox_is_enabled(locator, options={})
+      xp = xpath('checkbox', locator, options)
       begin
-        enabled = @browser.checked?(xpath('checkbox', locator, options))
+        enabled = @browser.checked?(xp)
       rescue
         return false
       else
@@ -447,8 +448,9 @@ module Rsel
     #   | Radio | medium | is disabled |
     #
     def checkbox_is_disabled(locator, options={})
+      xp = xpath('checkbox', locator, options)
       begin
-        enabled = @browser.checked?(xpath('checkbox', locator, options))
+        enabled = @browser.checked?(xp)
       rescue
         return false
       else
@@ -580,7 +582,6 @@ module Rsel
       begin
         yield
       rescue => e
-        #puts e.message
         #puts e.backtrace
         return false
       else
@@ -601,8 +602,8 @@ module Rsel
     # @param [Hash] options
     #   Additional options to restrict the scope of matching elements
     # @option options [String] :within
-    #   Restrict scope to elements having this name or id, matching `locator`
-    #   only if it's contained within an element with this name or id.
+    #   Restrict scope to elements having this id, matching `locator` only if
+    #   it's contained within an element with this id.
     #
     # @example
     #   xpath('link', 'Log in')
@@ -614,9 +615,8 @@ module Rsel
       loc_xp = XPath::HTML.send(kind, locator)
       if options[:within]
         parent = options[:within]
-        scope = XPath.descendant[
-          XPath.attr(:id).equals(parent) | XPath.attr(:name).equals(parent)]
-        result = scope[loc_xp].to_s
+        scope = XPath.descendant[XPath.attr(:id).equals(parent)]
+        result = scope.child(loc_xp).to_s
       else
         result = loc_xp.to_s
       end
