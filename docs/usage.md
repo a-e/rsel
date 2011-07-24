@@ -46,5 +46,5 @@ driver frowns upon it.)
 See the `SeleniumTest` class documentation for a full list of available methods
 and how to use them.
 
-Next: [Customization](custom.md)
+Next: [Scoping](scoping.md)
 

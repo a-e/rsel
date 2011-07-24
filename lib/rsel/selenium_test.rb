@@ -197,7 +197,6 @@ module Rsel
     #
     # @example
     #   | Link | Logout | exists |
-    #   | Link exists | Logout |
     #   | Link | Logout | exists | !{within:header} |
     #
     # @since 0.0.2
@@ -216,7 +215,6 @@ module Rsel
     #
     # @example
     #   | Button | Search | exists |
-    #   | Button exists | Search |
     #   | Button | Search | exists | !{within:members} |
     #
     # @since 0.0.2
@@ -251,7 +249,6 @@ module Rsel
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
-    #   | Type | Dale | into field | First name |
     #   | Type | Dale | into | First name | field |
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
@@ -335,7 +332,6 @@ module Rsel
     #
     # @example
     #   | Click | Logout | link |
-    #   | Click link | Logout |
     #   | Follow | Logout |
     #   | Click | Logout | link | !{within:header} |
     #
@@ -356,8 +352,8 @@ module Rsel
     #
     # @example
     #   | Click | Search | button |
-    #   | Click button | Search |
     #   | Press | Login |
+    #   | Click | Search | button | !{within:customers} |
     #
     def click_button(locator, options={})
       # TODO: Make this fail when the button is disabled
@@ -378,7 +374,7 @@ module Rsel
     #
     # @example
     #   | Enable | Send me spam | checkbox |
-    #   | Enable checkbox | Send me spam |
+    #   | Enable | Send me spam | checkbox | !{within:opt_in} |
     #
     def enable_checkbox(locator, options={})
       return true if checkbox_is_enabled(locator, options)
@@ -398,7 +394,7 @@ module Rsel
     #
     # @example
     #   | Disable | Send me spam | checkbox |
-    #   | Disable checkbox | Send me spam |
+    #   | Disable | Send me spam | checkbox | !{within:opt_in} |
     #
     def disable_checkbox(locator, options={})
       return true if checkbox_is_disabled(locator, options)
@@ -416,10 +412,10 @@ module Rsel
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
-    #   | Checkbox is enabled | send me spam |
     #   | Checkbox | send me spam | is enabled |
-    #   | Radio is enabled | medium |
     #   | Radio | medium | is enabled |
+    #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
+    #   | Radio | medium | is enabled | !{within:shirt_size} |
     #
     def checkbox_is_enabled(locator, options={})
       xp = xpath('checkbox', locator, options)
@@ -442,10 +438,10 @@ module Rsel
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
-    #   | Checkbox is disabled | send me spam |
     #   | Checkbox | send me spam | is disabled |
-    #   | Radio is disabled | medium |
     #   | Radio | medium | is disabled |
+    #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
+    #   | Radio | medium | is disabled | !{within:shirt_size} |
     #
     def checkbox_is_disabled(locator, options={})
       xp = xpath('checkbox', locator, options)
@@ -469,7 +465,7 @@ module Rsel
     #
     # @example
     #   | Select | female | radio |
-    #   | Select radio | female |
+    #   | Select | female | radio | !{within:gender} |
     #
     def select_radio(locator, options={})
       return_error_status do
