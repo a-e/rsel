@@ -618,22 +618,26 @@ module Rsel
       loc_xp = XPath::HTML.send(kind, locator)
       if scope[:within]
         parent = XPath.descendant[XPath.attr(:id).equals(scope[:within])]
-        # Prepend the scoping clause to each expression in loc_xp,
-        # then recombine into a union again
-        scoped_expressions = xpath_expressions(loc_xp).collect do |expr|
-          parent.child(expr)
-        end
-        result = XPath::Union.new(*scoped_expressions).to_s
+        result = apply_scope(parent, loc_xp)
       elsif scope[:in_row]
         row = XPath.descendant(:tr)[XPath.contains(scope[:in_row])]
-        scoped_expressions = xpath_expressions(loc_xp).collect do |expr|
-          row.child(expr)
-        end
-        result = XPath::Union.new(*scoped_expressions).to_s
+        result = apply_scope(row, loc_xp)
       else
         result = loc_xp.to_s
       end
       return "xpath=#{result}"
+    end
+
+
+    # Restrict the scope of all XPath expressions in `inner` by prepending
+    # `container` to each of them, and return new union expression where
+    # `inner` matches only if it's a child of `container`.
+    #
+    def apply_scope(container, inner)
+      scoped_expressions = xpath_expressions(inner).collect do |expr|
+        container.child(expr)
+      end
+      return XPath::Union.new(*scoped_expressions).to_s
     end
 
 

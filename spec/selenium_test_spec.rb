@@ -22,21 +22,26 @@ describe Rsel::SeleniumTest do
     describe "#enable_checkbox" do
       context "passes when" do
         context "checkbox with label" do
-          it "is present" do
+          it "exists" do
             @st.enable_checkbox("I like cheese").should be_true
             @st.enable_checkbox("I like salami").should be_true
           end
 
-          it "is present within scope" do
+          it "exists within scope" do
             @st.enable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
             @st.enable_checkbox("I like salami", :within => "salami_checkbox").should be_true
+          end
+
+          it "exists in table row" do
+            @st.visit("/table")
+            @st.enable_checkbox("Like", :in_row => "Marcus").should be_true
           end
         end
       end
 
       context "fails when" do
         context "checkbox with label" do
-          it "is absent" do
+          it "does not exist" do
             @st.enable_checkbox("I dislike bacon").should be_false
             @st.enable_checkbox("I like broccoli").should be_false
           end
@@ -45,6 +50,11 @@ describe Rsel::SeleniumTest do
             @st.enable_checkbox("I like cheese", :within => "salami_checkbox").should be_false
             @st.enable_checkbox("I like salami", :within => "cheese_checkbox").should be_false
           end
+
+          it "exists, but not in table row" do
+            @st.visit("/table")
+            @st.enable_checkbox("Like", :in_row => "Eric").should be_false
+          end
         end
       end
     end
@@ -52,21 +62,26 @@ describe Rsel::SeleniumTest do
     describe "#disable_checkbox" do
       context "passes when" do
         context "checkbox with label" do
-          it "is present" do
+          it "exists" do
             @st.disable_checkbox("I like cheese").should be_true
             @st.disable_checkbox("I like salami").should be_true
           end
 
-          it "is present within scope" do
+          it "exists within scope" do
             @st.disable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
             @st.disable_checkbox("I like salami", :within => "preferences_form").should be_true
+          end
+
+          it "exists in table row" do
+            @st.visit("/table")
+            @st.disable_checkbox("Like", :in_row => "Marcus").should be_true
           end
         end
       end
 
       context "fails when" do
         context "checkbox with label" do
-          it "is absent" do
+          it "does not exist" do
             @st.disable_checkbox("I dislike bacon").should be_false
             @st.disable_checkbox("I like broccoli").should be_false
           end
@@ -74,6 +89,11 @@ describe Rsel::SeleniumTest do
           it "exists, but not within scope" do
             @st.disable_checkbox("I like cheese", :within => "salami_checkbox").should be_false
             @st.disable_checkbox("I like salami", :within => "cheese_checkbox").should be_false
+          end
+
+          it "exists, but not in table row" do
+            @st.visit("/table")
+            @st.disable_checkbox("Like", :in_row => "Eric").should be_false
           end
         end
       end
@@ -91,11 +111,21 @@ describe Rsel::SeleniumTest do
             @st.enable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
             @st.checkbox_is_enabled("I like cheese", :within => "cheese_checkbox").should be_true
           end
+
+          it "exists in table row and is checked" do
+            @st.visit("/table")
+            @st.enable_checkbox("Like", :in_row => "Ken").should be_true
+            @st.checkbox_is_enabled("Like", :in_row => "Ken").should be_true
+          end
         end
       end
 
       context "fails when" do
         context "checkbox with label" do
+          it "does not exist" do
+            @st.checkbox_is_enabled("I dislike bacon").should be_false
+          end
+
           it "exists but is unchecked" do
             @st.disable_checkbox("I like cheese").should be_true
             @st.checkbox_is_enabled("I like cheese").should be_false
@@ -106,8 +136,10 @@ describe Rsel::SeleniumTest do
             @st.checkbox_is_enabled("I like cheese", :within => "salami_checkbox").should be_false
           end
 
-          it "does not exist" do
-            @st.checkbox_is_enabled("I dislike bacon").should be_false
+          it "exists and is checked, but not in table row" do
+            @st.visit("/table")
+            @st.enable_checkbox("Like", :in_row => "Marcus").should be_true
+            @st.checkbox_is_enabled("Like", :in_row => "Eric").should be_false
           end
         end
       end
@@ -125,11 +157,21 @@ describe Rsel::SeleniumTest do
             @st.disable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
             @st.checkbox_is_disabled("I like cheese", :within => "cheese_checkbox").should be_true
           end
+
+          it "exists in table row and is unchecked" do
+            @st.visit("/table")
+            @st.disable_checkbox("Like", :in_row => "Ken").should be_true
+            @st.checkbox_is_disabled("Like", :in_row => "Ken").should be_true
+          end
         end
       end
 
       context "fails when" do
         context "checkbox with label" do
+          it "does not exist" do
+            @st.checkbox_is_disabled("I dislike bacon").should be_false
+          end
+
           it "exists but is checked" do
             @st.enable_checkbox("I like cheese").should be_true
             @st.checkbox_is_disabled("I like cheese").should be_false
@@ -140,8 +182,10 @@ describe Rsel::SeleniumTest do
             @st.checkbox_is_disabled("I like cheese", :within => "salami_checkbox").should be_false
           end
 
-          it "does not exist" do
-            @st.checkbox_is_disabled("I dislike bacon").should be_false
+          it "exists and is unchecked, but not in table row" do
+            @st.visit("/table")
+            @st.disable_checkbox("Like", :in_row => "Marcus").should be_true
+            @st.checkbox_is_disabled("Like", :in_row => "Eric").should be_false
           end
         end
       end
