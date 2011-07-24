@@ -193,6 +193,11 @@ describe Rsel::SeleniumTest do
   end
 
 
+  context "radiobuttons" do
+    # TODO
+  end
+
+
   context "dropdowns" do
     before(:each) do
       @st.visit("/form").should be_true
@@ -208,9 +213,17 @@ describe Rsel::SeleniumTest do
         it "option exists in the dropdown within scope" do
           @st.select_from_dropdown("Tall", "Height", :within => "spouse_form").should be_true
         end
+
+        it "option exists in the dropdown in table row" do
+          # TODO
+        end
       end
 
       context "fails when" do
+        it "no such dropdown exists" do
+          @st.select_from_dropdown("Over easy", "Eggs").should be_false
+        end
+
         it "dropdown exists, but the option doesn't" do
           @st.select_from_dropdown("Giant", "Height").should be_false
           @st.select_from_dropdown("Obese", "Weight").should be_false
@@ -220,8 +233,8 @@ describe Rsel::SeleniumTest do
           @st.select_from_dropdown("Medium", "Weight", :within => "spouse_form").should be_false
         end
 
-        it "no such dropdown exists" do
-          @st.select_from_dropdown("Over easy", "Eggs").should be_false
+        it "dropdown exists, but not in table row" do
+          # TODO
         end
       end
     end
@@ -404,6 +417,10 @@ describe Rsel::SeleniumTest do
         it "button exists within scope" do
           @st.click_button("Submit person form", :within => "person_form").should be_true
         end
+
+        it "button exists in table row" do
+          # TODO
+        end
       end
 
       context "fails when" do
@@ -413,6 +430,10 @@ describe Rsel::SeleniumTest do
 
         it "button exists, but not within scope" do
           @st.click_button("Submit person form", :within => "spouse_form").should be_false
+        end
+
+        it "button exists, but not in table row" do
+          # TODO
         end
 
         it "button exists but is disabled" do
@@ -526,19 +547,43 @@ describe Rsel::SeleniumTest do
 
     describe "#field_equals" do
       context "passes when" do
+        context "text field with label" do
+          # TODO
+        end
+
         context "textarea with label" do
           it "equals the text" do
             @st.fill_in_with("Life story", "Blah dee blah")
             @st.field_equals("Life story", "Blah dee blah").should be_true
           end
+
+          it "equals the text, and is within scope" do
+            # TODO
+          end
+
+          it "equals the text, and is in table row" do
+            # TODO
+          end
         end
       end
 
       context "fails when" do
+        context "text field with label" do
+          # TODO
+        end
+
         context "textarea with label" do
           it "does not exactly equal the text" do
             @st.fill_in_with("Life story", "Blah dee blah")
             @st.field_equals("Life story", "Blah dee").should be_false
+          end
+
+          it "exactly equals the text, but is not within scope" do
+            # TODO
+          end
+
+          it "exactly equals the text, but is not in table row" do
+            # TODO
           end
         end
       end

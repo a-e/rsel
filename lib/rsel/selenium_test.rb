@@ -305,9 +305,10 @@ module Rsel
     #
     # @example
     #   | Field | First name | equals | Eric |
+    #   | Field | First name | equals; | Eric | !{within:contact} |
     #
-    def field_equals(locator, text)
-      @browser.field(xpath('field', locator)) == text
+    def field_equals(locator, text, scope={})
+      @browser.field(xpath('field', locator, scope)) == text
     end
 
 
@@ -319,10 +320,11 @@ module Rsel
     # @example
     #   | Click | Next   |
     #   | Click | Logout |
+    #   | Click; | Logout | !{within:header} |
     #
-    def click(locator)
+    def click(locator, scope={})
       return_error_status do
-        @browser.click(xpath('link_or_button', locator))
+        @browser.click(xpath('link_or_button', locator, scope))
       end
     end
 
@@ -338,6 +340,7 @@ module Rsel
     #   | Click | Logout | link |
     #   | Follow | Logout |
     #   | Click | Logout | link | !{within:header} |
+    #   | Click | Edit | link | !{in_row:Eric} |
     #
     def click_link(locator, scope={})
       return_error_status do
@@ -508,7 +511,8 @@ module Rsel
     #
     # @since 0.0.2
     #
-    def dropdown_includes(locator, option)
+    def dropdown_includes(locator, option, scope={})
+      # TODO: Apply scope
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
       opt_str = opt.to_s
@@ -528,7 +532,8 @@ module Rsel
     #
     # @since 0.0.2
     #
-    def dropdown_equals(locator, option)
+    def dropdown_equals(locator, option, scope={})
+      # TODO: Apply scope
       begin
         selected = @browser.get_selected_label(xpath('select', locator))
       rescue

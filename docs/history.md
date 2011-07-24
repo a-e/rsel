@@ -1,6 +1,13 @@
 Rsel History
 ============
 
+0.0.4
+-----
+
+- Added `in_row` to scope
+- More methods accept scope hash now
+
+
 0.0.3
 -----
 
