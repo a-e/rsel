@@ -604,6 +604,9 @@ module Rsel
     # @option scope [String] :within
     #   Restrict scope to elements having this id, matching `locator` only if
     #   it's contained within an element with this id.
+    # @option scope [String] :in_row
+    #   Restrict scope to a table row containing this text, matching `locator`
+    #   only if that locator is in the same row as the given text.
     #
     # @example
     #   xpath('link', 'Log in')
@@ -619,6 +622,12 @@ module Rsel
         # then recombine into a union again
         scoped_expressions = xpath_expressions(loc_xp).collect do |expr|
           parent.child(expr)
+        end
+        result = XPath::Union.new(*scoped_expressions).to_s
+      elsif scope[:in_row]
+        row = XPath.descendant(:tr)[XPath.contains(scope[:in_row])]
+        scoped_expressions = xpath_expressions(loc_xp).collect do |expr|
+          row.child(expr)
         end
         result = XPath::Union.new(*scoped_expressions).to_s
       else

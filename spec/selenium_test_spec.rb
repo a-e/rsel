@@ -14,14 +14,14 @@ describe Rsel::SeleniumTest do
   end
 
 
-  context "checkbox" do
+  context "checkboxes" do
     before(:each) do
       @st.visit("/form").should be_true
     end
 
     describe "#enable_checkbox" do
-      context "checkbox with label" do
-        context "passes when" do
+      context "passes when" do
+        context "checkbox with label" do
           it "is present" do
             @st.enable_checkbox("I like cheese").should be_true
             @st.enable_checkbox("I like salami").should be_true
@@ -32,8 +32,10 @@ describe Rsel::SeleniumTest do
             @st.enable_checkbox("I like salami", :within => "salami_checkbox").should be_true
           end
         end
+      end
 
-        context "fails when" do
+      context "fails when" do
+        context "checkbox with label" do
           it "is absent" do
             @st.enable_checkbox("I dislike bacon").should be_false
             @st.enable_checkbox("I like broccoli").should be_false
@@ -48,8 +50,8 @@ describe Rsel::SeleniumTest do
     end
 
     describe "#disable_checkbox" do
-      context "checkbox with label" do
-        context "passes when" do
+      context "passes when" do
+        context "checkbox with label" do
           it "is present" do
             @st.disable_checkbox("I like cheese").should be_true
             @st.disable_checkbox("I like salami").should be_true
@@ -60,8 +62,10 @@ describe Rsel::SeleniumTest do
             @st.disable_checkbox("I like salami", :within => "preferences_form").should be_true
           end
         end
+      end
 
-        context "fails when" do
+      context "fails when" do
+        context "checkbox with label" do
           it "is absent" do
             @st.disable_checkbox("I dislike bacon").should be_false
             @st.disable_checkbox("I like broccoli").should be_false
@@ -76,8 +80,8 @@ describe Rsel::SeleniumTest do
     end
 
     describe "#checkbox_is_enabled" do
-      context "checkbox with label" do
-        context "passes when" do
+      context "passes when" do
+        context "checkbox with label" do
           it "exists and is checked" do
             @st.enable_checkbox("I like cheese").should be_true
             @st.checkbox_is_enabled("I like cheese").should be_true
@@ -88,8 +92,10 @@ describe Rsel::SeleniumTest do
             @st.checkbox_is_enabled("I like cheese", :within => "cheese_checkbox").should be_true
           end
         end
+      end
 
-        context "fails when" do
+      context "fails when" do
+        context "checkbox with label" do
           it "exists but is unchecked" do
             @st.disable_checkbox("I like cheese").should be_true
             @st.checkbox_is_enabled("I like cheese").should be_false
@@ -108,8 +114,8 @@ describe Rsel::SeleniumTest do
     end
 
     describe "#checkbox_is_disabled" do
-      context "checkbox with label" do
-        context "passes when" do
+      context "passes when" do
+        context "checkbox with label" do
           it "exists and is unchecked" do
             @st.disable_checkbox("I like cheese").should be_true
             @st.checkbox_is_disabled("I like cheese").should be_true
@@ -120,8 +126,10 @@ describe Rsel::SeleniumTest do
             @st.checkbox_is_disabled("I like cheese", :within => "cheese_checkbox").should be_true
           end
         end
+      end
 
-        context "fails when" do
+      context "fails when" do
+        context "checkbox with label" do
           it "exists but is checked" do
             @st.enable_checkbox("I like cheese").should be_true
             @st.checkbox_is_disabled("I like cheese").should be_false
@@ -284,6 +292,12 @@ describe Rsel::SeleniumTest do
         it "link exists within scope" do
           @st.click_link("About this site", :within => "header").should be_true
         end
+
+        it "link exists in table row" do
+          @st.visit("/table")
+          @st.click_link("Edit", :in_row => "Marcus").should be_true
+          @st.see_title("Editing Marcus").should be_true
+        end
       end
 
       context "fails when" do
@@ -293,6 +307,11 @@ describe Rsel::SeleniumTest do
 
         it "link exists, but not within scope" do
           @st.click_link("About this site", :within => "footer").should be_false
+        end
+
+        it "link exists, but not in table row" do
+          @st.visit("/table")
+          @st.click_link("Edit", :in_row => "Ken").should be_false
         end
       end
     end
@@ -358,16 +377,19 @@ describe Rsel::SeleniumTest do
       end
     end
 
+
     describe "#button_exists" do
       context "passes when" do
-        it "button with the given text exists" do
-          @st.button_exists("Submit person form").should be_true
-          @st.button_exists("Save preferences").should be_true
-        end
+        context "button with text" do
+          it "exists" do
+            @st.button_exists("Submit person form").should be_true
+            @st.button_exists("Save preferences").should be_true
+          end
 
-        it "button with the given text exists within scope" do
-          @st.button_exists("Submit person form", :within => "person_form").should be_true
-          @st.button_exists("Submit spouse form", :within => "spouse_form").should be_true
+          it "exists within scope" do
+            @st.button_exists("Submit person form", :within => "person_form").should be_true
+            @st.button_exists("Submit spouse form", :within => "spouse_form").should be_true
+          end
         end
       end
 
@@ -393,29 +415,36 @@ describe Rsel::SeleniumTest do
 
     describe "#type_into_field" do
       context "passes when" do
-        it "text field with the given label exists" do
-          @st.type_into_field("Eric", "First name").should be_true
-          @st.fill_in_with("Last name", "Pierce").should be_true
+        context "text field with label" do
+          it "exists" do
+            @st.type_into_field("Eric", "First name").should be_true
+            @st.fill_in_with("Last name", "Pierce").should be_true
+          end
+          it "exists within scope" do
+            @st.type_into_field("Eric", "First name", :within => 'person_form').should be_true
+            @st.type_into_field("Andrea", "First name", :within => 'spouse_form').should be_true
+          end
         end
 
-        it "text field with the given id exists" do
-          @st.type_into_field("Eric", "first_name").should be_true
-          @st.fill_in_with("last_name", "Pierce").should be_true
+        context "text field with id" do
+          it "exists" do
+            @st.type_into_field("Eric", "first_name").should be_true
+            @st.fill_in_with("last_name", "Pierce").should be_true
+          end
         end
 
-        it "texarea with the given label exists" do
-          @st.type_into_field("Blah blah blah", "Life story").should be_true
-          @st.fill_in_with("Life story", "Jibber jabber").should be_true
+        context "textarea with label" do
+          it "exists" do
+            @st.type_into_field("Blah blah blah", "Life story").should be_true
+            @st.fill_in_with("Life story", "Jibber jabber").should be_true
+          end
         end
 
-        it "texarea with the given id exists" do
-          @st.type_into_field("Blah blah blah", "biography").should be_true
-          @st.fill_in_with("biography", "Jibber jabber").should be_true
-        end
-
-        it "text field with the given label exists within scope" do
-          @st.type_into_field("Eric", "First name", :within => 'person_form').should be_true
-          @st.type_into_field("Andrea", "First name", :within => 'spouse_form').should be_true
+        context "textarea with id" do
+          it "exists" do
+            @st.type_into_field("Blah blah blah", "biography").should be_true
+            @st.fill_in_with("biography", "Jibber jabber").should be_true
+          end
         end
       end
 
@@ -433,32 +462,40 @@ describe Rsel::SeleniumTest do
 
     describe "#field_contains" do
       context "passes when" do
-        it "textarea contains the text" do
-          @st.fill_in_with("Life story", "Blah dee blah")
-          @st.field_contains("Life story", "blah").should be_true
+        context "textarea with label" do
+          it "contains the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_contains("Life story", "blah").should be_true
+          end
         end
       end
 
       context "fails when" do
-        it "textarea does not contain the text" do
-          @st.fill_in_with("Life story", "Blah dee blah")
-          @st.field_contains("Life story", "spam").should be_false
+        context "textarea with label" do
+          it "does not contain the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_contains("Life story", "spam").should be_false
+          end
         end
       end
     end
 
     describe "#field_equals" do
       context "passes when" do
-        it "textarea equals the text" do
-          @st.fill_in_with("Life story", "Blah dee blah")
-          @st.field_equals("Life story", "Blah dee blah").should be_true
+        context "textarea with label" do
+          it "equals the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_equals("Life story", "Blah dee blah").should be_true
+          end
         end
       end
 
       context "fails when" do
-        it "textarea does not exactly equal the text" do
-          @st.fill_in_with("Life story", "Blah dee blah")
-          @st.field_equals("Life story", "Blah dee").should be_false
+        context "textarea with label" do
+          it "does not exactly equal the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_equals("Life story", "Blah dee").should be_false
+          end
         end
       end
     end
@@ -551,6 +588,7 @@ describe Rsel::SeleniumTest do
         end
       end
     end
+
   end
 end
 

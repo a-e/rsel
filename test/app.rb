@@ -13,20 +13,8 @@ class TestApp < Sinatra::Base
     erb :index
   end
 
-  get '/about' do
-    erb :about
-  end
-
-  get '/form' do
-    erb :form
-  end
-
-  get '/table' do
-    erb :table
-  end
-
-  get '/thanks' do
-    erb :thanks
+  get '/:view' do |view|
+    erb view.to_sym
   end
 
   # Allow shutting down the app with a request
