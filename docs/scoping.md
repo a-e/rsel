@@ -44,9 +44,9 @@ there are a lot of fields in each container, you only need to keep track of one
 `id` instead of several.
 
 One important thing to note is that due to the way FitNesse Slim script tables
-are evaluated, the scoping options hash must be added after a cell that
-contains part of the method name. Cells in these tables must contain
-alternating (function, argument) chunks; the way the above example breaks down is:
+are evaluated, the scoping hash must be added after a cell that contains part
+of the method name. Cells in these tables must contain alternating (function,
+argument) chunks; the way the above example breaks down is:
 
     | Type |              | into |              | field |                |
     |      | 111-222-3333 |      | Phone number |       | !{within:work} |

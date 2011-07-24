@@ -114,12 +114,22 @@ describe Rsel::SeleniumTest do
             @st.disable_checkbox("I like cheese").should be_true
             @st.checkbox_is_disabled("I like cheese").should be_true
           end
+
+          it "exists within scope and is unchecked" do
+            @st.disable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
+            @st.checkbox_is_disabled("I like cheese", :within => "cheese_checkbox").should be_true
+          end
         end
 
         context "fails when" do
           it "exists but is checked" do
             @st.enable_checkbox("I like cheese").should be_true
             @st.checkbox_is_disabled("I like cheese").should be_false
+          end
+
+          it "exists and is unchecked, but not within scope" do
+            @st.disable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
+            @st.checkbox_is_disabled("I like cheese", :within => "salami_checkbox").should be_false
           end
 
           it "does not exist" do
@@ -142,12 +152,20 @@ describe Rsel::SeleniumTest do
           @st.select_from_dropdown("Tall", "Height").should be_true
           @st.select_from_dropdown("Medium", "Weight").should be_true
         end
+
+        it "option exists in the dropdown within scope" do
+          @st.select_from_dropdown("Tall", "Height", :within => "spouse_form").should be_true
+        end
       end
 
       context "fails when" do
         it "dropdown exists, but the option doesn't" do
           @st.select_from_dropdown("Giant", "Height").should be_false
           @st.select_from_dropdown("Obese", "Weight").should be_false
+        end
+
+        it "dropdown exists, but not within scope" do
+          @st.select_from_dropdown("Medium", "Weight", :within => "spouse_form").should be_false
         end
 
         it "no such dropdown exists" do

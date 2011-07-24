@@ -59,6 +59,8 @@ module Rsel
     # @example
     #   | Open browser |
     #
+    # @raise [SeleniumNotRunning] if Selenium connection cannot be made
+    #
     def open_browser
       begin
         @browser.start_new_browser_session
@@ -192,7 +194,7 @@ module Rsel
     #
     # @param [String] locator
     #   Text or id of the link, or image alt text
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
@@ -201,8 +203,8 @@ module Rsel
     #
     # @since 0.0.2
     #
-    def link_exists(locator, options={})
-      return @browser.element?(xpath('link', locator, options))
+    def link_exists(locator, scope={})
+      return @browser.element?(xpath('link', locator, scope))
     end
 
 
@@ -210,7 +212,7 @@ module Rsel
     #
     # @param [String] locator
     #   Text, value, or id of the button
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
@@ -219,8 +221,8 @@ module Rsel
     #
     # @since 0.0.2
     #
-    def button_exists(locator, options={})
-      return @browser.element?(xpath('button', locator, options))
+    def button_exists(locator, scope={})
+      return @browser.element?(xpath('button', locator, scope))
     end
 
 
@@ -245,16 +247,16 @@ module Rsel
     #   What to type into the field
     # @param [String] locator
     #   Label, name, or id of the field you want to type into
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Type | Dale | into | First name | field |
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
-    def type_into_field(text, locator, options={})
+    def type_into_field(text, locator, scope={})
       return_error_status do
-        @browser.type(xpath('field', locator, options), text)
+        @browser.type(xpath('field', locator, scope), text)
       end
     end
 
@@ -327,7 +329,7 @@ module Rsel
     #
     # @param [String] locator
     #   Text or id of the link, or image alt text
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
@@ -335,9 +337,9 @@ module Rsel
     #   | Follow | Logout |
     #   | Click | Logout | link | !{within:header} |
     #
-    def click_link(locator, options={})
+    def click_link(locator, scope={})
       return_error_status do
-        @browser.click(xpath('link', locator, options))
+        @browser.click(xpath('link', locator, scope))
       end
     end
     alias_method :follow, :click_link
@@ -347,7 +349,7 @@ module Rsel
     #
     # @param [String] locator
     #   Text, value, or id of the button
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
@@ -355,10 +357,10 @@ module Rsel
     #   | Press | Login |
     #   | Click | Search | button | !{within:customers} |
     #
-    def click_button(locator, options={})
+    def click_button(locator, scope={})
       # TODO: Make this fail when the button is disabled
       return_error_status do
-        @browser.click(xpath('button', locator, options))
+        @browser.click(xpath('button', locator, scope))
       end
     end
     alias_method :press, :click_button
@@ -369,17 +371,17 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to check
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Enable | Send me spam | checkbox |
     #   | Enable | Send me spam | checkbox | !{within:opt_in} |
     #
-    def enable_checkbox(locator, options={})
-      return true if checkbox_is_enabled(locator, options)
+    def enable_checkbox(locator, scope={})
+      return true if checkbox_is_enabled(locator, scope)
       return_error_status do
-        @browser.click(xpath('checkbox', locator, options))
+        @browser.click(xpath('checkbox', locator, scope))
       end
     end
 
@@ -389,17 +391,17 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to uncheck
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Disable | Send me spam | checkbox |
     #   | Disable | Send me spam | checkbox | !{within:opt_in} |
     #
-    def disable_checkbox(locator, options={})
-      return true if checkbox_is_disabled(locator, options)
+    def disable_checkbox(locator, scope={})
+      return true if checkbox_is_disabled(locator, scope)
       return_error_status do
-        @browser.click(xpath('checkbox', locator, options))
+        @browser.click(xpath('checkbox', locator, scope))
       end
     end
 
@@ -408,7 +410,7 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
@@ -417,8 +419,8 @@ module Rsel
     #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
     #   | Radio | medium | is enabled | !{within:shirt_size} |
     #
-    def checkbox_is_enabled(locator, options={})
-      xp = xpath('checkbox', locator, options)
+    def checkbox_is_enabled(locator, scope={})
+      xp = xpath('checkbox', locator, scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -434,7 +436,7 @@ module Rsel
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
@@ -443,8 +445,8 @@ module Rsel
     #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
     #   | Radio | medium | is disabled | !{within:shirt_size} |
     #
-    def checkbox_is_disabled(locator, options={})
-      xp = xpath('checkbox', locator, options)
+    def checkbox_is_disabled(locator, scope={})
+      xp = xpath('checkbox', locator, scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -460,16 +462,16 @@ module Rsel
     #
     # @param [String] locator
     #   Label, id, or name of the radio button to select
-    # @param [Hash] options
+    # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Select | female | radio |
     #   | Select | female | radio | !{within:gender} |
     #
-    def select_radio(locator, options={})
+    def select_radio(locator, scope={})
       return_error_status do
-        @browser.click(xpath('radio_button', locator, options))
+        @browser.click(xpath('radio_button', locator, scope))
       end
     end
 
@@ -485,9 +487,9 @@ module Rsel
     #   | Select | Tall | from | Height | dropdown |
     #   | Select | Tall | from dropdown | Height |
     #
-    def select_from_dropdown(option, locator)
+    def select_from_dropdown(option, locator, scope={})
       return_error_status do
-        @browser.select(xpath('select', locator), option)
+        @browser.select(xpath('select', locator, scope), option)
       end
     end
 
@@ -587,17 +589,17 @@ module Rsel
 
 
     # Return a Selenium-style xpath generated by calling `XPath::HTML.<kind>`
-    # with the given `arg`.
+    # with the given `locator`.
     #
     # @param [String] kind
     #   What kind of locator you're using (link, button, checkbox, field etc.).
     #   This must correspond to a method name in `XPath::HTML`.
-    # @param [String] arg
-    #   Argument accepted by `XPath::HTML.<kind>`. Usually a locator, but may
-    #   be something else depending on the method you're calling.
-    # @param [Hash] options
-    #   Additional options to restrict the scope of matching elements
-    # @option options [String] :within
+    # @param [String] locator
+    #   Name, id, value, label or whatever other locators are accepted by
+    #   `XPath::HTML.<kind>`
+    # @param [Hash] scope
+    #   Keywords to restrict the scope of matching elements
+    # @option scope [String] :within
     #   Restrict scope to elements having this id, matching `locator` only if
     #   it's contained within an element with this id.
     #
@@ -607,15 +609,14 @@ module Rsel
     #   xpath('field', 'First name')
     #   xpath('table_row', ['First', 'Last'])
     #
-    def xpath(kind, locator, options={})
+    def xpath(kind, locator, scope={})
       loc_xp = XPath::HTML.send(kind, locator)
-      if options[:within]
-        parent = options[:within]
-        scope = XPath.descendant[XPath.attr(:id).equals(parent)]
+      if scope[:within]
+        parent = XPath.descendant[XPath.attr(:id).equals(scope[:within])]
         # Prepend the scoping clause to each expression in loc_xp,
         # then recombine into a union again
         scoped_expressions = xpath_expressions(loc_xp).collect do |expr|
-          scope.child(expr)
+          parent.child(expr)
         end
         result = XPath::Union.new(*scoped_expressions).to_s
       else
@@ -629,6 +630,9 @@ module Rsel
     # just `[union]` if it has no sub-expressions. This is an ugly recursive
     # hack, designed to allow splitting up unions into their constituents for
     # the purpose of modifying them individually and re-combining them.
+    #
+    # @param [XPath::Union, XPath::Expression] union
+    #   The xpath you want to break down into individual expressions
     #
     def xpath_expressions(union)
       if union.respond_to?(:expressions)
