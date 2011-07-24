@@ -616,11 +616,32 @@ module Rsel
       if options[:within]
         parent = options[:within]
         scope = XPath.descendant[XPath.attr(:id).equals(parent)]
-        result = scope.child(loc_xp).to_s
+        # Prepend the scoping clause to each expression in loc_xp,
+        # then recombine into a union again
+        scoped_expressions = xpath_expressions(loc_xp).collect do |expr|
+          scope.child(expr)
+        end
+        result = XPath::Union.new(*scoped_expressions).to_s
       else
         result = loc_xp.to_s
       end
       return "xpath=#{result}"
+    end
+
+
+    # Return an array of individual Expressions in the given XPath::Union, or
+    # just `[union]` if it has no sub-expressions. This is an ugly recursive
+    # hack, designed to allow splitting up unions into their constituents for
+    # the purpose of modifying them individually and re-combining them.
+    #
+    def xpath_expressions(union)
+      if union.respond_to?(:expressions)
+        return union.expressions.collect do |expr|
+          xpath_expressions(expr)
+        end.flatten
+      else
+        return [union]
+      end
     end
 
   end
