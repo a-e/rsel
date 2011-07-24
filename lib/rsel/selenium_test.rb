@@ -235,6 +235,8 @@ module Rsel
     #   | Row exists | First, Middle, Last, Email |
     #   | Row | First, Middle, Last, Email | exists |
     #
+    # @since 0.0.3
+    #
     def row_exists(cells)
       row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
       return @browser.element?("xpath=#{row.to_s}")
@@ -633,6 +635,8 @@ module Rsel
     #
     # @param [XPath::Union, XPath::Expression] union
     #   The xpath you want to break down into individual expressions
+    #
+    # @since 0.0.3
     #
     def xpath_expressions(union)
       if union.respond_to?(:expressions)
