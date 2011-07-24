@@ -8,6 +8,5 @@ To-do list
 - Find a way to abort a test if something goes catastrophically wrong (such as
   being unable to connect to the Selenium server)
 - Verify the presence of images, allow clicking on images
-- Support clicking links, checkboxes, buttons etc. in table rows
 
 Next: [History](history.md)

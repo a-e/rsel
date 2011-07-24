@@ -1,10 +1,16 @@
 Scoping
--------
+=======
 
 Several of the actions and verifications accept an optional hash of scoping
 keywords, allowing you to be specific about what area of the page to operate
-on. For example, you might have a page of contact information with HTML that
-looks something like this:
+on. This page describes how to use them.
+
+
+within
+------
+
+Say you have a page of contact information with HTML that looks something like
+this:
 
     <div id="work">
       <label for="work_phone">Phone number</label>
@@ -43,6 +49,36 @@ Yeah I know, we're still using an `id` which could be annoyingly long, but if
 there are a lot of fields in each container, you only need to keep track of one
 `id` instead of several.
 
+
+in_row
+------
+
+Another kind of scoping that can be useful is `in_row`, which selects only the
+elements that are in the same table row as a given piece of text. For example,
+a common approach to editing or deleting items in a list is to place links next
+to those items in an HTML table:
+
+    <table>
+      <tr><th>Name</th>   <th>Actions</th></tr>
+      <tr><td>Eric</td>   <td><a href="/edit/eric">Edit</a></td></tr>
+      <tr><td>Marcus</td> <td><a href="/edit/marcus">Edit</a></td></tr>
+      <tr><td>Ken</td>    <td><a href="/edit/ken">Edit</a></td></tr>
+    </table>
+
+Here, we have three "Edit" links. Clicking "Edit" without any scoping qualifier
+is ambiguous, and would simply use the first match. If you want to click the
+"Edit" link in a specific row, include an `in_row` scope with some text that is
+unique to that row:
+
+    | Click | Edit | link | !{in_row:Marcus} |
+
+This works for any method that accepts scoping qualifiers, so you can use it to
+operate on checkboxes, dropdowns, or text fields as well.
+
+
+Caveat
+------
+
 One important thing to note is that due to the way FitNesse Slim script tables
 are evaluated, the scoping hash must be added after a cell that contains part
 of the method name. Cells in these tables must contain alternating (function,
@@ -63,10 +99,10 @@ be treated as arguments. These are valid alternative ways of calling the same fu
 The `SeleniumTest` method names were, for the most part, crafted so that the
 alternating (function, argument) form reads the most naturally.
 
-As of now, `within` is the only supported scoping keyword, but additional ones
-are being considered. For example, it might be useful to scope to something
-that is `below` another element (such as a heading), or `next_to` an element
-(such as in a table row or list).
+Additional scoping qualifiers may be added to Rsel if they prove useful. If you
+have a use case that isn't covered by the existing scopes, please [submit an
+issue](http://github.com/a-e/rsel/issues), or better yet, implement it yourself
+and submit a pull request. See [Development](development.md) for more info.
 
 Next: [Customization](custom.md)
 
