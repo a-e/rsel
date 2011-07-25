@@ -4,8 +4,9 @@ Rsel History
 0.0.4
 -----
 
-- Added `in_row` to scope
-- More methods accept scope hash now
+- Added `in_row` to scope, for narrowing scope to a specific table row
+- Many more methods accept scope hash now
+- Added (working) `radio_is_enabled` and `radio_is_disabled` methods
 
 
 0.0.3
