@@ -14,12 +14,12 @@ class TestApp < Sinatra::Base
   end
 
   get '/:view' do |view|
-    erb view.to_sym
-  end
-
-  # Allow shutting down the app with a request
-  get '/shutdown' do
-    Process.kill('KILL', Process.pid)
+    # Allow shutting down the app with a request
+    if view == 'shutdown'
+      Process.kill('KILL', Process.pid)
+    else
+      erb view.to_sym
+    end
   end
 end
 
