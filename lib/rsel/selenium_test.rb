@@ -587,6 +587,7 @@ module Rsel
       begin
         yield
       rescue => e
+        #puts e.message
         #puts e.backtrace
         return false
       else

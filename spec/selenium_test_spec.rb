@@ -215,7 +215,8 @@ describe Rsel::SeleniumTest do
         end
 
         it "option exists in the dropdown in table row" do
-          # TODO
+          @st.visit("/table")
+          @st.select_from_dropdown("Male", "Gender", :in_row => "Eric").should be_true
         end
       end
 
@@ -234,7 +235,8 @@ describe Rsel::SeleniumTest do
         end
 
         it "dropdown exists, but not in table row" do
-          # TODO
+          @st.visit("/table")
+          @st.select_from_dropdown("Female", "Gender", :in_row => "First name").should be_false
         end
       end
     end
@@ -436,7 +438,7 @@ describe Rsel::SeleniumTest do
           # TODO
         end
 
-        it "button exists but is disabled" do
+        it "button exists, but is disabled" do
           # TODO
         end
       end
@@ -455,6 +457,10 @@ describe Rsel::SeleniumTest do
             @st.button_exists("Submit person form", :within => "person_form").should be_true
             @st.button_exists("Submit spouse form", :within => "spouse_form").should be_true
           end
+
+          it "exists in table row" do
+            # TODO
+          end
         end
       end
 
@@ -467,6 +473,10 @@ describe Rsel::SeleniumTest do
         it "button exists, but not within scope" do
           @st.button_exists("Submit spouse form", :within => "person_form").should be_false
           @st.button_exists("Submit person form", :within => "spouse_form").should be_false
+        end
+
+        it "button exists, but not in table row" do
+          # TODO
         end
       end
     end
@@ -648,21 +658,21 @@ describe Rsel::SeleniumTest do
     describe "#row_exists" do
       context "passes when" do
         it "full row of headings exists" do
-          @st.row_exists("First name, Last name, Nickname, Email").should be_true
+          @st.row_exists("First name, Last name, Email").should be_true
         end
 
         it "partial row of headings exists" do
           @st.row_exists("First name, Last name").should be_true
-          @st.row_exists("Nickname, Email").should be_true
+          @st.row_exists("Last name, Email").should be_true
         end
 
         it "full row of cells exists" do
-          @st.row_exists("Eric, Pierce, epierce, epierce@example.com").should be_true
+          @st.row_exists("Eric, Pierce, epierce@example.com").should be_true
         end
 
         it "partial row of cells exists" do
           @st.row_exists("Eric, Pierce").should be_true
-          @st.row_exists("epierce, epierce@example.com").should be_true
+          @st.row_exists("Pierce, epierce@example.com").should be_true
         end
       end
 
@@ -673,7 +683,7 @@ describe Rsel::SeleniumTest do
 
         it "cell values are not consecutive" do
           @st.row_exists("First name, Email").should be_false
-          @st.row_exists("Eric, epierce").should be_false
+          @st.row_exists("Eric, epierce@example.com").should be_false
         end
       end
     end

@@ -8,39 +8,55 @@
     <tr>
       <th>First name</th>
       <th>Last name</th>
-      <th>Nickname</th>
       <th>Email</th>
       <th>Actions</th>
     </tr>
     <tr>
       <td>Eric</td>
       <td>Pierce</td>
-      <td>epierce</td>
       <td>epierce@example.com</td>
       <td>
         <a href="/edit_eric">Edit</a>
+
+        <label for="eric_gender">Gender</a>
+        <select id="eric_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
       </td>
     </tr>
     <tr>
       <td>Marcus</td>
       <td>French</td>
-      <td>mfrench</td>
       <td>mfrench@example.com</td>
       <td>
         <a href="/edit_marcus">Edit</a>
+
         <label for="like_marcus">Like</label>
         <input id="like_marcus" type="checkbox"/>
+
+        <label for="marcus_gender">Gender</a>
+        <select id="marcus_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
       </td>
     </tr>
     <tr>
       <td>Ken</td>
       <td>Brazier</td>
-      <td>kbrazier</td>
       <td>kbrazier@example.com</td>
       <td>
         (read-only)
+
         <label for="like_ken">Like</label>
         <input id="like_ken" type="checkbox"/>
+
+        <label for="ken_gender">Gender</a>
+        <select id="ken_gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
       </td>
     </tr>
   </table>
