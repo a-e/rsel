@@ -1,3 +1,0 @@
-class SlimError < Exception
-
-end
