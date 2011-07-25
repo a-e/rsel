@@ -445,6 +445,8 @@ module Rsel
     #   | Radio | medium | is enabled |
     #   | Radio | medium | is enabled | !{within:shirt_size} |
     #
+    # @since 0.0.4
+    #
     def radio_is_enabled(locator, scope={})
       xp = xpath('radio_button', locator, scope)
       begin
@@ -490,6 +492,8 @@ module Rsel
     # @example
     #   | Radio | medium | is disabled |
     #   | Radio | medium | is disabled | !{within:shirt_size} |
+    #
+    # @since 0.0.4
     #
     def radio_is_disabled(locator, scope={})
       xp = xpath('radio_button', locator, scope)
