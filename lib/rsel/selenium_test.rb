@@ -411,7 +411,7 @@ module Rsel
     end
 
 
-    # Verify that a given checkbox or radiobutton is enabled (checked)
+    # Verify that a given checkbox is enabled (checked)
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
@@ -420,9 +420,7 @@ module Rsel
     #
     # @example
     #   | Checkbox | send me spam | is enabled |
-    #   | Radio | medium | is enabled |
     #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
-    #   | Radio | medium | is enabled | !{within:shirt_size} |
     #
     def checkbox_is_enabled(locator, scope={})
       xp = xpath('checkbox', locator, scope)
@@ -434,10 +432,32 @@ module Rsel
         return enabled
       end
     end
-    alias_method :radio_is_enabled, :checkbox_is_enabled
 
 
-    # Verify that a given checkbox or radiobutton is disabled (unchecked)
+    # Verify that a given radio button is enabled (checked)
+    #
+    # @param [String] locator
+    #   Label, value, or id of the radio button to inspect
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
+    # @example
+    #   | Radio | medium | is enabled |
+    #   | Radio | medium | is enabled | !{within:shirt_size} |
+    #
+    def radio_is_enabled(locator, scope={})
+      xp = xpath('radio_button', locator, scope)
+      begin
+        enabled = @browser.checked?(xp)
+      rescue
+        return false
+      else
+        return enabled
+      end
+    end
+
+
+    # Verify that a given checkbox is disabled (unchecked)
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to inspect
@@ -446,9 +466,7 @@ module Rsel
     #
     # @example
     #   | Checkbox | send me spam | is disabled |
-    #   | Radio | medium | is disabled |
     #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
-    #   | Radio | medium | is disabled | !{within:shirt_size} |
     #
     def checkbox_is_disabled(locator, scope={})
       xp = xpath('checkbox', locator, scope)
@@ -460,7 +478,29 @@ module Rsel
         return !enabled
       end
     end
-    alias_method :radio_is_disabled, :checkbox_is_disabled
+
+
+    # Verify that a given radio button is disabled (unchecked)
+    #
+    # @param [String] locator
+    #   Label, value, or id of the radio button to inspect
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
+    # @example
+    #   | Radio | medium | is disabled |
+    #   | Radio | medium | is disabled | !{within:shirt_size} |
+    #
+    def radio_is_disabled(locator, scope={})
+      xp = xpath('radio_button', locator, scope)
+      begin
+        enabled = @browser.checked?(xp)
+      rescue
+        return false
+      else
+        return !enabled
+      end
+    end
 
 
     # Select a radio button.
