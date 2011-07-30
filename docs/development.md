@@ -1,9 +1,13 @@
 Development
------------
+===========
 
 If you would like to contribute to development of Rsel, create a fork of the
 [Github repository](https://github.com/a-e/rsel), clone your fork, and submit
 pull requests for any improvements you would like to share.
+
+
+Testing
+-------
 
 While developing, you should run the RSpec tests frequently to ensure nothing
 gets broken. You can do this with a single `rake` command:
@@ -42,7 +46,8 @@ and stop them:
     $ rake selenium:rc:stop
     $ rake testapp:stop
 
-If you are developing new features, please add spec tests in the `spec`
-directory!
+When the test application is running, you can view the site in your browser by
+visiting http://localhost:8070/. If you are developing new features, please add
+spec tests in the `spec` directory!
 
 Next: [To-do list](todo.md)
