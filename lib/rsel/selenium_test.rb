@@ -662,7 +662,9 @@ module Rsel
     #   allowed options.
     #
     def loc(locator, kind='', scope={})
-      if locator =~ /^(id=|name=|dom=|xpath=|link=|css=)/
+      if locator.empty?
+        raise ArgumentError, "locator is required."
+      elsif locator =~ /^(id=|name=|dom=|xpath=|link=|css=)/
         return locator
       else
         return xpath(kind, locator, scope)
@@ -696,6 +698,9 @@ module Rsel
     #   xpath('table_row', ['First', 'Last'])
     #
     def xpath(kind, locator, scope={})
+      if !XPath::HTML.respond_to?(kind)
+        raise ArgumentError, "Unknown kind of locator: '#{kind}'"
+      end
       loc_xp = XPath::HTML.send(kind, locator)
       if scope[:within]
         parent = XPath.descendant[XPath.attr(:id).equals(scope[:within])]

@@ -38,6 +38,12 @@ describe Rsel::SeleniumTest do
         end
       end
 
+      it "requires a non-empty locator" do
+        lambda do
+          @st.loc('')
+        end.should raise_error
+      end
+
       it "requires element kind for Rsel-style locators" do
         lambda do
           @st.loc('foo')
@@ -46,6 +52,11 @@ describe Rsel::SeleniumTest do
     end
 
     describe "#xpath" do
+      it "requires a valid kind" do
+        lambda do
+          @st.xpath('junk', 'hello')
+        end.should raise_error
+      end
     end
   end
 
