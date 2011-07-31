@@ -59,14 +59,13 @@ module Rsel
     # @example
     #   | Open browser |
     #
-    # @raise [SeleniumNotRunning] if Selenium connection cannot be made
+    # @raise [StopTestSeleniumNotRunning] if Selenium connection cannot be made
     #
     def open_browser
       begin
         @browser.start_new_browser_session
       rescue
-        # TODO: Find a way to make the test abort here
-        raise SeleniumNotRunning, "Could not start Selenium."
+        raise StopTestSeleniumNotRunning, "Could not start Selenium."
       else
         visit @url
       end
