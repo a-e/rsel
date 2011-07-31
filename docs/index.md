@@ -5,8 +5,9 @@ Rsel connects [FitNesse](http://fitnesse.org) to
 [Selenium](http://seleniumhq.org) via [Ruby](http://ruby-lang.org). It allows
 you to use a natural English syntax to write web application tests.
 
-- [Installation & Configuration](install.md)
+- [Installation](install.md)
 - [Usage](usage.md)
+- [Locators](locators.md)
 - [Scoping](scoping.md)
 - [Examples](examples.md)
 - [Customization](custom.md)
