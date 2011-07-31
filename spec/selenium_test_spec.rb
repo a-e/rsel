@@ -14,6 +14,42 @@ describe Rsel::SeleniumTest do
   end
 
 
+  context "helper methods" do
+    describe "#loc" do
+      it "returns Selenium-style locators unchanged" do
+        locators = [
+          "id=foo_bar",
+          "name=foo_bar",
+          "xpath=//input[@id='foo_bar']",
+          "css=div#foo_bar",
+        ]
+        locators.each do |locator|
+          @st.loc(locator).should == locator
+        end
+      end
+
+      it "returns Rsel-style locators as Selenium xpaths" do
+        locators = [
+          "First name",
+          "first_name",
+        ]
+        locators.each do |locator|
+          @st.loc(locator, 'field').should =~ /^xpath=/
+        end
+      end
+
+      it "requires element kind for Rsel-style locators" do
+        lambda do
+          @st.loc('foo')
+        end.should raise_error
+      end
+    end
+
+    describe "#xpath" do
+    end
+  end
+
+
   context "checkboxes" do
     before(:each) do
       @st.visit("/form").should be_true
@@ -35,6 +71,18 @@ describe Rsel::SeleniumTest do
           it "exists in table row" do
             @st.visit("/table")
             @st.enable_checkbox("Like", :in_row => "Marcus").should be_true
+          end
+        end
+
+        context "checkbox with id=" do
+          it "exists" do
+            @st.enable_checkbox("id=like_cheese").should be_true
+          end
+        end
+
+        context "checkbox with xpath=" do
+          it "exists" do
+            @st.enable_checkbox("xpath=//input[@id='like_cheese']").should be_true
           end
         end
       end
@@ -75,6 +123,18 @@ describe Rsel::SeleniumTest do
           it "exists in table row" do
             @st.visit("/table")
             @st.disable_checkbox("Like", :in_row => "Marcus").should be_true
+          end
+        end
+
+        context "checkbox with id=" do
+          it "exists" do
+            @st.disable_checkbox("id=like_cheese").should be_true
+          end
+        end
+
+        context "checkbox with xpath=" do
+          it "exists" do
+            @st.disable_checkbox("xpath=//input[@id='like_cheese']").should be_true
           end
         end
       end

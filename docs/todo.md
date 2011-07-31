@@ -8,5 +8,7 @@ To-do list
 - Find a way to abort a test if something goes catastrophically wrong (such as
   being unable to connect to the Selenium server)
 - Verify the presence of images, allow clicking on images
+- Create a Selenium IDE plugin to generate FitNesse-formatted output for
+  recorded scripts
 
 Next: [History](history.md)

@@ -1,5 +1,5 @@
 Usage
------
+=====
 
 Once you have created your `SetUp` page, you can create sibling pages with
 tests in them. For instance, continuing with the example from
@@ -46,5 +46,5 @@ driver frowns upon it.)
 See the `SeleniumTest` class documentation for a full list of available methods
 and how to use them.
 
-Next: [Scoping](scoping.md)
+Next: [Locators](locators.md)
 

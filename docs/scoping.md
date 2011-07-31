@@ -79,10 +79,24 @@ operate on checkboxes, dropdowns, or text fields as well.
 Caveat
 ------
 
-One important thing to note is that due to the way FitNesse Slim script tables
-are evaluated, the scoping hash must be added after a cell that contains part
-of the method name. Cells in these tables must contain alternating (function,
-argument) chunks; the way the above example breaks down is:
+The first thing you need to remember when using a scoping hash is that your tables
+must not be fully escaped. This just means you should not include a `!` at the
+beginning of your table, otherwise the hash syntax will be interpreted
+literally, instead of as an embedded hash.
+
+This means you will need to manually escape any cells in your table that
+contain URLs, email addresses, or other auto-interpreted text:
+
+    | script | selenium test | !-http://www.example.com-! |
+    | Open browser                                        |
+    | See           | Welcome                             |
+    | Click         | About   | link | !{within:footer}   |
+    | Close browser                                       |
+
+Another important thing to note is that due to the way FitNesse Slim script
+tables are evaluated, the scoping hash must be added after a cell that contains
+part of the method name. Cells in these tables must contain alternating
+(function, argument) chunks; the way the above example breaks down is:
 
     | Type |              | into |              | field |                |
     |      | 111-222-3333 |      | Phone number |       | !{within:work} |
@@ -104,5 +118,5 @@ have a use case that isn't covered by the existing scopes, please [submit an
 issue](http://github.com/a-e/rsel/issues), or better yet, implement it yourself
 and submit a pull request. See [Development](development.md) for more info.
 
-Next: [Customization](custom.md)
+Next: [Examples](examples.md)
 
