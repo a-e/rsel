@@ -1,6 +1,15 @@
 Rsel History
 ============
 
+0.0.5
+-----
+
+- Allow Selenium-style locators beginning with id=, name=, xpath=, css= etc.
+- Raise a StopTest exception when Selenium is not running (requires updated rubyslim)
+- Locators are now documented
+- Example FitNesse tables are now included
+
+
 0.0.4
 -----
 
