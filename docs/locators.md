@@ -54,5 +54,19 @@ This allows you to use human-readable locator strings for most HTML elements,
 keeping your test steps free of ugly markup. Refer to the `SeleniumTest` method
 documentation for details on what locator strings are expected for each element.
 
+If you like, you can still pass explicit Selenium-style locators, as long as
+they are prefixed with `id=`, `name=`, `dom=`, `xpath=`, `link=`, or `css=`. If
+you do this, it's up to you to make sure you're using a suitable locator for
+the kind of element you're interacting with. For example, it doesn't make much
+sense to write:
+
+    | Type | Eric | into field | link=Contact Us |
+
+But Rsel won't stop you from trying! One drawback to this approach is that any
+[scoping](scoping.md) clause is ignored. In most cases, it's easier, safer, and
+more readable to use the plain text locator, and rely on Rsel's internal logic
+to find the correct element. This feature is only provided as a workaround for
+the possibility that Rsel's locator scheme is too restrictive for your needs.
+
 Next: [Scoping](scoping.md)
 

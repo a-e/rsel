@@ -204,7 +204,7 @@ module Rsel
     # @since 0.0.2
     #
     def link_exists(locator, scope={})
-      return @browser.element?(xpath('link', locator, scope))
+      return @browser.element?(loc(locator, 'link', scope))
     end
 
 
@@ -222,7 +222,7 @@ module Rsel
     # @since 0.0.2
     #
     def button_exists(locator, scope={})
-      return @browser.element?(xpath('button', locator, scope))
+      return @browser.element?(loc(locator, 'button', scope))
     end
 
 
@@ -258,7 +258,7 @@ module Rsel
     #
     def type_into_field(text, locator, scope={})
       return_error_status do
-        @browser.type(xpath('field', locator, scope), text)
+        @browser.type(loc(locator, 'field', scope), text)
       end
     end
 
@@ -291,7 +291,7 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text)
-      @browser.field(xpath('field', locator)).include?(text)
+      @browser.field(loc(locator, 'field')).include?(text)
     end
 
 
@@ -308,7 +308,7 @@ module Rsel
     #   | Field | First name | equals; | Eric | !{within:contact} |
     #
     def field_equals(locator, text, scope={})
-      @browser.field(xpath('field', locator, scope)) == text
+      @browser.field(loc(locator, 'field', scope)) == text
     end
 
 
@@ -324,7 +324,7 @@ module Rsel
     #
     def click(locator, scope={})
       return_error_status do
-        @browser.click(xpath('link_or_button', locator, scope))
+        @browser.click(loc(locator, 'link_or_button', scope))
       end
     end
 
@@ -344,7 +344,7 @@ module Rsel
     #
     def click_link(locator, scope={})
       return_error_status do
-        @browser.click(xpath('link', locator, scope))
+        @browser.click(loc(locator, 'link', scope))
       end
     end
     alias_method :follow, :click_link
@@ -365,7 +365,7 @@ module Rsel
     def click_button(locator, scope={})
       # TODO: Make this fail when the button is disabled
       return_error_status do
-        @browser.click(xpath('button', locator, scope))
+        @browser.click(loc(locator, 'button', scope))
       end
     end
     alias_method :press, :click_button
@@ -386,7 +386,7 @@ module Rsel
     def enable_checkbox(locator, scope={})
       return true if checkbox_is_enabled(locator, scope)
       return_error_status do
-        @browser.click(xpath('checkbox', locator, scope))
+        @browser.click(loc(locator, 'checkbox', scope))
       end
     end
 
@@ -406,7 +406,7 @@ module Rsel
     def disable_checkbox(locator, scope={})
       return true if checkbox_is_disabled(locator, scope)
       return_error_status do
-        @browser.click(xpath('checkbox', locator, scope))
+        @browser.click(loc(locator, 'checkbox', scope))
       end
     end
 
@@ -423,7 +423,7 @@ module Rsel
     #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
     #
     def checkbox_is_enabled(locator, scope={})
-      xp = xpath('checkbox', locator, scope)
+      xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -448,7 +448,7 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_enabled(locator, scope={})
-      xp = xpath('radio_button', locator, scope)
+      xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -471,7 +471,7 @@ module Rsel
     #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
     #
     def checkbox_is_disabled(locator, scope={})
-      xp = xpath('checkbox', locator, scope)
+      xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -496,7 +496,7 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_disabled(locator, scope={})
-      xp = xpath('radio_button', locator, scope)
+      xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -520,7 +520,7 @@ module Rsel
     #
     def select_radio(locator, scope={})
       return_error_status do
-        @browser.click(xpath('radio_button', locator, scope))
+        @browser.click(loc(locator, 'radio_button', scope))
       end
     end
 
@@ -538,7 +538,7 @@ module Rsel
     #
     def select_from_dropdown(option, locator, scope={})
       return_error_status do
-        @browser.select(xpath('select', locator, scope), option)
+        @browser.select(loc(locator, 'select', scope), option)
       end
     end
 
@@ -579,7 +579,7 @@ module Rsel
     def dropdown_equals(locator, option, scope={})
       # TODO: Apply scope
       begin
-        selected = @browser.get_selected_label(xpath('select', locator))
+        selected = @browser.get_selected_label(loc(locator, 'select'))
       rescue
         return false
       else
@@ -640,8 +640,40 @@ module Rsel
     end
 
 
+    # Convert the given locator to a format accepted by Selenium. If `locator`
+    # starts with `id=`, `name=`, `dom=`, `xpath=` `link=` or `css=`, then the
+    # locator is returned unchanged. Otherwise, `locator` is assumed to be a
+    # plain string, and a Selenium-style `xpath=` locator is returned, matching
+    # HTML elements of the given kind, in the given scope. This allows you to
+    # use simple human-readable locator strings, or more specific
+    # Selenium-style locators.
+    #
+    # @param [String] locator
+    #   A Selenium-style locator beginning with `id=`, `name=`, `dom=`,
+    #   `xpath=`, `link=` or `css=`, or a plain text string that will
+    #   automatically match on the `id`, `name`, label, value, or text content
+    #   depending on the value of `kind`.
+    # @param [String] kind
+    #   What kind of locator you're using (link, button, checkbox, field etc.).
+    #   This must correspond to a method name in `XPath::HTML`. If you're using
+    #   a raw Selenium-style `locator` string, this argument can be omitted.
+    # @param [Hash] scope
+    #   Keywords to restrict the scope of matching elements. Ignored when
+    #   a Selenium-style locator is used. See the {#xpath} documentation for
+    #   allowed options.
+    #
+    def loc(locator, kind='', scope={})
+      if locator =~ /^(id=|name=|dom=|xpath=|link=|css=)/
+        return locator
+      else
+        return xpath(kind, locator, scope)
+      end
+    end
+
+
     # Return a Selenium-style xpath generated by calling `XPath::HTML.<kind>`
-    # with the given `locator`.
+    # with the given `locator`. If `scope` options are provided, the xpath is
+    # modified accordingly, to match only elements in the given scope.
     #
     # @param [String] kind
     #   What kind of locator you're using (link, button, checkbox, field etc.).
