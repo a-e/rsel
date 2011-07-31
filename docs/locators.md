@@ -1,8 +1,7 @@
 Locators
 ========
 
-By default, Selenium accepts a [variety of locator strings]
-(http://release.seleniumhq.org/selenium-remote-control/0.9.2/doc/dotnet/Selenium.html)
+By default, Selenium accepts a [variety of locator strings](http://release.seleniumhq.org/selenium-remote-control/0.9.2/doc/dotnet/Selenium.html)
 for specifying the element you want to inspect or interact with. While these
 are suitable for programmers and web developers with intimate knowledge of
 their webpages' structure, they are often not intuitive to the average user.
