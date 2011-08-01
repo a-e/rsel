@@ -1,6 +1,15 @@
 require File.expand_path(File.dirname(__FILE__) + "/spec_helper")
 
 describe Rsel::SeleniumTest do
+  before(:all) do
+    @st = Rsel::SeleniumTest.new('http://localhost:8070/')
+    @st.open_browser
+  end
+
+  after(:all) do
+    @st.close_browser
+  end
+
   context "initialization" do
     before(:each) do
       @st.visit("/")
@@ -10,53 +19,6 @@ describe Rsel::SeleniumTest do
       @st.url.should == "http://localhost:8070/"
       @st.browser.host.should == "localhost"
       @st.browser.port.should == 4444
-    end
-  end
-
-
-  context "helper methods" do
-    describe "#loc" do
-      it "returns Selenium-style locators unchanged" do
-        locators = [
-          "id=foo_bar",
-          "name=foo_bar",
-          "xpath=//input[@id='foo_bar']",
-          "css=div#foo_bar",
-        ]
-        locators.each do |locator|
-          @st.loc(locator).should == locator
-        end
-      end
-
-      it "returns Rsel-style locators as Selenium xpaths" do
-        locators = [
-          "First name",
-          "first_name",
-        ]
-        locators.each do |locator|
-          @st.loc(locator, 'field').should =~ /^xpath=/
-        end
-      end
-
-      it "requires a non-empty locator" do
-        lambda do
-          @st.loc('')
-        end.should raise_error
-      end
-
-      it "requires element kind for Rsel-style locators" do
-        lambda do
-          @st.loc('foo')
-        end.should raise_error
-      end
-    end
-
-    describe "#xpath" do
-      it "requires a valid kind" do
-        lambda do
-          @st.xpath('junk', 'hello')
-        end.should raise_error
-      end
     end
   end
 
@@ -675,13 +637,26 @@ describe Rsel::SeleniumTest do
         end
 
         it "field exists, but not within scope" do
-          @st.type_into_field("Long story", "Life story", :within => 'spouse_form').should be_false
+          @st.type_into_field("Long story", "Life story",
+                              :within => 'spouse_form').should be_false
         end
       end
     end
 
     describe "#field_contains" do
       context "passes when" do
+        context "text field with label" do
+          it "equals the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_contains("First name", "Marcus").should be_true
+          end
+
+          it "contains the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_contains("First name", "Marc").should be_true
+          end
+        end
+
         context "textarea with label" do
           it "contains the text" do
             @st.fill_in_with("Life story", "Blah dee blah")
@@ -691,6 +666,13 @@ describe Rsel::SeleniumTest do
       end
 
       context "fails when" do
+        context "text field with label" do
+          it "does not contain the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_contains("First name", "Eric").should be_false
+          end
+        end
+
         context "textarea with label" do
           it "does not contain the text" do
             @st.fill_in_with("Life story", "Blah dee blah")
@@ -703,7 +685,15 @@ describe Rsel::SeleniumTest do
     describe "#field_equals" do
       context "passes when" do
         context "text field with label" do
-          # TODO
+          it "equals the text" do
+            @st.fill_in_with("First name", "Ken")
+            @st.field_equals("First name", "Ken").should be_true
+          end
+
+          it "equals the text, and is within scope" do
+            @st.fill_in_with("First name", "Eric", :within => "person_form")
+            @st.field_equals("First name", "Eric", :within => "person_form")
+          end
         end
 
         context "textarea with label" do
@@ -713,7 +703,10 @@ describe Rsel::SeleniumTest do
           end
 
           it "equals the text, and is within scope" do
-            # TODO
+            @st.fill_in_with("Life story", "Blah dee blah",
+                             :within => "person_form")
+            @st.field_equals("Life story", "Blah dee blah",
+                             :within => "person_form").should be_true
           end
 
           it "equals the text, and is in table row" do
@@ -724,7 +717,10 @@ describe Rsel::SeleniumTest do
 
       context "fails when" do
         context "text field with label" do
-          # TODO
+          it "does not exactly equal the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_equals("First name", "Marc").should be_false
+          end
         end
 
         context "textarea with label" do
