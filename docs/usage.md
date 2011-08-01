@@ -3,8 +3,8 @@ Usage
 
 Once you have created your `SetUp` page, you can create sibling pages with
 tests in them. For instance, continuing with the example from
-[Installation & Configuration](install.md), your `SeleniumTests.LoginTest`
-might look like this:
+[Installation](install.md), your `SeleniumTests.LoginTest` might look like
+this:
 
     !| script | selenium test | http://www.mysite.com |
     | Open browser                                    |

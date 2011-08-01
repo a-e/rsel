@@ -11,11 +11,11 @@ their `name` attribute. Given this HTML:
 
     <a name="contact_us_link" href="/contact">Contact Us</a>
 
-To click on the "Concact Us" link using a standard Selenium locator, you'd have
+To click on the "Contact Us" link using a standard Selenium locator, you'd have
 to do one of the following:
 
-    | click | contact_us_link |
-    | click | link=Contact Us |
+    | Click | contact_us_link |
+    | Click | link=Contact Us |
 
 This is easy enough, but what if the target element does not have a `name`
 attribute defined? What if the link is an image instead of a piece of text? In
@@ -47,7 +47,7 @@ the `alt` text in the case of an image link. Form fields are matched on their
 plain-text label, `name` or `id` attribute. In Rsel, the above examples become
 much easier:
 
-    | click | Contact Us |
+    | Click | Contact Us |
     | Type | Eric | into field | First name |
 
 This allows you to use human-readable locator strings for most HTML elements,
@@ -62,11 +62,12 @@ sense to write:
 
     | Type | Eric | into field | link=Contact Us |
 
-But Rsel won't stop you from trying! One drawback to this approach is that any
-[scoping](scoping.md) clause is ignored. In most cases, it's easier, safer, and
-more readable to use the plain text locator, and rely on Rsel's internal logic
-to find the correct element. This feature is only provided as a workaround for
-the possibility that Rsel's locator scheme is too restrictive for your needs.
+But Rsel won't stop you from trying! One drawback to using explicit Selenium
+locators is that any [scoping](scoping.md) clause is ignored. In most cases,
+it's easier, safer, and more readable to use the plain text locator, and rely
+on Rsel's internal logic to find the correct element. This feature is only
+provided as a workaround for the possibility that Rsel's locator scheme is too
+restrictive for your needs.
 
 Next: [Scoping](scoping.md)
 
