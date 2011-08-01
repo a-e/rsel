@@ -576,9 +576,8 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_equals(locator, option, scope={})
-      # TODO: Apply scope
       begin
-        selected = @browser.get_selected_label(loc(locator, 'select'))
+        selected = @browser.get_selected_label(loc(locator, 'select', scope))
       rescue
         return false
       else
