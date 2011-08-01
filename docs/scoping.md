@@ -113,8 +113,8 @@ call row that does not end with a function-name component, you need to include
 a semicolon after the last function-name component, so all remaining cells will
 be treated as arguments. These are valid alternative ways of calling the same function:
 
-    | Type | 111-222-3333 | into field; | Phone number | !{within:work |
-    | Type into field; | 111-222-3333 | Phone number | !{within:work |
+    | Type | 111-222-3333 | into field; | Phone number | !{within:work} |
+    | Type into field; | 111-222-3333 | Phone number | !{within:work} |
 
 The `SeleniumTest` method names were, for the most part, crafted so that the
 alternating (function, argument) form reads the most naturally.
