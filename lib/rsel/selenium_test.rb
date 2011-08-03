@@ -742,6 +742,35 @@ module Rsel
       end
     end
 
+
+    # Invoke a missing method. If a method is called on a SeleniumTest
+    # instance, and that method is not explicitly defined, this method
+    # will check to see whether the underlying Selenium::Client::Driver
+    # instance can respond to that method. If so, that method is called
+    # instead.
+    #
+    def method_missing(method, *args, &block)
+      if @browser.respond_to?(method)
+        @browser.send(method, *args, &block)
+      else
+        super
+      end
+    end
+
+
+    # Return true if SeleniumTest explicitly responds to a given method
+    # name, or if the underlying Selenium::Client::Driver instance can
+    # respond to it. This is a counterpart to {#method_missing}, used
+    # for checking whether a given method can be called on this instance.
+    #
+    def respond_to?(method, include_private=false)
+      if @browser.respond_to?(method)
+        true
+      else
+        super
+      end
+    end
+
   end
 end
 
