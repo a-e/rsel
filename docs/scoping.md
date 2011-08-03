@@ -1,7 +1,7 @@
 Scoping
 =======
 
-Several of the actions and verifications accept an optional hash of scoping
+Most of Rsel's actions and verifications accept an optional hash of scoping
 keywords, allowing you to be specific about what area of the page to operate
 on. This page describes how to use them.
 
@@ -96,7 +96,13 @@ contain URLs, email addresses, or other auto-interpreted text:
 Another important thing to note is that due to the way FitNesse Slim script
 tables are evaluated, the scoping hash must be added after a cell that contains
 part of the method name. Cells in these tables must contain alternating
-(function, argument) chunks; the way the above example breaks down is:
+(function, argument) chunks. To illustrate, consider the phone number example:
+
+    | Type | 111-222-3333 | into | Phone number | field | !{within:work} |
+
+The cells in this row alternate between function and argument, with the first
+cell being the beginning of the function name, and every alternating cell after
+that being a continuation of the function name. Picture it like this:
 
     | Type |              | into |              | field |                |
     |      | 111-222-3333 |      | Phone number |       | !{within:work} |
@@ -107,8 +113,8 @@ call row that does not end with a function-name component, you need to include
 a semicolon after the last function-name component, so all remaining cells will
 be treated as arguments. These are valid alternative ways of calling the same function:
 
-    | Type | 111-222-3333 | into field; | Phone number | !{within:work |
-    | Type into field; | 111-222-3333 | Phone number | !{within:work |
+    | Type | 111-222-3333 | into field; | Phone number | !{within:work} |
+    | Type into field; | 111-222-3333 | Phone number | !{within:work} |
 
 The `SeleniumTest` method names were, for the most part, crafted so that the
 alternating (function, argument) form reads the most naturally.

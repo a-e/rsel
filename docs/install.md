@@ -1,5 +1,5 @@
-Installation & Configuration
-----------------------------
+Installation
+============
 
 To install Rsel from a gem:
 
