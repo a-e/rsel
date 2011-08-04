@@ -6,26 +6,6 @@ module Rsel
   # Support functions for Rsel
   module Support
 
-    # Execute the given block, and return false if it raises an exception.
-    # Otherwise, return true.
-    #
-    # @example
-    #   return_error_status do
-    #     # some code that might raise an exception
-    #   end
-    #
-    def return_error_status
-      begin
-        yield
-      rescue => e
-        #puts e.message
-        #puts e.backtrace
-        return false
-      else
-        return true
-      end
-    end
-
     # Convert the given locator to a format accepted by Selenium. If `locator`
     # starts with `id=`, `name=`, `dom=`, `xpath=` `link=` or `css=`, then the
     # locator is returned unchanged. Otherwise, `locator` is assumed to be a

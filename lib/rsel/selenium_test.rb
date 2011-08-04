@@ -39,16 +39,17 @@ module Rsel
     #   | script | selenium test | http://site.to.test/ |
     #   | script | selenium test | http://site.to.test/ | 192.168.0.3 | 4445 |
     #
-    def initialize(url, host='localhost', port='4444', browser='*firefox')
+    def initialize(url, host='localhost', port='4444', browser='*firefox', stop_on_error=false)
       @url = url
       @browser = Selenium::Client::Driver.new(
         :host => host,
         :port => port,
         :browser => browser,
         :url => url)
+      @stop_on_error = stop_on_error
     end
 
-    attr_reader :url, :browser
+    attr_reader :url, :browser, :stop_on_error
 
 
     # Start the session and open a browser to the URL defined at the start of
@@ -426,8 +427,9 @@ module Rsel
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue
-        return false
+      rescue => e
+        return false unless @stop_on_error
+        raise StopTestStepFailed, e.message
       else
         return enabled
       end
@@ -452,7 +454,8 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue
-        return false
+        return false unless @stop_on_error
+        raise StopTestStepFailed, e.message
       else
         return enabled
       end
@@ -475,7 +478,8 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue
-        return false
+        return false unless @stop_on_error
+        raise StopTestStepFailed, e.message
       else
         return !enabled
       end
@@ -500,7 +504,8 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue
-        return false
+        return false unless @stop_on_error
+        raise StopTestStepFailed, e.message
       else
         return !enabled
       end
@@ -580,7 +585,8 @@ module Rsel
       begin
         selected = @browser.get_selected_label(loc(locator, 'select', scope))
       rescue
-        return false
+        return false unless @stop_on_error
+        raise StopTestStepFailed, e.message
       else
         return selected == option
       end
@@ -643,6 +649,29 @@ module Rsel
         true
       else
         super
+      end
+    end
+
+
+    # Execute the given block, and return false if it raises an exception.
+    # Otherwise, return true. If `@exception_on_fail` is true, raise a
+    # `StopTestStepFailed` exception instead of returning false.
+    #
+    # @example
+    #   return_error_status do
+    #     # some code that might raise an exception
+    #   end
+    #
+    def return_error_status
+      begin
+        yield
+      rescue => e
+        #puts e.message
+        #puts e.backtrace
+        return false unless @stop_on_error
+        raise StopTestStepFailed, e.message
+      else
+        return true
       end
     end
 
