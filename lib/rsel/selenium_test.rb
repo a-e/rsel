@@ -39,17 +39,18 @@ module Rsel
     #   | script | selenium test | http://site.to.test/ |
     #   | script | selenium test | http://site.to.test/ | 192.168.0.3 | 4445 |
     #
-    def initialize(url, host='localhost', port='4444', browser='*firefox', stop_on_error=false)
+    def initialize(url, host='localhost', port='4444', browser='*firefox')
       @url = url
       @browser = Selenium::Client::Driver.new(
         :host => host,
         :port => port,
         :browser => browser,
         :url => url)
-      @stop_on_error = stop_on_error
+      @stop_on_error = false
     end
 
     attr_reader :url, :browser, :stop_on_error
+    attr_writer :stop_on_error
 
 
     # Start the session and open a browser to the URL defined at the start of
@@ -146,7 +147,7 @@ module Rsel
     #   | See | Welcome, Marcus |
     #
     def see(text)
-      return @browser.text?(text)
+      pass_if @browser.text?(text)
     end
 
 
@@ -159,7 +160,7 @@ module Rsel
     #   | Do not see | Take a hike |
     #
     def do_not_see(text)
-      return !@browser.text?(text)
+      pass_if !@browser.text?(text)
     end
 
 
@@ -172,7 +173,7 @@ module Rsel
     #   | See title | Our Homepage |
     #
     def see_title(title)
-      return (@browser.get_title == title)
+      pass_if @browser.get_title == title
     end
 
 
@@ -185,7 +186,7 @@ module Rsel
     #   | Do not see title | Someone else's homepage |
     #
     def do_not_see_title(title)
-      return !(@browser.get_title == title)
+      pass_if !(@browser.get_title == title)
     end
 
 
@@ -203,7 +204,7 @@ module Rsel
     # @since 0.0.2
     #
     def link_exists(locator, scope={})
-      return @browser.element?(loc(locator, 'link', scope))
+      pass_if @browser.element?(loc(locator, 'link', scope))
     end
 
 
@@ -221,7 +222,7 @@ module Rsel
     # @since 0.0.2
     #
     def button_exists(locator, scope={})
-      return @browser.element?(loc(locator, 'button', scope))
+      pass_if @browser.element?(loc(locator, 'button', scope))
     end
 
 
@@ -238,7 +239,7 @@ module Rsel
     #
     def row_exists(cells)
       row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
-      return @browser.element?("xpath=#{row.to_s}")
+      pass_if @browser.element?("xpath=#{row.to_s}")
     end
 
 
@@ -292,7 +293,7 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text, scope={})
-      @browser.field(loc(locator, 'field', scope)).include?(text)
+      pass_if @browser.field(loc(locator, 'field', scope)).include?(text)
     end
 
 
@@ -309,7 +310,7 @@ module Rsel
     #   | Field | First name | equals; | Eric | !{within:contact} |
     #
     def field_equals(locator, text, scope={})
-      @browser.field(loc(locator, 'field', scope)) == text
+      pass_if @browser.field(loc(locator, 'field', scope)) == text
     end
 
 
@@ -428,8 +429,7 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue => e
-        return false unless @stop_on_error
-        raise StopTestStepFailed, e.message
+        failure e.message
       else
         return enabled
       end
@@ -453,9 +453,8 @@ module Rsel
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue
-        return false unless @stop_on_error
-        raise StopTestStepFailed, e.message
+      rescue => e
+        failure e.message
       else
         return enabled
       end
@@ -477,9 +476,8 @@ module Rsel
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue
-        return false unless @stop_on_error
-        raise StopTestStepFailed, e.message
+      rescue => e
+        failure e.message
       else
         return !enabled
       end
@@ -503,9 +501,8 @@ module Rsel
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue
-        return false unless @stop_on_error
-        raise StopTestStepFailed, e.message
+      rescue => e
+        failure e.message
       else
         return !enabled
       end
@@ -565,7 +562,7 @@ module Rsel
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
       opt_str = opt.to_s
-      return @browser.element?("xpath=#{opt_str}")
+      pass_if @browser.element?("xpath=#{opt_str}")
     end
 
 
@@ -584,9 +581,8 @@ module Rsel
     def dropdown_equals(locator, option, scope={})
       begin
         selected = @browser.get_selected_label(loc(locator, 'select', scope))
-      rescue
-        return false unless @stop_on_error
-        raise StopTestStepFailed, e.message
+      rescue => e
+        failure e.message
       else
         return selected == option
       end
@@ -654,7 +650,7 @@ module Rsel
 
 
     # Execute the given block, and return false if it raises an exception.
-    # Otherwise, return true. If `@exception_on_fail` is true, raise a
+    # Otherwise, return true. If `@stop_on_error` is true, raise a
     # `StopTestStepFailed` exception instead of returning false.
     #
     # @example
@@ -668,10 +664,38 @@ module Rsel
       rescue => e
         #puts e.message
         #puts e.backtrace
-        return false unless @stop_on_error
-        raise StopTestStepFailed, e.message
+        failure e.message
       else
         return true
+      end
+    end
+
+
+    # Indicate a failure by returning `false` or raising an exception.
+    # If `@stop_on_error` is true, raise a `StopTestStepFailed` exception.
+    # Otherwise, simply return false.
+    #
+    # @param [String] message
+    #   Optional message to include in the exception.
+    #   Ignored if `@stop_on_error` is false.
+    #
+    def failure(message='')
+      if @stop_on_error
+        raise StopTestStepFailed, message
+      else
+        return false
+      end
+    end
+
+
+    # Pass if the given condition is true; otherwise, fail by calling
+    # {#failure} with an optional `message`.
+    #
+    def pass_if(condition, message='')
+      if condition
+        return true
+      else
+        failure message
       end
     end
 
