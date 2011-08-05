@@ -1,6 +1,14 @@
 Rsel History
 ============
 
+0.0.7
+-----
+
+- Indicate pass/fail status for Selenium::Client::Driver wrapped methods
+- Allow passing stop_on_error to SeleniumTest constructor
+- Auto-strip HTML in URL passed to constructor
+
+
 0.0.6
 -----
 
