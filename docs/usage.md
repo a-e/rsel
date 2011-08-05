@@ -6,14 +6,14 @@ tests in them. For instance, continuing with the example from
 [Installation](install.md), your `SeleniumTests.LoginTest` might look like
 this:
 
-    !| script | selenium test | http://www.mysite.com |
-    | Open browser                                    |
-    | Fill in       | Username | with | castle        |
-    | Fill in       | Password | with | beckett       |
-    | Click button  | Log in                          |
-    | Page loads in | 5        | seconds or less      |
-    | See           | Logged in as castle             |
-    | Close browser                                   |
+    | script | selenium test | http://www.mysite.com |
+    | Open browser                                   |
+    | Fill in       | Username | with | castle       |
+    | Fill in       | Password | with | beckett      |
+    | Click button  | Log in                         |
+    | Page loads in | 5        | seconds or less     |
+    | See           | Logged in as castle            |
+    | Close browser                                  |
 
 Before running a test, you must make sure you have Selenium Server installed and running.
 Download [selenium-server-standalone-x.x.x.jar](http://seleniumhq.org/download/), and start
@@ -25,10 +25,18 @@ By default, the server runs on port 4444, and this is the port that Rsel uses
 unless you tell it otherwise. Rsel also assumes that you're running
 selenium-server on your localhost (that is, the same host where FitNesse is
 running); if you need to use a different host or port number, pass those as
-arguments to the first line of the table. For example, if you are running
+a hash argument to the first line of the table. For example, if you are running
 selenium-server on `my.selenium.host`, port `4455`, do this:
 
-    !| script | selenium test | http://www.mysite.com | my.selenium.host | 4455 |
+    | script | selenium test | http://www.mysite.com | !{host:my.selenium.host, port:4455} |
+
+Another useful argument to pass in this hash is `stop_on_error`, which causes
+the test to be aborted whenever any failure occurs:
+
+    | script | selenium test | http://www.mysite.com | !{stop_on_error:true} |
+
+By default, when an error occurs, the failing step is simply colored red, and
+the test continues. With `stop_on_error` set, an exception will be raised.
 
 The first argument after `selenium test` is the URL of the site you will be testing.
 This URL is loaded when you call `Open browser`, and all steps that follow are

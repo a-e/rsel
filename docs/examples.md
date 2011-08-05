@@ -12,7 +12,7 @@ like to execute these examples.
 Links
 -------------
 
-    | script | selenium test | !-http://localhost:8070-! |
+    | script | selenium test | http://localhost:8070 |
     | Open browser |
     | Maximize browser |
     | Visit | / |
@@ -32,7 +32,7 @@ Links
 Buttons
 -------------
 
-    | script | selenium test | !-http://localhost:8070-! |
+    | script | selenium test | http://localhost:8070 |
     | Open browser |
     | Maximize browser |
     | Visit | /form |
@@ -49,7 +49,7 @@ Buttons
 Checkboxes
 -------------
 
-    | script | selenium test | !-http://localhost:8070-! |
+    | script | selenium test | http://localhost:8070 |
     | Open browser |
     | Maximize browser |
     | Visit | /form |
@@ -67,7 +67,7 @@ Checkboxes
 Dropdowns
 -------------
 
-    | script | selenium test | !-http://localhost:8070-! |
+    | script | selenium test | http://localhost:8070 |
     | Open browser |
     | Maximize browser |
     | Visit | /form |
@@ -84,7 +84,7 @@ Dropdowns
 Radiobuttons
 -------------
 
-    | script | selenium test | !-http://localhost:8070-! |
+    | script | selenium test | http://localhost:8070 |
     | Open browser |
     | Maximize browser |
     | Visit | /form |
@@ -100,7 +100,7 @@ Radiobuttons
 Tables
 -------------
 
-    | script | selenium test | !-http://localhost:8070-! |
+    | script | selenium test | http://localhost:8070 |
     | Open browser |
     | Maximize browser |
     | Visit | /table |

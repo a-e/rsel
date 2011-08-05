@@ -85,13 +85,17 @@ beginning of your table, otherwise the hash syntax will be interpreted
 literally, instead of as an embedded hash.
 
 This means you will need to manually escape any cells in your table that
-contain URLs, email addresses, or other auto-interpreted text:
+contain URLs, email addresses, or other auto-interpreted text. For example,
+email addresses normally have HTML added by FitNesse; you'll have to escape
+those so they'll be treated as literal text:
 
-    | script | selenium test | !-http://www.example.com-! |
-    | Open browser                                        |
-    | See           | Welcome                             |
-    | Click         | About   | link | !{within:footer}   |
-    | Close browser                                       |
+    | Click | !-epierce@example.com-! | link | !{within:footer} |
+
+The only exception to this is the URL argument provided on the first row of the
+table; even if FitNesse adds HTML markup to this, the `SeleniumTest` constructor
+is smart enough to ignore it, so you can still do this:
+
+    | script | selenium test | http://my.site.com | !{port:4445} |
 
 Another important thing to note is that due to the way FitNesse Slim script
 tables are evaluated, the scoping hash must be added after a cell that contains
