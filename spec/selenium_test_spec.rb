@@ -1029,5 +1029,38 @@ describe Rsel::SeleniumTest do
     end
   end # stop on error
 
+  context "Selenium::Client::Driver wrapper" do
+    before(:each) do
+      @st.visit("/form").should be_true
+    end
+
+    context "method returning Boolean" do
+      it "passes if method returns true" do
+        @st.is_element_present("id=first_name").should be_true
+        @st.is_visible("id=first_name").should be_true
+        @st.is_text_present("This page has some random forms").should be_true
+      end
+
+      it "fails if method returns false" do
+        @st.is_element_present("id=bogus_id").should be_false
+        @st.is_visible("id=bogus_id").should be_false
+        @st.is_text_present("This text is not there").should be_false
+      end
+    end
+
+    context "method not returning Boolean" do
+      it "passes if method doesn't raise an exception" do
+        @st.get_title.should be_true
+        @st.mouse_over("id=first_name").should be_true
+      end
+
+      it "fails if method raises an exception" do
+        @st.double_click("id=bogus_id").should be_false
+        @st.mouse_over("id=bogus_id").should be_false
+      end
+    end
+
+  end # Selenium::Client::Driver wrapper
+
 end
 
