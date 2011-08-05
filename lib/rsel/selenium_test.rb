@@ -293,7 +293,13 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text, scope={})
-      pass_if @browser.field(loc(locator, 'field', scope)).include?(text)
+      begin
+        field = @browser.field(loc(locator, 'field', scope))
+      rescue => e
+        failure e.message
+      else
+        pass_if field.include?(text)
+      end
     end
 
 
@@ -310,7 +316,13 @@ module Rsel
     #   | Field | First name | equals; | Eric | !{within:contact} |
     #
     def field_equals(locator, text, scope={})
-      pass_if @browser.field(loc(locator, 'field', scope)) == text
+      begin
+        field = @browser.field(loc(locator, 'field', scope))
+      rescue => e
+        failure e.message
+      else
+        pass_if field == text
+      end
     end
 
 

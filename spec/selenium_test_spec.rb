@@ -23,6 +23,414 @@ describe Rsel::SeleniumTest do
   end
 
 
+  context "navigation" do
+    before(:each) do
+      @st.visit("/").should be_true
+    end
+
+    describe "#visit" do
+      context "passes when" do
+        it "page exists" do
+          @st.visit("/about").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "page does not exist" do
+          @st.visit("/bad/path").should be_false
+        end
+      end
+    end
+
+    context "reload the current page" do
+      # TODO
+    end
+
+    describe "#click_back" do
+      it "passes and loads the correct URL" do
+        @st.visit("/about")
+        @st.visit("/")
+        @st.click_back.should be_true
+        @st.see_title("About this site").should be_true
+      end
+
+      #it "fails when there is no previous page in the history" do
+        # TODO: No obvious way to test this, since everything is running in the
+        # same session
+      #end
+    end
+  end # navigation
+
+
+  context "visibility" do
+    before(:each) do
+      @st.visit("/").should be_true
+    end
+
+    describe "#see" do
+      context "passes when" do
+        it "text is present" do
+          @st.see("Welcome").should be_true
+          @st.see("This is a Sinatra webapp").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "text is absent" do
+          @st.see("Nonexistent").should be_false
+          @st.see("Some bogus text").should be_false
+        end
+      end
+
+      it "is case-sensitive" do
+        @st.see("Sinatra webapp").should be_true
+        @st.see("sinatra Webapp").should be_false
+      end
+    end
+
+    describe "#do_not_see" do
+      context "passes when" do
+        it "text is absent" do
+          @st.do_not_see("Nonexistent").should be_true
+          @st.do_not_see("Some bogus text").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "fails when test is present" do
+          @st.do_not_see("Welcome").should be_false
+          @st.do_not_see("This is a Sinatra webapp").should be_false
+        end
+      end
+
+      it "is case-sensitive" do
+        @st.do_not_see("Sinatra webapp").should be_false
+        @st.do_not_see("sinatra Webapp").should be_true
+      end
+    end
+  end # visibility
+
+
+  context "links" do
+    before(:each) do
+      @st.visit("/").should be_true
+    end
+
+    describe "#click" do
+      context "passes when" do
+        it "link exists" do
+          @st.click("About this site").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "link does not exist" do
+          @st.click("Bogus link").should be_false
+        end
+      end
+    end
+
+    describe "#click_link" do
+      context "passes when" do
+        it "link exists" do
+          @st.click_link("About this site").should be_true
+        end
+
+        it "link exists within scope" do
+          @st.click_link("About this site", :within => "header").should be_true
+        end
+
+        it "link exists in table row" do
+          @st.visit("/table")
+          @st.click_link("Edit", :in_row => "Marcus").should be_true
+          @st.see_title("Editing Marcus").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "link does not exist" do
+          @st.click_link("Bogus link").should be_false
+        end
+
+        it "link exists, but not within scope" do
+          @st.click_link("About this site", :within => "footer").should be_false
+        end
+
+        it "link exists, but not in table row" do
+          @st.visit("/table")
+          @st.click_link("Edit", :in_row => "Ken").should be_false
+        end
+      end
+    end
+
+    describe "#link_exists" do
+      context "passes when" do
+        it "link with the given text exists" do
+          @st.link_exists("About this site").should be_true
+          @st.link_exists("Form test").should be_true
+        end
+
+        it "link with the given text exists within scope" do
+          @st.link_exists("About this site", :within => "header").should be_true
+          @st.link_exists("Form test", :within => "footer").should be_true
+          @st.link_exists("Table test", :within => "footer").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "no such link exists" do
+          @st.link_exists("Welcome").should be_false
+          @st.link_exists("Don't click here").should be_false
+        end
+
+        it "link exists, but not within scope" do
+          @st.link_exists("About this site", :within => "footer").should be_false
+          @st.link_exists("Form test", :within => "header").should be_false
+          @st.link_exists("Table test", :within => "header").should be_false
+        end
+      end
+    end
+  end # links
+
+
+  context "buttons" do
+    before(:each) do
+      @st.visit("/form").should be_true
+    end
+
+    describe "#click_button" do
+      context "passes when" do
+        it "button exists and is enabled" do
+          @st.click_button("Submit person form").should be_true
+        end
+
+        it "button exists within scope" do
+          @st.click_button("Submit person form", :within => "person_form").should be_true
+        end
+
+        it "button exists in table row" do
+          # TODO
+        end
+      end
+
+      context "fails when" do
+        it "button does not exist" do
+          @st.click_button("No such button").should be_false
+        end
+
+        it "button exists, but not within scope" do
+          @st.click_button("Submit person form", :within => "spouse_form").should be_false
+        end
+
+        it "button exists, but not in table row" do
+          # TODO
+        end
+
+        it "button exists, but is disabled" do
+          # TODO
+        end
+      end
+    end
+
+
+    describe "#button_exists" do
+      context "passes when" do
+        context "button with text" do
+          it "exists" do
+            @st.button_exists("Submit person form").should be_true
+            @st.button_exists("Save preferences").should be_true
+          end
+
+          it "exists within scope" do
+            @st.button_exists("Submit person form", :within => "person_form").should be_true
+            @st.button_exists("Submit spouse form", :within => "spouse_form").should be_true
+          end
+
+          it "exists in table row" do
+            # TODO
+          end
+        end
+      end
+
+      context "fails when" do
+        it "no such button exists" do
+          @st.button_exists("Apple").should be_false
+          @st.button_exists("Big Red").should be_false
+        end
+
+        it "button exists, but not within scope" do
+          @st.button_exists("Submit spouse form", :within => "person_form").should be_false
+          @st.button_exists("Submit person form", :within => "spouse_form").should be_false
+        end
+
+        it "button exists, but not in table row" do
+          # TODO
+        end
+      end
+    end
+  end # buttons
+
+
+  context "fields" do
+    before(:each) do
+      @st.visit("/form").should be_true
+    end
+
+    describe "#type_into_field" do
+      context "passes when" do
+        context "text field with label" do
+          it "exists" do
+            @st.type_into_field("Eric", "First name").should be_true
+            @st.fill_in_with("Last name", "Pierce").should be_true
+          end
+          it "exists within scope" do
+            @st.type_into_field("Eric", "First name", :within => 'person_form').should be_true
+            @st.type_into_field("Andrea", "First name", :within => 'spouse_form').should be_true
+          end
+        end
+
+        context "text field with id" do
+          it "exists" do
+            @st.type_into_field("Eric", "first_name").should be_true
+            @st.fill_in_with("last_name", "Pierce").should be_true
+          end
+        end
+
+        context "textarea with label" do
+          it "exists" do
+            @st.type_into_field("Blah blah blah", "Life story").should be_true
+            @st.fill_in_with("Life story", "Jibber jabber").should be_true
+          end
+        end
+
+        context "textarea with id" do
+          it "exists" do
+            @st.type_into_field("Blah blah blah", "biography").should be_true
+            @st.fill_in_with("biography", "Jibber jabber").should be_true
+          end
+        end
+      end
+
+      context "fails when" do
+        it "no field with the given label or id exists" do
+          @st.type_into_field("Matthew", "Middle name").should be_false
+          @st.fill_in_with("middle_name", "Matthew").should be_false
+        end
+
+        it "field exists, but not within scope" do
+          @st.type_into_field("Long story", "Life story",
+                              :within => 'spouse_form').should be_false
+        end
+      end
+    end
+
+    describe "#field_contains" do
+      context "passes when" do
+        context "text field with label" do
+          it "equals the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_contains("First name", "Marcus").should be_true
+          end
+
+          it "contains the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_contains("First name", "Marc").should be_true
+          end
+        end
+
+        context "textarea with label" do
+          it "contains the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_contains("Life story", "blah").should be_true
+          end
+        end
+      end
+
+      context "fails when" do
+        context "text field with label" do
+          it "does not exist" do
+            @st.field_contains("Third name", "Smith").should be_false
+          end
+
+          it "does not contain the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_contains("First name", "Eric").should be_false
+          end
+        end
+
+        context "textarea with label" do
+          it "does not contain the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_contains("Life story", "spam").should be_false
+          end
+        end
+      end
+    end
+
+    describe "#field_equals" do
+      context "passes when" do
+        context "text field with label" do
+          it "equals the text" do
+            @st.fill_in_with("First name", "Ken")
+            @st.field_equals("First name", "Ken").should be_true
+          end
+
+          it "equals the text, and is within scope" do
+            @st.fill_in_with("First name", "Eric", :within => "person_form")
+            @st.field_equals("First name", "Eric", :within => "person_form")
+          end
+        end
+
+        context "textarea with label" do
+          it "equals the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_equals("Life story", "Blah dee blah").should be_true
+          end
+
+          it "equals the text, and is within scope" do
+            @st.fill_in_with("Life story", "Blah dee blah",
+                             :within => "person_form")
+            @st.field_equals("Life story", "Blah dee blah",
+                             :within => "person_form").should be_true
+          end
+
+          it "equals the text, and is in table row" do
+            # TODO
+          end
+        end
+      end
+
+      context "fails when" do
+        context "text field with label" do
+          it "does not exactly equal the text" do
+            @st.fill_in_with("First name", "Marcus")
+            @st.field_equals("First name", "Marc").should be_false
+          end
+        end
+
+        context "textarea with label" do
+          it "does not exist" do
+            @st.field_equals("Third name", "Smith").should be_false
+          end
+
+          it "does not exactly equal the text" do
+            @st.fill_in_with("Life story", "Blah dee blah")
+            @st.field_equals("Life story", "Blah dee").should be_false
+          end
+
+          it "exactly equals the text, but is not within scope" do
+            # TODO
+          end
+
+          it "exactly equals the text, but is not in table row" do
+            # TODO
+          end
+        end
+      end
+    end
+  end # fields
+
+
   context "checkboxes" do
     before(:each) do
       @st.visit("/form").should be_true
@@ -223,7 +631,7 @@ describe Rsel::SeleniumTest do
         end
       end
     end
-  end
+  end # checkboxes
 
 
   context "radiobuttons" do
@@ -302,7 +710,7 @@ describe Rsel::SeleniumTest do
         end
       end
     end
-  end
+  end # radiobuttons
 
 
   context "dropdowns" do
@@ -426,407 +834,7 @@ describe Rsel::SeleniumTest do
         end
       end
     end
-  end
-
-
-  context "navigation" do
-    before(:each) do
-      @st.visit("/").should be_true
-    end
-
-    describe "#visit" do
-      context "passes when" do
-        it "page exists" do
-          @st.visit("/about").should be_true
-        end
-      end
-
-      context "fails when" do
-        it "page does not exist" do
-          @st.visit("/bad/path").should be_false
-        end
-      end
-    end
-
-    context "reload the current page" do
-      # TODO
-    end
-
-    describe "#click_back" do
-      it "passes and loads the correct URL" do
-        @st.visit("/about")
-        @st.visit("/")
-        @st.click_back.should be_true
-        @st.see_title("About this site").should be_true
-      end
-
-      #it "fails when there is no previous page in the history" do
-        # TODO: No obvious way to test this, since everything is running in the
-        # same session
-      #end
-    end
-  end
-
-
-  context "links" do
-    before(:each) do
-      @st.visit("/").should be_true
-    end
-
-    describe "#click" do
-      context "passes when" do
-        it "link exists" do
-          @st.click("About this site").should be_true
-        end
-      end
-
-      context "fails when" do
-        it "link does not exist" do
-          @st.click("Bogus link").should be_false
-        end
-      end
-    end
-
-    describe "#click_link" do
-      context "passes when" do
-        it "link exists" do
-          @st.click_link("About this site").should be_true
-        end
-
-        it "link exists within scope" do
-          @st.click_link("About this site", :within => "header").should be_true
-        end
-
-        it "link exists in table row" do
-          @st.visit("/table")
-          @st.click_link("Edit", :in_row => "Marcus").should be_true
-          @st.see_title("Editing Marcus").should be_true
-        end
-      end
-
-      context "fails when" do
-        it "link does not exist" do
-          @st.click_link("Bogus link").should be_false
-        end
-
-        it "link exists, but not within scope" do
-          @st.click_link("About this site", :within => "footer").should be_false
-        end
-
-        it "link exists, but not in table row" do
-          @st.visit("/table")
-          @st.click_link("Edit", :in_row => "Ken").should be_false
-        end
-      end
-    end
-
-    describe "#link_exists" do
-      context "passes when" do
-        it "link with the given text exists" do
-          @st.link_exists("About this site").should be_true
-          @st.link_exists("Form test").should be_true
-        end
-
-        it "link with the given text exists within scope" do
-          @st.link_exists("About this site", :within => "header").should be_true
-          @st.link_exists("Form test", :within => "footer").should be_true
-          @st.link_exists("Table test", :within => "footer").should be_true
-        end
-      end
-
-      context "fails when" do
-        it "no such link exists" do
-          @st.link_exists("Welcome").should be_false
-          @st.link_exists("Don't click here").should be_false
-        end
-
-        it "link exists, but not within scope" do
-          @st.link_exists("About this site", :within => "footer").should be_false
-          @st.link_exists("Form test", :within => "header").should be_false
-          @st.link_exists("Table test", :within => "header").should be_false
-        end
-      end
-    end
-  end
-
-
-  context "buttons" do
-    before(:each) do
-      @st.visit("/form").should be_true
-    end
-
-    describe "#click_button" do
-      context "passes when" do
-        it "button exists and is enabled" do
-          @st.click_button("Submit person form").should be_true
-        end
-
-        it "button exists within scope" do
-          @st.click_button("Submit person form", :within => "person_form").should be_true
-        end
-
-        it "button exists in table row" do
-          # TODO
-        end
-      end
-
-      context "fails when" do
-        it "button does not exist" do
-          @st.click_button("No such button").should be_false
-        end
-
-        it "button exists, but not within scope" do
-          @st.click_button("Submit person form", :within => "spouse_form").should be_false
-        end
-
-        it "button exists, but not in table row" do
-          # TODO
-        end
-
-        it "button exists, but is disabled" do
-          # TODO
-        end
-      end
-    end
-
-
-    describe "#button_exists" do
-      context "passes when" do
-        context "button with text" do
-          it "exists" do
-            @st.button_exists("Submit person form").should be_true
-            @st.button_exists("Save preferences").should be_true
-          end
-
-          it "exists within scope" do
-            @st.button_exists("Submit person form", :within => "person_form").should be_true
-            @st.button_exists("Submit spouse form", :within => "spouse_form").should be_true
-          end
-
-          it "exists in table row" do
-            # TODO
-          end
-        end
-      end
-
-      context "fails when" do
-        it "no such button exists" do
-          @st.button_exists("Apple").should be_false
-          @st.button_exists("Big Red").should be_false
-        end
-
-        it "button exists, but not within scope" do
-          @st.button_exists("Submit spouse form", :within => "person_form").should be_false
-          @st.button_exists("Submit person form", :within => "spouse_form").should be_false
-        end
-
-        it "button exists, but not in table row" do
-          # TODO
-        end
-      end
-    end
-  end
-
-
-  context "fields" do
-    before(:each) do
-      @st.visit("/form").should be_true
-    end
-
-    describe "#type_into_field" do
-      context "passes when" do
-        context "text field with label" do
-          it "exists" do
-            @st.type_into_field("Eric", "First name").should be_true
-            @st.fill_in_with("Last name", "Pierce").should be_true
-          end
-          it "exists within scope" do
-            @st.type_into_field("Eric", "First name", :within => 'person_form').should be_true
-            @st.type_into_field("Andrea", "First name", :within => 'spouse_form').should be_true
-          end
-        end
-
-        context "text field with id" do
-          it "exists" do
-            @st.type_into_field("Eric", "first_name").should be_true
-            @st.fill_in_with("last_name", "Pierce").should be_true
-          end
-        end
-
-        context "textarea with label" do
-          it "exists" do
-            @st.type_into_field("Blah blah blah", "Life story").should be_true
-            @st.fill_in_with("Life story", "Jibber jabber").should be_true
-          end
-        end
-
-        context "textarea with id" do
-          it "exists" do
-            @st.type_into_field("Blah blah blah", "biography").should be_true
-            @st.fill_in_with("biography", "Jibber jabber").should be_true
-          end
-        end
-      end
-
-      context "fails when" do
-        it "no field with the given label or id exists" do
-          @st.type_into_field("Matthew", "Middle name").should be_false
-          @st.fill_in_with("middle_name", "Matthew").should be_false
-        end
-
-        it "field exists, but not within scope" do
-          @st.type_into_field("Long story", "Life story",
-                              :within => 'spouse_form').should be_false
-        end
-      end
-    end
-
-    describe "#field_contains" do
-      context "passes when" do
-        context "text field with label" do
-          it "equals the text" do
-            @st.fill_in_with("First name", "Marcus")
-            @st.field_contains("First name", "Marcus").should be_true
-          end
-
-          it "contains the text" do
-            @st.fill_in_with("First name", "Marcus")
-            @st.field_contains("First name", "Marc").should be_true
-          end
-        end
-
-        context "textarea with label" do
-          it "contains the text" do
-            @st.fill_in_with("Life story", "Blah dee blah")
-            @st.field_contains("Life story", "blah").should be_true
-          end
-        end
-      end
-
-      context "fails when" do
-        context "text field with label" do
-          it "does not contain the text" do
-            @st.fill_in_with("First name", "Marcus")
-            @st.field_contains("First name", "Eric").should be_false
-          end
-        end
-
-        context "textarea with label" do
-          it "does not contain the text" do
-            @st.fill_in_with("Life story", "Blah dee blah")
-            @st.field_contains("Life story", "spam").should be_false
-          end
-        end
-      end
-    end
-
-    describe "#field_equals" do
-      context "passes when" do
-        context "text field with label" do
-          it "equals the text" do
-            @st.fill_in_with("First name", "Ken")
-            @st.field_equals("First name", "Ken").should be_true
-          end
-
-          it "equals the text, and is within scope" do
-            @st.fill_in_with("First name", "Eric", :within => "person_form")
-            @st.field_equals("First name", "Eric", :within => "person_form")
-          end
-        end
-
-        context "textarea with label" do
-          it "equals the text" do
-            @st.fill_in_with("Life story", "Blah dee blah")
-            @st.field_equals("Life story", "Blah dee blah").should be_true
-          end
-
-          it "equals the text, and is within scope" do
-            @st.fill_in_with("Life story", "Blah dee blah",
-                             :within => "person_form")
-            @st.field_equals("Life story", "Blah dee blah",
-                             :within => "person_form").should be_true
-          end
-
-          it "equals the text, and is in table row" do
-            # TODO
-          end
-        end
-      end
-
-      context "fails when" do
-        context "text field with label" do
-          it "does not exactly equal the text" do
-            @st.fill_in_with("First name", "Marcus")
-            @st.field_equals("First name", "Marc").should be_false
-          end
-        end
-
-        context "textarea with label" do
-          it "does not exactly equal the text" do
-            @st.fill_in_with("Life story", "Blah dee blah")
-            @st.field_equals("Life story", "Blah dee").should be_false
-          end
-
-          it "exactly equals the text, but is not within scope" do
-            # TODO
-          end
-
-          it "exactly equals the text, but is not in table row" do
-            # TODO
-          end
-        end
-      end
-    end
-  end
-
-
-  context "visibility" do
-    before(:each) do
-      @st.visit("/").should be_true
-    end
-
-    describe "#see" do
-      context "passes when" do
-        it "text is present" do
-          @st.see("Welcome").should be_true
-          @st.see("This is a Sinatra webapp").should be_true
-        end
-      end
-
-      context "fails when" do
-        it "text is absent" do
-          @st.see("Nonexistent").should be_false
-          @st.see("Some bogus text").should be_false
-        end
-      end
-
-      it "is case-sensitive" do
-        @st.see("Sinatra webapp").should be_true
-        @st.see("sinatra Webapp").should be_false
-      end
-    end
-
-    describe "#do_not_see" do
-      context "passes when" do
-        it "text is absent" do
-          @st.do_not_see("Nonexistent").should be_true
-          @st.do_not_see("Some bogus text").should be_true
-        end
-      end
-
-      context "fails when" do
-        it "fails when test is present" do
-          @st.do_not_see("Welcome").should be_false
-          @st.do_not_see("This is a Sinatra webapp").should be_false
-        end
-      end
-
-      it "is case-sensitive" do
-        @st.do_not_see("Sinatra webapp").should be_false
-        @st.do_not_see("sinatra Webapp").should be_true
-      end
-    end
-  end
+  end # dropdowns
 
 
   context "tables" do
@@ -867,6 +875,159 @@ describe Rsel::SeleniumTest do
       end
     end
 
-  end
+  end # tables
+
+
+  context "stop on error" do
+    before(:each) do
+      @st.visit("/").should be_true
+      @st.stop_on_error = true
+    end
+
+    after(:each) do
+      @st.stop_on_error = false
+    end
+
+    context "causes an exception to be raised" do
+      it "when #see fails" do
+        lambda do
+          @st.see("Nonexistent")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #do_not_see fails" do
+        lambda do
+          @st.do_not_see("Welcome")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #see_title fails" do
+        lambda do
+          @st.see_title("Wrong Title")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #do_not_see_title fails" do
+        lambda do
+          @st.do_not_see_title("Rsel Test Site")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #link_exists fails" do
+        lambda do
+          @st.link_exists("Bogus Link")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #button_exists fails" do
+        lambda do
+          @st.button_exists("Bogus Button")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #row_exists fails" do
+        lambda do
+          @st.row_exists("No, Such, Row")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #type_into_field fails" do
+        lambda do
+          @st.type_into_field("Hello", "Bad Field")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #field_contains fails" do
+        lambda do
+          @st.field_contains("Bad Field", "Hello")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #field_equals fails" do
+        lambda do
+          @st.field_equals("Bad Field", "Hello")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #click fails" do
+        lambda do
+          @st.click("No Such Link")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #click_link fails" do
+        lambda do
+          @st.click_link("No Such Link")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #click_button fails" do
+        lambda do
+          @st.click_button("No Such Link")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #enable_checkbox fails" do
+        lambda do
+          @st.enable_checkbox("No Such Checkbox")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #disable_checkbox fails" do
+        lambda do
+          @st.disable_checkbox("No Such Checkbox")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #checkbox_is_enabled fails" do
+        lambda do
+          @st.checkbox_is_enabled("No Such Checkbox")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #checkbox_is_disabled fails" do
+        lambda do
+          @st.checkbox_is_disabled("No Such Checkbox")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #radio_is_enabled fails" do
+        lambda do
+          @st.radio_is_enabled("No Such Radio")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #radio_is_disabled fails" do
+        lambda do
+          @st.radio_is_disabled("No Such Radio")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #select_radio fails" do
+        lambda do
+          @st.select_radio("No Such Radio")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #select_from_dropdown fails" do
+        lambda do
+          @st.select_from_dropdown("Junk", "No Such Dropdown")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #dropdown_includes fails" do
+        lambda do
+          @st.dropdown_includes("No Such Dropdown", "Junk")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+
+      it "when #dropdown_equals fails" do
+        lambda do
+          @st.dropdown_equals("No Such Dropdown", "Junk")
+        end.should raise_error(Rsel::StopTestStepFailed)
+      end
+    end
+  end # stop on error
+
 end
 
