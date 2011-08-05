@@ -679,8 +679,15 @@ module Rsel
     #
     def method_missing(method, *args, &block)
       if @browser.respond_to?(method)
-        fail_on_exception do
-          @browser.send(method, *args, &block)
+        begin
+          result = @browser.send(method, *args, &block)
+        rescue => e
+          failure e.message
+        else
+          # The method call succeeded; did it return true or false?
+          return result if [true, false].include? result
+          # Not a Boolean return value--assume passing
+          return true
         end
       else
         super
