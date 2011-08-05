@@ -27,26 +27,41 @@ module Rsel
     # Initialize a test, connecting to the given Selenium server.
     #
     # @param [String] url
-    #   Full URL, including http://, of the system under test
-    # @param [String] host
+    #   Full URL, including http://, of the system under test. Any
+    #   HTML tags around the URL will be stripped.
+    # @param [Hash] options
+    #   Additional configuration settings
+    #
+    # @option options [String] :host
     #   IP address or hostname where selenium-server is running
-    # @param [String] port
+    # @option options [String] :port
     #   Port number of selenium-server
-    # @param [String] browser
+    # @option options [String] :browser
     #   Which browser to test with
+    # @option options [String, Boolean] :stop_on_error
+    #   `true` or `'true'` to raise an exception when a step fails,
+    #   `false` or `'false'` to simply return false when a step fails
     #
     # @example
     #   | script | selenium test | http://site.to.test/ |
-    #   | script | selenium test | http://site.to.test/ | 192.168.0.3 | 4445 |
+    #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3} |
+    #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3, port:4445} |
+    #   | script | selenium test | http://site.to.test/ | !{stop_on_error:true} |
     #
-    def initialize(url, host='localhost', port='4444', browser='*firefox')
-      @url = url
+    def initialize(url, options={})
+      # Strip HTML tags from URL
+      @url = url.gsub(/<\/?[^>]*>/, '')
       @browser = Selenium::Client::Driver.new(
-        :host => host,
-        :port => port,
-        :browser => browser,
-        :url => url)
-      @stop_on_error = false
+        :host => options[:host] || 'localhost',
+        :port => options[:port] || 4444,
+        :browser => options[:browser] || '*firefox',
+        :url => @url)
+      # Accept Booleans or strings, case-insensitive
+      if options[:stop_on_error].to_s =~ /true/i
+        @stop_on_error = true
+      else
+        @stop_on_error = false
+      end
     end
 
     attr_reader :url, :browser, :stop_on_error
