@@ -4,16 +4,17 @@ Rsel History
 0.0.6
 -----
 
-- Added stop_on_error attribute, to raise an exception when a step fails
+- Added stop_on_error attribute to raise a StopTest exception when a step fails
 - Allow execution of arbitrary Selenium::Client::Driver methods
 - Separated support methods from SeleniumTest methods
+- Fixed field_contains and field_equals so they fail when a field doesn't exist
 
 
 0.0.5
 -----
 
 - Allow Selenium-style locators beginning with id=, name=, xpath=, css= etc.
-- Raise a StopTest exception when Selenium is not running (requires updated rubyslim)
+- Raise a StopTest exception when Selenium is not running
 - Locators are now documented
 - Example FitNesse tables are now included
 
