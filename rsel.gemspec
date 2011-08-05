@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "rsel"
-  s.version = "0.0.5"
+  s.version = "0.0.6"
   s.summary = "Runs Selenium tests from FitNesse"
   s.description = <<-EOS
     Rsel provides a Slim fixture for running Selenium tests, with

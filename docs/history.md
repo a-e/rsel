@@ -1,6 +1,14 @@
 Rsel History
 ============
 
+0.0.6
+-----
+
+- Added stop_on_error attribute, to raise an exception when a step fails
+- Allow execution of arbitrary Selenium::Client::Driver methods
+- Separated support methods from SeleniumTest methods
+
+
 0.0.5
 -----
 

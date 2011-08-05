@@ -632,35 +632,6 @@ module Rsel
     end
 
 
-    # Invoke a missing method. If a method is called on a SeleniumTest
-    # instance, and that method is not explicitly defined, this method
-    # will check to see whether the underlying Selenium::Client::Driver
-    # instance can respond to that method. If so, that method is called
-    # instead.
-    #
-    def method_missing(method, *args, &block)
-      if @browser.respond_to?(method)
-        @browser.send(method, *args, &block)
-      else
-        super
-      end
-    end
-
-
-    # Return true if SeleniumTest explicitly responds to a given method
-    # name, or if the underlying Selenium::Client::Driver instance can
-    # respond to it. This is a counterpart to {#method_missing}, used
-    # for checking whether a given method can be called on this instance.
-    #
-    def respond_to?(method, include_private=false)
-      if @browser.respond_to?(method)
-        true
-      else
-        super
-      end
-    end
-
-
     # Execute the given block, and return false if it raises an exception.
     # Otherwise, return true. If `@stop_on_error` is true, raise a
     # `StopTestStepFailed` exception instead of returning false.
@@ -683,6 +654,39 @@ module Rsel
     end
 
 
+    # Invoke a missing method. If a method is called on a SeleniumTest
+    # instance, and that method is not explicitly defined, this method
+    # will check to see whether the underlying Selenium::Client::Driver
+    # instance can respond to that method. If so, that method is called
+    # instead.
+    #
+    # @since 0.0.6
+    #
+    def method_missing(method, *args, &block)
+      if @browser.respond_to?(method)
+        @browser.send(method, *args, &block)
+      else
+        super
+      end
+    end
+
+
+    # Return true if SeleniumTest explicitly responds to a given method
+    # name, or if the underlying Selenium::Client::Driver instance can
+    # respond to it. This is a counterpart to {#method_missing}, used
+    # for checking whether a given method can be called on this instance.
+    #
+    # @since 0.0.6
+    #
+    def respond_to?(method, include_private=false)
+      if @browser.respond_to?(method)
+        true
+      else
+        super
+      end
+    end
+
+
     # Indicate a failure by returning `false` or raising an exception.
     # If `@stop_on_error` is true, raise a `StopTestStepFailed` exception.
     # Otherwise, simply return false.
@@ -690,6 +694,8 @@ module Rsel
     # @param [String] message
     #   Optional message to include in the exception.
     #   Ignored if `@stop_on_error` is false.
+    #
+    # @since 0.0.6
     #
     def failure(message='')
       if @stop_on_error
@@ -702,6 +708,8 @@ module Rsel
 
     # Pass if the given condition is true; otherwise, fail by calling
     # {#failure} with an optional `message`.
+    #
+    # @since 0.0.6
     #
     def pass_if(condition, message='')
       if condition
