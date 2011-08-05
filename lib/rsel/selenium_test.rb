@@ -112,7 +112,7 @@ module Rsel
     #   | Visit | /software |
     #
     def visit(path_or_url)
-      return_error_status do
+      fail_on_exception do
         @browser.open(path_or_url)
       end
     end
@@ -124,7 +124,7 @@ module Rsel
     #   | Click back |
     #
     def click_back
-      return_error_status do
+      fail_on_exception do
         @browser.go_back
       end
     end
@@ -136,7 +136,7 @@ module Rsel
     #   | Refresh page |
     #
     def refresh_page
-      return_error_status do
+      fail_on_exception do
         @browser.refresh
       end
     end
@@ -272,7 +272,7 @@ module Rsel
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
     def type_into_field(text, locator, scope={})
-      return_error_status do
+      fail_on_exception do
         @browser.type(loc(locator, 'field', scope), text)
       end
     end
@@ -352,7 +352,7 @@ module Rsel
     #   | Click; | Logout | !{within:header} |
     #
     def click(locator, scope={})
-      return_error_status do
+      fail_on_exception do
         @browser.click(loc(locator, 'link_or_button', scope))
       end
     end
@@ -372,7 +372,7 @@ module Rsel
     #   | Click | Edit | link | !{in_row:Eric} |
     #
     def click_link(locator, scope={})
-      return_error_status do
+      fail_on_exception do
         @browser.click(loc(locator, 'link', scope))
       end
     end
@@ -393,7 +393,7 @@ module Rsel
     #
     def click_button(locator, scope={})
       # TODO: Make this fail when the button is disabled
-      return_error_status do
+      fail_on_exception do
         @browser.click(loc(locator, 'button', scope))
       end
     end
@@ -414,7 +414,7 @@ module Rsel
     #
     def enable_checkbox(locator, scope={})
       return true if checkbox_is_enabled(locator, scope)
-      return_error_status do
+      fail_on_exception do
         @browser.click(loc(locator, 'checkbox', scope))
       end
     end
@@ -434,7 +434,7 @@ module Rsel
     #
     def disable_checkbox(locator, scope={})
       return true if checkbox_is_disabled(locator, scope)
-      return_error_status do
+      fail_on_exception do
         @browser.click(loc(locator, 'checkbox', scope))
       end
     end
@@ -548,7 +548,7 @@ module Rsel
     #   | Select | female | radio | !{within:gender} |
     #
     def select_radio(locator, scope={})
-      return_error_status do
+      fail_on_exception do
         @browser.click(loc(locator, 'radio_button', scope))
       end
     end
@@ -566,7 +566,7 @@ module Rsel
     #   | Select | Tall | from dropdown | Height |
     #
     def select_from_dropdown(option, locator, scope={})
-      return_error_status do
+      fail_on_exception do
         @browser.select(loc(locator, 'select', scope), option)
       end
     end
@@ -641,7 +641,7 @@ module Rsel
     #   | Page loads in | 10 | seconds or less |
     #
     def page_loads_in_seconds_or_less(seconds)
-      return_error_status do
+      fail_on_exception do
         @browser.wait_for_page_to_load(seconds)
       end
     end
@@ -652,11 +652,11 @@ module Rsel
     # `StopTestStepFailed` exception instead of returning false.
     #
     # @example
-    #   return_error_status do
+    #   fail_on_exception do
     #     # some code that might raise an exception
     #   end
     #
-    def return_error_status
+    def fail_on_exception
       begin
         yield
       rescue => e
@@ -679,7 +679,9 @@ module Rsel
     #
     def method_missing(method, *args, &block)
       if @browser.respond_to?(method)
-        @browser.send(method, *args, &block)
+        fail_on_exception do
+          @browser.send(method, *args, &block)
+        end
       else
         super
       end
