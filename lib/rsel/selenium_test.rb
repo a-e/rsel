@@ -258,7 +258,8 @@ module Rsel
     end
 
 
-    # Type a value into the given field.
+    # Type a value into the given field. Passes if the field exists and is
+    # editable. Fails if the field is not found, or is not editable.
     #
     # @param [String] text
     #   What to type into the field
@@ -279,7 +280,8 @@ module Rsel
     end
 
 
-    # Fill in a field with the given text.
+    # Fill in a field with the given text. Passes if the field exists and is
+    # editable. Fails if the field is not found, or is not editable.
     #
     # @param [String] locator
     #   Label, name, or id of the field you want to type into
@@ -296,9 +298,8 @@ module Rsel
     end
 
 
-    # Verify that a text field contains the given text.
-    # The field may include additional text, as long as the
-    # expected value is in there somewhere.
+    # Verify that a text field contains the given text. The field may include
+    # additional text, as long as the expected value is in there somewhere.
     #
     # @param [String] locator
     #   Label, name, or id of the field you want to inspect
@@ -319,8 +320,8 @@ module Rsel
     end
 
 
-    # Verify that a text field's value equals the given text.
-    # The value must match exactly.
+    # Verify that a text field's value equals the given text. The value must
+    # match exactly.
     #
     # @param [String] locator
     #   Label, name, or id of the field you want to inspect
@@ -380,7 +381,8 @@ module Rsel
     alias_method :follow, :click_link
 
 
-    # Press a button.
+    # Press a button. Passes if the button exists and is not disabled.
+    # Fails if the button is not found, or is disabled.
     #
     # @param [String] locator
     #   Text, value, or id of the button
@@ -401,8 +403,9 @@ module Rsel
     alias_method :press, :click_button
 
 
-    # Enable (check) a checkbox by clicking on it.
-    # If the checkbox is already enabled, do nothing.
+    # Enable (check) a checkbox by clicking on it. If the checkbox is already
+    # enabled, do nothing. Passes if the checkbox exists and is editable. Fails
+    # if the checkbox is not found, or is not editable.
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to check
@@ -421,8 +424,9 @@ module Rsel
     end
 
 
-    # Disable (uncheck) a checkbox by clicking on it.
-    # If the checkbox is already disabled, do nothing.
+    # Disable (uncheck) a checkbox by clicking on it. If the checkbox is
+    # already disabled, do nothing. Passes if the checkbox exists and is
+    # editable. Fails if the checkbox is not found, or is not editable.
     #
     # @param [String] locator
     #   Label, value, or id of the checkbox to uncheck
@@ -537,7 +541,8 @@ module Rsel
     end
 
 
-    # Select a radio button.
+    # Select a radio button. Passes if the radio button exists and is editable.
+    # Fails if the radiobutton is not found, or is not editable.
     #
     # @param [String] locator
     #   Label, id, or name of the radio button to select
@@ -556,7 +561,9 @@ module Rsel
     end
 
 
-    # Select an option from a dropdown/combo box.
+    # Select an option from a dropdown/combo box. Passes if the dropdown exists,
+    # is editable, and includes the given option. Fails if the dropdown is not
+    # found, the option is not found, or the dropdown is not editable.
     #
     # @param [String] option
     #   The option to choose from the dropdown
@@ -716,7 +723,13 @@ module Rsel
     end
 
 
-    # Raise an exception if the given input is not editable
+    # Raise an exception if the given input is not editable.
+    #
+    # @param [String] selenium_locator
+    #   Locator string for an input (text field, checkbox, or button) as
+    #   understood by Selenium
+    #
+    # @since 0.0.7
     #
     def ensure_editable(selenium_locator)
       if @browser.is_editable(selenium_locator)

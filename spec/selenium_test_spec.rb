@@ -97,7 +97,7 @@ describe Rsel::SeleniumTest do
       end
 
       context "fails when" do
-        it "fails when test is present" do
+        it "fails when text is present" do
           @st.do_not_see("Welcome").should be_false
           @st.do_not_see("This is a Sinatra webapp").should be_false
         end
@@ -451,6 +451,11 @@ describe Rsel::SeleniumTest do
             @st.enable_checkbox("I like salami").should be_true
           end
 
+          it "exists and is already checked" do
+            @st.enable_checkbox("I like cheese")
+            @st.enable_checkbox("I like cheese").should be_true
+          end
+
           it "exists within scope" do
             @st.enable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
             @st.enable_checkbox("I like salami", :within => "salami_checkbox").should be_true
@@ -508,6 +513,11 @@ describe Rsel::SeleniumTest do
             @st.disable_checkbox("I like salami").should be_true
           end
 
+          it "exists and is already unchecked" do
+            @st.disable_checkbox("I like cheese")
+            @st.disable_checkbox("I like cheese").should be_true
+          end
+
           it "exists within scope" do
             @st.disable_checkbox("I like cheese", :within => "cheese_checkbox").should be_true
             @st.disable_checkbox("I like salami", :within => "preferences_form").should be_true
@@ -549,7 +559,7 @@ describe Rsel::SeleniumTest do
             @st.disable_checkbox("Like", :in_row => "Eric").should be_false
           end
 
-          it "exists, but is readonly" do
+          it "exists, but is read-only" do
             @st.visit("/readonly_form").should be_true
             @st.disable_checkbox("I like cheese").should be_false
           end
@@ -576,7 +586,7 @@ describe Rsel::SeleniumTest do
             @st.checkbox_is_enabled("Like", :in_row => "Ken").should be_true
           end
 
-          it "exists and is checked, but readonly" do
+          it "exists and is checked, but read-only" do
             @st.visit("/readonly_form").should be_true
             @st.checkbox_is_enabled("I like cheese").should be_true
           end
@@ -627,7 +637,7 @@ describe Rsel::SeleniumTest do
             @st.checkbox_is_disabled("Like", :in_row => "Ken").should be_true
           end
 
-          it "exists and is unchecked, but readonly" do
+          it "exists and is unchecked, but read-only" do
             @st.visit("/readonly_form").should be_true
             @st.checkbox_is_disabled("I like salami").should be_true
           end
@@ -693,7 +703,7 @@ describe Rsel::SeleniumTest do
             @st.select_radio("Briefs", :within => "food").should be_false
           end
 
-          it "exists, but is readonly" do
+          it "exists, but is read-only" do
             @st.visit("/readonly_form").should be_true
             @st.select_radio("Boxers").should be_false
           end
@@ -777,7 +787,7 @@ describe Rsel::SeleniumTest do
           @st.select_from_dropdown("Obese", "Weight").should be_false
         end
 
-        it "dropdown exists, but is readonly" do
+        it "dropdown exists, but is read-only" do
           @st.visit("/readonly_form").should be_true
           @st.select_from_dropdown("Tall", "Height").should be_false
         end
