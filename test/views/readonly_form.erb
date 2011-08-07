@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head><title>Rsel Test Read-only Forms</title></head>
+<body>
+  <h1>Read-only Forms</h1>
+  <p>This page has some read-only form widgets to test.</p>
+
+  <div id="person_form">
+    <form action="/thanks" method="get">
+      <p>
+        <label for="first_name">First name</label>
+        <input id="first_name" type="text" disabled="disabled" />
+      </p>
+      <p>
+        <label for="biography">Life story</label>
+        <textarea id="biography" cols="80" rows="10" disabled="disabled">
+        </textarea>
+      </p>
+      <p>
+        <label for="person_height">Height</label>
+        <select id="person_height" disabled="disabled">
+          <option value="short">Short</option>
+          <option value="average" selected="selected">Average</option>
+          <option value="tall" >Tall</option>
+        </select>
+      </p>
+      <p><button value="submit_person_form" disabled="disabled">Submit person form</button></p>
+    </form>
+  </div>
+
+  <div id="preferences_form">
+    <form action="/thanks" method="get">
+      <p>
+        <label for="favorite_colors">Favorite Colors</label>
+        <select id="favorite_colors" multiple="multiple" disabled="disabled">
+          <option value="r">Red</option>
+          <option value="g">Green</option>
+          <option value="b">Blue</option>
+        </select>
+      </p>
+      <p id="cheese_checkbox">
+        <label for="like_cheese">I like cheese</label>
+        <input id="like_cheese" type="checkbox" checked="checked" disabled="disabled" />
+      </p>
+      <p id="salami_checkbox">
+        <label for="like_salami">I like salami</label>
+        <input id="like_salami" type="checkbox" disabled="disabled" />
+      </p>
+      <p id="clothing">
+        <label for="boxers">Boxers</label>
+        <input id="boxers" type="radio" name="underwear" value="boxers" disabled="disabled" />
+        <label for="briefs">Briefs</label>
+        <input id="briefs" type="radio" name="underwear" value="briefs" disabled="disabled" />
+      </p>
+      <p><input type="submit" value="Save preferences" disabled="disabled" /></p>
+    </form>
+  </div>
+
+</body>
+</html>
+
+

@@ -7,6 +7,7 @@ Rsel History
 - Indicate pass/fail status for Selenium::Client::Driver wrapped methods
 - Allow passing stop_on_error to SeleniumTest constructor
 - Auto-strip HTML in URL passed to constructor
+- Button, field, checkbox, and radiobutton edits fail on disabled inputs
 
 
 0.0.6

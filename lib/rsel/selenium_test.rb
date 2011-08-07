@@ -272,8 +272,9 @@ module Rsel
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
     def type_into_field(text, locator, scope={})
+      field = loc(locator, 'field', scope)
       fail_on_exception do
-        @browser.type(loc(locator, 'field', scope), text)
+        ensure_editable(field) && @browser.type(field, text)
       end
     end
 
@@ -392,9 +393,9 @@ module Rsel
     #   | Click | Search | button | !{within:customers} |
     #
     def click_button(locator, scope={})
-      # TODO: Make this fail when the button is disabled
+      button = loc(locator, 'button', scope)
       fail_on_exception do
-        @browser.click(loc(locator, 'button', scope))
+        ensure_editable(button) && @browser.click(button)
       end
     end
     alias_method :press, :click_button
@@ -413,9 +414,9 @@ module Rsel
     #   | Enable | Send me spam | checkbox | !{within:opt_in} |
     #
     def enable_checkbox(locator, scope={})
-      return true if checkbox_is_enabled(locator, scope)
+      cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
-        @browser.click(loc(locator, 'checkbox', scope))
+        ensure_editable(cb) && checkbox_is_disabled(cb) && @browser.click(cb)
       end
     end
 
@@ -433,9 +434,9 @@ module Rsel
     #   | Disable | Send me spam | checkbox | !{within:opt_in} |
     #
     def disable_checkbox(locator, scope={})
-      return true if checkbox_is_disabled(locator, scope)
+      cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
-        @browser.click(loc(locator, 'checkbox', scope))
+        ensure_editable(cb) && checkbox_is_enabled(cb) && @browser.click(cb)
       end
     end
 
@@ -548,8 +549,9 @@ module Rsel
     #   | Select | female | radio | !{within:gender} |
     #
     def select_radio(locator, scope={})
+      radio = loc(locator, 'radio_button', scope)
       fail_on_exception do
-        @browser.click(loc(locator, 'radio_button', scope))
+        ensure_editable(radio) && @browser.click(radio)
       end
     end
 
@@ -566,8 +568,9 @@ module Rsel
     #   | Select | Tall | from dropdown | Height |
     #
     def select_from_dropdown(option, locator, scope={})
+      dropdown = loc(locator, 'select', scope)
       fail_on_exception do
-        @browser.select(loc(locator, 'select', scope), option)
+        ensure_editable(dropdown) && @browser.select(dropdown, option)
       end
     end
 
@@ -647,28 +650,6 @@ module Rsel
     end
 
 
-    # Execute the given block, and return false if it raises an exception.
-    # Otherwise, return true. If `@stop_on_error` is true, raise a
-    # `StopTestStepFailed` exception instead of returning false.
-    #
-    # @example
-    #   fail_on_exception do
-    #     # some code that might raise an exception
-    #   end
-    #
-    def fail_on_exception
-      begin
-        yield
-      rescue => e
-        #puts e.message
-        #puts e.backtrace
-        failure e.message
-      else
-        return true
-      end
-    end
-
-
     # Invoke a missing method. If a method is called on a SeleniumTest
     # instance, and that method is not explicitly defined, this method
     # will check to see whether the underlying Selenium::Client::Driver
@@ -707,6 +688,41 @@ module Rsel
         true
       else
         super
+      end
+    end
+
+
+    private
+
+    # Execute the given block, and return false if it raises an exception.
+    # Otherwise, return true. If `@stop_on_error` is true, raise a
+    # `StopTestStepFailed` exception instead of returning false.
+    #
+    # @example
+    #   fail_on_exception do
+    #     # some code that might raise an exception
+    #   end
+    #
+    def fail_on_exception
+      begin
+        yield
+      rescue => e
+        #puts e.message
+        #puts e.backtrace
+        failure e.message
+      else
+        return true
+      end
+    end
+
+
+    # Raise an exception if the given input is not editable
+    #
+    def ensure_editable(selenium_locator)
+      if @browser.is_editable(selenium_locator)
+        return true
+      else
+        raise StopTestInputDisabled, "Input is not editable"
       end
     end
 

@@ -226,8 +226,9 @@ describe Rsel::SeleniumTest do
           # TODO
         end
 
-        it "button exists, but is disabled" do
-          # TODO
+        it "button exists, but is read-only" do
+          @st.visit("/readonly_form").should be_true
+          @st.click_button("Submit person form").should be_false
         end
       end
     end
@@ -320,6 +321,11 @@ describe Rsel::SeleniumTest do
         it "field exists, but not within scope" do
           @st.type_into_field("Long story", "Life story",
                               :within => 'spouse_form').should be_false
+        end
+
+        it "field exists, but is read-only" do
+          @st.visit("/readonly_form").should be_true
+          @st.type_into_field("Eric", "First name").should be_false
         end
       end
     end
@@ -419,7 +425,8 @@ describe Rsel::SeleniumTest do
           end
 
           it "exactly equals the text, but is not within scope" do
-            # TODO
+            @st.fill_in_with("First name", "Eric", :within => "person_form")
+            @st.field_equals("First name", "Eric", :within => "spouse_form").should be_false
           end
 
           it "exactly equals the text, but is not in table row" do
@@ -484,6 +491,11 @@ describe Rsel::SeleniumTest do
             @st.visit("/table")
             @st.enable_checkbox("Like", :in_row => "Eric").should be_false
           end
+
+          it "exists, but is read-only" do
+            @st.visit("/readonly_form").should be_true
+            @st.enable_checkbox("I like salami").should be_false
+          end
         end
       end
     end
@@ -536,6 +548,11 @@ describe Rsel::SeleniumTest do
             @st.visit("/table")
             @st.disable_checkbox("Like", :in_row => "Eric").should be_false
           end
+
+          it "exists, but is readonly" do
+            @st.visit("/readonly_form").should be_true
+            @st.disable_checkbox("I like cheese").should be_false
+          end
         end
       end
     end
@@ -557,6 +574,11 @@ describe Rsel::SeleniumTest do
             @st.visit("/table")
             @st.enable_checkbox("Like", :in_row => "Ken").should be_true
             @st.checkbox_is_enabled("Like", :in_row => "Ken").should be_true
+          end
+
+          it "exists and is checked, but readonly" do
+            @st.visit("/readonly_form").should be_true
+            @st.checkbox_is_enabled("I like cheese").should be_true
           end
         end
       end
@@ -603,6 +625,11 @@ describe Rsel::SeleniumTest do
             @st.visit("/table")
             @st.disable_checkbox("Like", :in_row => "Ken").should be_true
             @st.checkbox_is_disabled("Like", :in_row => "Ken").should be_true
+          end
+
+          it "exists and is unchecked, but readonly" do
+            @st.visit("/readonly_form").should be_true
+            @st.checkbox_is_disabled("I like salami").should be_true
           end
         end
       end
@@ -664,6 +691,11 @@ describe Rsel::SeleniumTest do
 
           it "exists, but not within scope" do
             @st.select_radio("Briefs", :within => "food").should be_false
+          end
+
+          it "exists, but is readonly" do
+            @st.visit("/readonly_form").should be_true
+            @st.select_radio("Boxers").should be_false
           end
 
           it "exists, but not in table row" do
@@ -745,6 +777,11 @@ describe Rsel::SeleniumTest do
           @st.select_from_dropdown("Obese", "Weight").should be_false
         end
 
+        it "dropdown exists, but is readonly" do
+          @st.visit("/readonly_form").should be_true
+          @st.select_from_dropdown("Tall", "Height").should be_false
+        end
+
         it "dropdown exists, but not within scope" do
           @st.select_from_dropdown("Medium", "Weight", :within => "spouse_form").should be_false
         end
@@ -761,6 +798,11 @@ describe Rsel::SeleniumTest do
         it "option exists in the dropdown" do
           @st.dropdown_includes("Height", "Tall").should be_true
           @st.dropdown_includes("Weight", "Medium").should be_true
+        end
+
+        it "option exists in a read-only dropdown" do
+          @st.visit("/readonly_form").should be_true
+          @st.dropdown_includes("Height", "Tall").should be_true
         end
       end
 
@@ -783,6 +825,11 @@ describe Rsel::SeleniumTest do
             @st.select_from_dropdown(height, "Height")
             @st.dropdown_equals("Height", height).should be_true
           end
+        end
+
+        it "option is selected in a read-only dropdown" do
+          @st.visit("/readonly_form").should be_true
+          @st.dropdown_equals("Height", "Average").should be_true
         end
 
         it "option is selected in the dropdown, within scope" do
@@ -820,7 +867,7 @@ describe Rsel::SeleniumTest do
           @st.dropdown_equals("Height", "Average").should be_false
         end
 
-        it "dropdown exists, and option is selected, but not in scope" do
+        it "dropdown exists, and option is selected, but not within scope" do
           @st.select_from_dropdown("Tall", "Height", :within => "person_form")
           @st.select_from_dropdown("Short", "Height", :within => "spouse_form")
           @st.dropdown_equals("Height", "Tall", :within => "spouse_form").should be_false
