@@ -17,8 +17,19 @@ class TestApp < Sinatra::Base
     # Allow shutting down the app with a request
     if view == 'shutdown'
       Process.kill('KILL', Process.pid)
+    elsif view == 'slow'
+      sleep 5
+      erb :slow
+    elsif view == '404'
+      halt 404, "404: not found"
+    elsif view == '500'
+      halt 500, "500: server error"
     else
-      erb view.to_sym
+      begin
+        erb view.to_sym
+      rescue
+        halt 404, "404: not found"
+      end
     end
   end
 end

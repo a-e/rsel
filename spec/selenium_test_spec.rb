@@ -35,11 +35,16 @@ describe Rsel::SeleniumTest do
         end
       end
 
-      context "fails when" do
-        it "page does not exist" do
-          @st.visit("/bad/path").should be_false
-        end
-      end
+      # FIXME: Selenium server 2.3.0 and 2.4.0 no longer fail
+      # when a 404 or 500 error is raised
+      #context "fails when" do
+        #it "page gets a 404 error" do
+          #@st.visit("/404").should be_false
+        #end
+        #it "page gets a 500 error" do
+          #@st.visit("/500").should be_false
+        #end
+      #end
     end
 
     context "reload the current page" do
@@ -129,6 +134,7 @@ describe Rsel::SeleniumTest do
         end
       end
     end
+
 
     describe "#click_link" do
       context "passes when" do
@@ -935,6 +941,35 @@ describe Rsel::SeleniumTest do
   end # tables
 
 
+  context "waiting" do
+    before(:each) do
+      @st.visit("/").should be_true
+    end
+
+    describe "#page_loads_in_seconds_or_less" do
+      context "passes when" do
+        it "page is already loaded" do
+          @st.click_link("About this site").should be_true
+          sleep 1
+          @st.page_loads_in_seconds_or_less(10).should be_true
+        end
+        it "page loads before the timeout" do
+          @st.click_link("Slow page").should be_true
+          @st.page_loads_in_seconds_or_less(10).should be_true
+          @st.see("This page takes a few seconds to load").should be_true
+        end
+      end
+
+      context "fails when" do
+        it "slow page does not load before the timeout" do
+          @st.click_link("Slow page").should be_true
+          @st.page_loads_in_seconds_or_less(1).should be_false
+        end
+      end
+    end
+  end # waiting
+
+
   context "stop on error" do
     before(:each) do
       @st.visit("/").should be_true
@@ -1085,6 +1120,7 @@ describe Rsel::SeleniumTest do
       end
     end
   end # stop on error
+
 
   context "Selenium::Client::Driver wrapper" do
     before(:each) do
