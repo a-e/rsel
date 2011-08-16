@@ -7,6 +7,7 @@ you to use a natural English syntax to write web application tests.
 
 - [Installation](install.md)
 - [Usage](usage.md)
+- [FitNesse](fitnesse.md)
 - [Locators](locators.md)
 - [Scoping](scoping.md)
 - [Examples](examples.md)
