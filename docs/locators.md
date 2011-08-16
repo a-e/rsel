@@ -14,6 +14,11 @@ their `name` attribute. Given this HTML:
 To click on the "Contact Us" link using a standard Selenium locator, you'd have
 to do one of the following:
 
+    click "contact_us_link"
+    click "link=Contact Us"
+
+Or in FitNesse:
+
     | Click | contact_us_link |
     | Click | link=Contact Us |
 
@@ -36,6 +41,11 @@ For instance, given this HTML:
 
 With Selenium's default selectors, you could do:
 
+    type "id=first_name_text_field", "Eric"
+    type "xpath=.//input[@id = ../label[.='First name']/@for]", "Eric"
+
+In FitNesse:
+
     | type | id=first_name_text_field | Eric |
     | type | xpath=.//input[@id = ../label[.='First name']/@for] | Eric |
 
@@ -46,6 +56,11 @@ based on several likely attributes. Links are matched on `id`, link text, or
 the `alt` text in the case of an image link. Form fields are matched on their
 plain-text label, `name` or `id` attribute. In Rsel, the above examples become
 much easier:
+
+    click "Contact Us"
+    type_into_field "Eric", "First name"
+
+Or in FitNesse:
 
     | Click | Contact Us |
     | Type | Eric | into field | First name |

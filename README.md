@@ -1,8 +1,10 @@
 Rsel
 ====
 
-Rsel connects [FitNesse](http://fitnesse.org) to [Selenium](http://seleniumhq.org)
-via [Ruby](http://ruby-lang.org).
+Rsel is a [Ruby](http://ruby-lang.org) wrapper for [Selenium](http://seleniumhq.org),
+making it a little easier to write browser automation scripts. It is especially
+tailored towards use in [FitNesse](http://fitnesse.org) script tables, though it
+works equally well with plain Ruby.
 
 [Full documentation is on rdoc.info](http://rdoc.info/github/a-e/rsel/master/frames).
 

@@ -1,15 +1,15 @@
 Customization
 -------------
 
-Rsel provides only the most basic imperative navigational steps and
-verification. For real-world testing, you will most likely want to define your
-own steps, built up from the low-level ones provided by Rsel.
+When you are using Rsel through FitNesse, you may find yourself needing more
+high-level steps; it can be tedious to spell out every action using the basic
+actions provided by the `SeleniumTest` class.
 
-It's pretty easy to do this by subclassing `SeleniumTest` and adding your own
-methods to it. Create a sibling directory to your `FitNesseRoot`, named
-something like `custom_rsel`, then create a Ruby file in there. The Ruby file
-can be called whatever you want--it's most logical to name it after your
-application:
+It's pretty easy to create custom steps by subclassing `SeleniumTest` and
+adding your own methods to it. Create a sibling directory to your
+`FitNesseRoot`, named something like `custom_rsel`, then create a Ruby file in
+there. The Ruby file can be called whatever you want--it's most logical to name
+it after your application:
 
 - `FitNesseRoot`
 - `custom_rsel`

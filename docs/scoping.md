@@ -27,6 +27,10 @@ you try to do this in your Rsel table:
 
     | Type | 123-456-7890 | into | Phone number | field |
 
+Or this with Ruby:
+
+    type_into_field "123-456-7890", "Phone number"
+
 Rsel will just fill in the first matching field that it finds (in this case,
 the "work" phone number). If you needed to fill in the "home" phone number,
 you'd have to refer to it by something less ambiguous, such as its `id`:
@@ -44,6 +48,11 @@ of its container:
 
     | Type | 111-222-3333 | into | Phone number | field | !{within:work} |
     | Type | 111-222-4444 | into | Phone number | field | !{within:home} |
+
+With plain Ruby:
+
+    type_into_field "111-222-3333", "Phone number", :within => "work"
+    type_into_field "111-222-4444", "Phone number", :within => "home"
 
 Yeah I know, we're still using an `id` which could be annoyingly long, but if
 there are a lot of fields in each container, you only need to keep track of one
@@ -72,6 +81,10 @@ unique to that row:
 
     | Click | Edit | link | !{in_row:Marcus} |
 
+In Ruby:
+
+    click_link "Edit", :in_row => "Marcus"
+
 This works for any method that accepts scoping qualifiers, so you can use it to
 operate on checkboxes, dropdowns, or text fields as well.
 
@@ -79,15 +92,15 @@ operate on checkboxes, dropdowns, or text fields as well.
 Caveat
 ------
 
-The first thing you need to remember when using a scoping hash is that your tables
-must not be fully escaped. This just means you should not include a `!` at the
-beginning of your table, otherwise the hash syntax will be interpreted
-literally, instead of as an embedded hash.
+With FitNesse, when using a scoping hash, your tables must not be fully
+escaped. This just means you should not include a `!` at the beginning of your
+table, otherwise the hash syntax will be interpreted literally, instead of as
+an embedded hash.
 
-This means you will need to manually escape any cells in your table that
-contain URLs, email addresses, or other auto-interpreted text. For example,
-email addresses normally have HTML added by FitNesse; you'll have to escape
-those so they'll be treated as literal text:
+This means you should manually escape any cells in your table that contain
+URLs, email addresses, or other auto-interpreted text. For example, email
+addresses normally have HTML added by FitNesse; you'll have to escape those so
+they'll be treated as literal text:
 
     | Click | !-epierce@example.com-! | link | !{within:footer} |
 

@@ -1,58 +1,56 @@
 Usage
 =====
 
-Once you have created your `SetUp` page, you can create sibling pages with
-tests in them. For instance, continuing with the example from
-[Installation](install.md), your `SeleniumTests.LoginTest` might look like
-this:
+Rsel was originally designed for use with [FitNesse](http://fitnesse.org)
+script tables, but it works just as well without FitNesse. This page describes
+the basic principles of using Rsel in a Ruby script. If you plan to use Rsel
+through FitNesse, you can skip to [FitNesse](fitnesse.md).
 
-    | script | selenium test | http://www.mysite.com |
-    | Open browser                                   |
-    | Fill in       | Username | with | castle       |
-    | Fill in       | Password | with | beckett      |
-    | Click button  | Log in                         |
-    | Page loads in | 5        | seconds or less     |
-    | See           | Logged in as castle            |
-    | Close browser                                  |
+Here is a simple example of a Ruby script that uses Rsel to login to a website:
 
-Before running a test, you must make sure you have Selenium Server installed and running.
-Download [selenium-server-standalone-x.x.x.jar](http://seleniumhq.org/download/), and start
-it up like this:
+    require 'rubygems'
+    require 'rsel/selenium_test'
 
-    $ java -jar selenium-server-standalone-x.x.x.jar
+    # Custom test class
+    class MyTest < SeleniumTest
+      def login
+        visit "/login"
+        fill_in_with "Username", "admin"
+        fill_in_with "Password", "B4tM4n"
+        press "Log in"
+      end
+    end
 
-By default, the server runs on port 4444, and this is the port that Rsel uses
-unless you tell it otherwise. Rsel also assumes that you're running
-selenium-server on your localhost (that is, the same host where FitNesse is
-running); if you need to use a different host or port number, pass those as
-a hash argument to the first line of the table. For example, if you are running
-selenium-server on `my.selenium.host`, port `4455`, do this:
+    # The "main" program
+    if __FILE__ == $0
+      st = MyTest.new("http://my.site.com")
+      st.open_browser
+      st.login
+      st.close_browser
+    end
 
-    | script | selenium test | http://www.mysite.com | !{host:my.selenium.host, port:4455} |
+The `SeleniumTest` class is the main API to Rsel, handling all browser actions
+that you might want to do. Overriding it allows you to define custom actions,
+built upon the ones already provided.
 
-Another useful argument to pass in this hash is `stop_on_error`, which causes
-the test to be aborted whenever any failure occurs:
+When you instantiate a `SeleniumTest`, you need to pass a URL. This is the URL
+of the website you are testing; in this example, we're logging into
+`http://my.site.com`. By default, `SeleniumTest` assumes your Selenium Server
+is running on `localhost` port `4444`; if your Selenium Server is running
+elsewhere, just provide the host and port to the `SeleniumTest` (in this case,
+`MyTest`) constructor:
 
-    | script | selenium test | http://www.mysite.com | !{stop_on_error:true} |
+    st = MyTest.new("http://my.site.com", :host => 'my.selenium.host', :port => '4445')
 
-By default, when an error occurs, the failing step is simply colored red, and
-the test continues. With `stop_on_error` set, an exception will be raised.
+The next step, `open_browser`, is very important. This is what starts up the web
+browser, connects to the test system's URL, and executes all further actions.
 
-The first argument after `selenium test` is the URL of the site you will be testing.
-This URL is loaded when you call `Open browser`, and all steps that follow are
-assumed to stay within the same domain. You can navigate around the site by
-clicking links and filling in forms just as a human user would; you can also go
-directly to a specific path within the domain with the `Visit` method:
-
-    | Visit | /some/path       |
-    | Visit | /some/other/path |
-
-These paths are evaluated relative to the domain your test is running in. (It's
-theoretically possible to navigate to a different domain, but the Selenium
-driver frowns upon it.)
+After opening the browser, you can call any of the methods `SeleniumTest`
+provides, or any custom ones you have defined in your `MyTest` derived class.
+When you're done, use `close_browser` to end the session.
 
 See the `SeleniumTest` class documentation for a full list of available methods
 and how to use them.
 
-Next: [Locators](locators.md)
+Next: [FitNesse](fitnesse.md)
 
