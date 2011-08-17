@@ -1,9 +1,9 @@
 Rsel
 ====
 
-Rsel connects [FitNesse](http://fitnesse.org) to
-[Selenium](http://seleniumhq.org) via [Ruby](http://ruby-lang.org). It allows
-you to use a natural English syntax to write web application tests.
+Rsel is a [Selenium](http://seleniumhq.org) wrapper for
+[Ruby](http://ruby-lang.org), tailored towards web browser automation using
+[FitNesse](http://fitnesse.org) script tables with a natural English syntax.
 
 - [Installation](install.md)
 - [Usage](usage.md)
