@@ -66,11 +66,11 @@ Note that this name must match the `module` line in your Ruby file, and the
 folder where your Ruby file resides must be the lowercase_and_underscore
 version of that same module name. Finally, in your actual test table, instead of:
 
-    !| script | selenium test | ... |
+    | script | selenium test | ... |
 
 You'll use:
 
-    !| script | my app test | ... |
+    | script | my app test | ... |
 
 This will ensure that the `MyAppTest` class will be used for evaluating the
 steps contained in that table.
