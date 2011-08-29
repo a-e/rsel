@@ -141,5 +141,5 @@ have a use case that isn't covered by the existing scopes, please [submit an
 issue](http://github.com/a-e/rsel/issues), or better yet, implement it yourself
 and submit a pull request. See [Development](development.md) for more info.
 
-Next: [Scenarios](scenarios.md)
+Next: [Examples](examples.md)
 

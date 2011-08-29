@@ -30,11 +30,11 @@ For maximum reusability, you may want to create a wiki page (or several)
 dedicated to helper scenarios, which can be included by the pages that use
 them. For example, given this page hierarchy:
 
-    * MyTests
-        * SetUp
-        * HelperScenarios
-        * TestOne
-        * TestTwo
+- `MyTests`
+    - `SetUp`
+    - `HelperScenarios`
+    - `TestOne`
+    - `TestTwo`
 
 If your Scenario table is in `HelperScenarios`, and `TestOne` and `TestTwo`
 both need to call the Login scenario, put this line at the top of `TestOne`
@@ -47,5 +47,5 @@ are expanded within the results table, so you can see the status of all
 sub-steps. It's possible to nest scenarios within scenarios, to build more
 complex steps out of simpler ones.
 
-Next: [Examples](examples.md)
+Next: [Development](development.md)
 
