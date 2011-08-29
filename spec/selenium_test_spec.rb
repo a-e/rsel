@@ -102,7 +102,7 @@ describe Rsel::SeleniumTest do
       end
 
       context "fails when" do
-        it "fails when text is present" do
+        it "text is present" do
           @st.do_not_see("Welcome").should be_false
           @st.do_not_see("This is a Sinatra webapp").should be_false
         end
