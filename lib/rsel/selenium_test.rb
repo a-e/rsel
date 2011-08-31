@@ -37,7 +37,8 @@ module Rsel
     # @option options [String] :port
     #   Port number of selenium-server
     # @option options [String] :browser
-    #   Which browser to test with
+    #   Which browser to run. Should be a string like `'*firefox'` (default),
+    #   `'*googlechrome'`, `'*opera'`, `'*iexplore'`, `'*safari'` etc.
     # @option options [String, Boolean] :stop_on_error
     #   `true` or `'true'` to raise an exception when a step fails,
     #   `false` or `'false'` to simply return false when a step fails
