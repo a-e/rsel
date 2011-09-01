@@ -86,6 +86,12 @@ module Rsel
       else
         visit @url
       end
+
+      # Use javascript-xpath for IE, since it's a lot faster than the default
+      if @browser.browser_string == '*iexplore'
+        @browser.use_xpath_library('javascript-xpath')
+      end
+
       # Make Selenium highlight elements whenever it locates them
       @browser.highlight_located_element = true
     end
