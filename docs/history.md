@@ -1,6 +1,14 @@
 Rsel History
 ============
 
+0.0.8
+-----
+
+- Use javascript-xpath to dramatically improve speed on MSIE
+- Documentation on Scenarios and non-FitNesse usage
+- Minor spec test cleanup
+
+
 0.0.7
 -----
 
