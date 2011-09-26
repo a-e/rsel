@@ -125,11 +125,12 @@ module Rsel
     #
     def begin_scenario
       @found_failure = false
+      return true
     end
 
 
     # End the current scenario. For now, this does not do anything, but is
-    # merely provided for symmetry with begin_scenario.
+    # merely provided for symmetry with {#begin_scenario}.
     #
     # @example
     #   | End scenario |
@@ -137,6 +138,7 @@ module Rsel
     # @since 0.0.9
     #
     def end_scenario
+      return true
     end
 
 
