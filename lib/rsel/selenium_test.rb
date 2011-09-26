@@ -42,9 +42,6 @@ module Rsel
     # @option options [String, Boolean] :stop_on_error
     #   `true` or `'true'` to raise an exception when a step fails,
     #   `false` or `'false'` to simply return false when a step fails
-    # @option options [String, Integer] :timeout
-    #   Default timeout in seconds. This determines how long the `open` method
-    #   will wait for the page to load.
     #
     # @example
     #   | script | selenium test | http://site.to.test/ |
@@ -59,18 +56,18 @@ module Rsel
         :host => options[:host] || 'localhost',
         :port => options[:port] || 4444,
         :browser => options[:browser] || '*firefox',
-        :url => @url,
-        :default_timeout_in_seconds => options[:timeout] || 300)
+        :url => @url)
       # Accept Booleans or strings, case-insensitive
       if options[:stop_on_error].to_s =~ /true/i
         @stop_on_error = true
       else
         @stop_on_error = false
       end
+      @found_failure = false
     end
 
-    attr_reader :url, :browser, :stop_on_error
-    attr_writer :stop_on_error
+    attr_reader :url, :browser, :stop_on_error, :found_failure
+    attr_writer :stop_on_error, :found_failure
 
 
     # Start the session and open a browser to the URL defined at the start of
@@ -123,6 +120,10 @@ module Rsel
     #   | Visit | /software |
     #
     def visit(path_or_url)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       fail_on_exception do
         @browser.open(path_or_url)
       end
@@ -135,6 +136,10 @@ module Rsel
     #   | Click back |
     #
     def click_back
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       fail_on_exception do
         @browser.go_back
       end
@@ -147,6 +152,10 @@ module Rsel
     #   | Refresh page |
     #
     def refresh_page
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       fail_on_exception do
         @browser.refresh
       end
@@ -173,6 +182,10 @@ module Rsel
     #   | See | Welcome, Marcus |
     #
     def see(text)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       pass_if @browser.text?(text)
     end
 
@@ -186,6 +199,10 @@ module Rsel
     #   | Do not see | Take a hike |
     #
     def do_not_see(text)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       pass_if !@browser.text?(text)
     end
 
@@ -199,6 +216,10 @@ module Rsel
     #   | See title | Our Homepage |
     #
     def see_title(title)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       pass_if @browser.get_title == title
     end
 
@@ -212,6 +233,10 @@ module Rsel
     #   | Do not see title | Someone else's homepage |
     #
     def do_not_see_title(title)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       pass_if !(@browser.get_title == title)
     end
 
@@ -230,6 +255,10 @@ module Rsel
     # @since 0.0.2
     #
     def link_exists(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       pass_if @browser.element?(loc(locator, 'link', scope))
     end
 
@@ -248,6 +277,10 @@ module Rsel
     # @since 0.0.2
     #
     def button_exists(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       pass_if @browser.element?(loc(locator, 'button', scope))
     end
 
@@ -264,6 +297,10 @@ module Rsel
     # @since 0.0.3
     #
     def row_exists(cells)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
       pass_if @browser.element?("xpath=#{row.to_s}")
     end
@@ -284,6 +321,10 @@ module Rsel
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
     def type_into_field(text, locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       field = loc(locator, 'field', scope)
       fail_on_exception do
         ensure_editable(field) && @browser.type(field, text)
@@ -305,6 +346,10 @@ module Rsel
     #   | Fill in | First name | with | Eric |
     #
     def fill_in_with(locator, text, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       type_into_field(text, locator, scope)
     end
 
@@ -321,6 +366,10 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       begin
         field = @browser.field(loc(locator, 'field', scope))
       rescue => e
@@ -344,6 +393,10 @@ module Rsel
     #   | Field | First name | equals; | Eric | !{within:contact} |
     #
     def field_equals(locator, text, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       begin
         field = @browser.field(loc(locator, 'field', scope))
       rescue => e
@@ -365,11 +418,14 @@ module Rsel
     #   | Click; | Logout | !{within:header} |
     #
     def click(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       fail_on_exception do
         @browser.click(loc(locator, 'link_or_button', scope))
       end
     end
-
 
     # Click on a link.
     #
@@ -385,6 +441,10 @@ module Rsel
     #   | Click | Edit | link | !{in_row:Eric} |
     #
     def click_link(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       fail_on_exception do
         @browser.click(loc(locator, 'link', scope))
       end
@@ -406,6 +466,10 @@ module Rsel
     #   | Click | Search | button | !{within:customers} |
     #
     def click_button(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       button = loc(locator, 'button', scope)
       fail_on_exception do
         ensure_editable(button) && @browser.click(button)
@@ -428,6 +492,10 @@ module Rsel
     #   | Enable | Send me spam | checkbox | !{within:opt_in} |
     #
     def enable_checkbox(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_disabled(cb) && @browser.click(cb)
@@ -449,6 +517,11 @@ module Rsel
     #   | Disable | Send me spam | checkbox | !{within:opt_in} |
     #
     def disable_checkbox(locator, scope={})
+
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_enabled(cb) && @browser.click(cb)
@@ -468,6 +541,10 @@ module Rsel
     #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
     #
     def checkbox_is_enabled(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -493,6 +570,10 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_enabled(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -516,6 +597,10 @@ module Rsel
     #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
     #
     def checkbox_is_disabled(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -541,6 +626,10 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_disabled(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -565,6 +654,10 @@ module Rsel
     #   | Select | female | radio | !{within:gender} |
     #
     def select_radio(locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       radio = loc(locator, 'radio_button', scope)
       fail_on_exception do
         ensure_editable(radio) && @browser.click(radio)
@@ -586,6 +679,10 @@ module Rsel
     #   | Select | Tall | from dropdown | Height |
     #
     def select_from_dropdown(option, locator, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       dropdown = loc(locator, 'select', scope)
       fail_on_exception do
         ensure_editable(dropdown) && @browser.select(dropdown, option)
@@ -606,6 +703,10 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_includes(locator, option, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       # TODO: Apply scope
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
@@ -627,6 +728,10 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_equals(locator, option, scope={})
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       begin
         selected = @browser.get_selected_label(loc(locator, 'select', scope))
       rescue => e
@@ -646,6 +751,10 @@ module Rsel
     #   | Pause | 5 | seconds |
     #
     def pause_seconds(seconds)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       sleep seconds.to_i
       return true
     end
@@ -662,6 +771,10 @@ module Rsel
     #   | Page loads in | 10 | seconds or less |
     #
     def page_loads_in_seconds_or_less(seconds)
+     if @found_failure && @stop_on_error
+        return false
+      end
+
       fail_on_exception do
         @browser.wait_for_page_to_load(seconds)
       end
@@ -762,11 +875,12 @@ module Rsel
     # @since 0.0.6
     #
     def failure(message='')
-      if @stop_on_error
-        raise StopTestStepFailed, message
-      else
+      @found_failure=true
+#      if @stop_on_error
+#        raise StopTestStepFailed, message
+#      else
         return false
-      end
+#      end
     end
 
 
