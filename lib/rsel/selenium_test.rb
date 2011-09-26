@@ -42,6 +42,9 @@ module Rsel
     # @option options [String, Boolean] :stop_on_error
     #   `true` or `'true'` to raise an exception when a step fails,
     #   `false` or `'false'` to simply return false when a step fails
+    # @option options [String, Integer] :timeout
+    #   Default timeout in seconds. This determines how long the `open` method
+    #   will wait for the page to load.
     #
     # @example
     #   | script | selenium test | http://site.to.test/ |
@@ -56,7 +59,8 @@ module Rsel
         :host => options[:host] || 'localhost',
         :port => options[:port] || 4444,
         :browser => options[:browser] || '*firefox',
-        :url => @url)
+        :url => @url,
+        :default_timeout_in_seconds => options[:timeout] || 300)
       # Accept Booleans or strings, case-insensitive
       if options[:stop_on_error].to_s =~ /true/i
         @stop_on_error = true
