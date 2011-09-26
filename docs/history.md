@@ -1,6 +1,14 @@
 Rsel History
 ============
 
+0.0.9
+-----
+
+- stop_on_error renamed to stop_on_failure
+- stop_on_failure now causes all subsequent steps to fail, instead of raising exception
+- Added begin_scenario and end_scenario to reset the found_failure flag
+
+
 0.0.8
 -----
 

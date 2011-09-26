@@ -39,9 +39,9 @@ module Rsel
     # @option options [String] :browser
     #   Which browser to run. Should be a string like `'*firefox'` (default),
     #   `'*googlechrome'`, `'*opera'`, `'*iexplore'`, `'*safari'` etc.
-    # @option options [String, Boolean] :stop_on_error
-    #   `true` or `'true'` to raise an exception when a step fails,
-    #   `false` or `'false'` to simply return false when a step fails
+    # @option options [String, Boolean] :stop_on_failure
+    #   `true` or `'true'` to abort the test when a failure occurs;
+    #   `false` or `'false'` to continue execution when failure occurs.
     # @option options [String, Integer] :timeout
     #   Default timeout in seconds. This determines how long the `open` method
     #   will wait for the page to load.
@@ -50,7 +50,7 @@ module Rsel
     #   | script | selenium test | http://site.to.test/ |
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3} |
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3, port:4445} |
-    #   | script | selenium test | http://site.to.test/ | !{stop_on_error:true} |
+    #   | script | selenium test | http://site.to.test/ | !{stop_on_failure:true} |
     #
     def initialize(url, options={})
       # Strip HTML tags from URL
@@ -62,16 +62,16 @@ module Rsel
         :url => @url,
         :default_timeout_in_seconds => options[:timeout] || 300)
       # Accept Booleans or strings, case-insensitive
-      if options[:stop_on_error].to_s =~ /true/i
-        @stop_on_error = true
+      if options[:stop_on_failure].to_s =~ /true/i
+        @stop_on_failure = true
       else
-        @stop_on_error = false
+        @stop_on_failure = false
       end
       @found_failure = false
     end
 
-    attr_reader :url, :browser, :stop_on_error, :found_failure
-    attr_writer :stop_on_error, :found_failure
+    attr_reader :url, :browser, :stop_on_failure, :found_failure
+    attr_writer :stop_on_failure, :found_failure
 
 
     # Start the session and open a browser to the URL defined at the start of
@@ -113,6 +113,33 @@ module Rsel
     end
 
 
+    # Begin a new scenario, and forget about any previous failures.
+    # This allows you to modularize your tests into standalone sections
+    # that can run independently of previous scenarios, regardless of
+    # whether those scenarios passed or failed.
+    #
+    # @example
+    #   | Begin scenario |
+    #
+    # @since 0.0.9
+    #
+    def begin_scenario
+      @found_failure = false
+    end
+
+
+    # End the current scenario. For now, this does not do anything, but is
+    # merely provided for symmetry with begin_scenario.
+    #
+    # @example
+    #   | End scenario |
+    #
+    # @since 0.0.9
+    #
+    def end_scenario
+    end
+
+
     # Load an absolute URL or a relative path in the browser.
     #
     # @param [String] path_or_url
@@ -124,10 +151,7 @@ module Rsel
     #   | Visit | /software |
     #
     def visit(path_or_url)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       fail_on_exception do
         @browser.open(path_or_url)
       end
@@ -140,10 +164,7 @@ module Rsel
     #   | Click back |
     #
     def click_back
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       fail_on_exception do
         @browser.go_back
       end
@@ -156,10 +177,7 @@ module Rsel
     #   | Refresh page |
     #
     def refresh_page
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       fail_on_exception do
         @browser.refresh
       end
@@ -186,10 +204,7 @@ module Rsel
     #   | See | Welcome, Marcus |
     #
     def see(text)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       pass_if @browser.text?(text)
     end
 
@@ -203,10 +218,7 @@ module Rsel
     #   | Do not see | Take a hike |
     #
     def do_not_see(text)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       pass_if !@browser.text?(text)
     end
 
@@ -220,10 +232,7 @@ module Rsel
     #   | See title | Our Homepage |
     #
     def see_title(title)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       pass_if @browser.get_title == title
     end
 
@@ -237,10 +246,7 @@ module Rsel
     #   | Do not see title | Someone else's homepage |
     #
     def do_not_see_title(title)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       pass_if !(@browser.get_title == title)
     end
 
@@ -259,10 +265,7 @@ module Rsel
     # @since 0.0.2
     #
     def link_exists(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       pass_if @browser.element?(loc(locator, 'link', scope))
     end
 
@@ -281,10 +284,7 @@ module Rsel
     # @since 0.0.2
     #
     def button_exists(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       pass_if @browser.element?(loc(locator, 'button', scope))
     end
 
@@ -301,10 +301,7 @@ module Rsel
     # @since 0.0.3
     #
     def row_exists(cells)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
       pass_if @browser.element?("xpath=#{row.to_s}")
     end
@@ -325,10 +322,7 @@ module Rsel
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
     def type_into_field(text, locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       field = loc(locator, 'field', scope)
       fail_on_exception do
         ensure_editable(field) && @browser.type(field, text)
@@ -350,10 +344,7 @@ module Rsel
     #   | Fill in | First name | with | Eric |
     #
     def fill_in_with(locator, text, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       type_into_field(text, locator, scope)
     end
 
@@ -370,14 +361,11 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       begin
         field = @browser.field(loc(locator, 'field', scope))
-      rescue => e
-        failure e.message
+      rescue
+        failure
       else
         pass_if field.include?(text)
       end
@@ -397,14 +385,11 @@ module Rsel
     #   | Field | First name | equals; | Eric | !{within:contact} |
     #
     def field_equals(locator, text, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       begin
         field = @browser.field(loc(locator, 'field', scope))
-      rescue => e
-        failure e.message
+      rescue
+        failure
       else
         pass_if field == text
       end
@@ -422,10 +407,7 @@ module Rsel
     #   | Click; | Logout | !{within:header} |
     #
     def click(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       fail_on_exception do
         @browser.click(loc(locator, 'link_or_button', scope))
       end
@@ -445,10 +427,7 @@ module Rsel
     #   | Click | Edit | link | !{in_row:Eric} |
     #
     def click_link(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       fail_on_exception do
         @browser.click(loc(locator, 'link', scope))
       end
@@ -470,10 +449,7 @@ module Rsel
     #   | Click | Search | button | !{within:customers} |
     #
     def click_button(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       button = loc(locator, 'button', scope)
       fail_on_exception do
         ensure_editable(button) && @browser.click(button)
@@ -496,10 +472,7 @@ module Rsel
     #   | Enable | Send me spam | checkbox | !{within:opt_in} |
     #
     def enable_checkbox(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_disabled(cb) && @browser.click(cb)
@@ -521,11 +494,7 @@ module Rsel
     #   | Disable | Send me spam | checkbox | !{within:opt_in} |
     #
     def disable_checkbox(locator, scope={})
-
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_enabled(cb) && @browser.click(cb)
@@ -545,15 +514,12 @@ module Rsel
     #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
     #
     def checkbox_is_enabled(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue => e
-        failure e.message
+      rescue
+        failure
       else
         return enabled
       end
@@ -574,15 +540,12 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_enabled(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue => e
-        failure e.message
+      rescue
+        failure
       else
         return enabled
       end
@@ -601,15 +564,12 @@ module Rsel
     #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
     #
     def checkbox_is_disabled(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue => e
-        failure e.message
+      rescue
+        failure
       else
         return !enabled
       end
@@ -630,15 +590,12 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_disabled(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
-      rescue => e
-        failure e.message
+      rescue
+        failure
       else
         return !enabled
       end
@@ -658,10 +615,7 @@ module Rsel
     #   | Select | female | radio | !{within:gender} |
     #
     def select_radio(locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       radio = loc(locator, 'radio_button', scope)
       fail_on_exception do
         ensure_editable(radio) && @browser.click(radio)
@@ -683,10 +637,7 @@ module Rsel
     #   | Select | Tall | from dropdown | Height |
     #
     def select_from_dropdown(option, locator, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       dropdown = loc(locator, 'select', scope)
       fail_on_exception do
         ensure_editable(dropdown) && @browser.select(dropdown, option)
@@ -707,10 +658,7 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_includes(locator, option, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       # TODO: Apply scope
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
@@ -732,14 +680,11 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_equals(locator, option, scope={})
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       begin
         selected = @browser.get_selected_label(loc(locator, 'select', scope))
-      rescue => e
-        failure e.message
+      rescue
+        failure
       else
         return selected == option
       end
@@ -755,10 +700,7 @@ module Rsel
     #   | Pause | 5 | seconds |
     #
     def pause_seconds(seconds)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       sleep seconds.to_i
       return true
     end
@@ -775,10 +717,7 @@ module Rsel
     #   | Page loads in | 10 | seconds or less |
     #
     def page_loads_in_seconds_or_less(seconds)
-     if @found_failure && @stop_on_error
-        return false
-      end
-
+      return false if aborted?
       fail_on_exception do
         @browser.wait_for_page_to_load(seconds)
       end
@@ -797,8 +736,8 @@ module Rsel
       if @browser.respond_to?(method)
         begin
           result = @browser.send(method, *args, &block)
-        rescue => e
-          failure e.message
+        rescue
+          failure
         else
           # The method call succeeded; did it return true or false?
           return result if [true, false].include? result
@@ -830,8 +769,7 @@ module Rsel
     private
 
     # Execute the given block, and return false if it raises an exception.
-    # Otherwise, return true. If `@stop_on_error` is true, raise a
-    # `StopTestStepFailed` exception instead of returning false.
+    # Otherwise, return true.
     #
     # @example
     #   fail_on_exception do
@@ -844,7 +782,7 @@ module Rsel
       rescue => e
         #puts e.message
         #puts e.backtrace
-        failure e.message
+        failure
       else
         return true
       end
@@ -859,6 +797,8 @@ module Rsel
     #
     # @since 0.0.7
     #
+    # @raise [StopTestInputDisabled] if the given input is not editable
+    #
     def ensure_editable(selenium_locator)
       if @browser.is_editable(selenium_locator)
         return true
@@ -868,37 +808,35 @@ module Rsel
     end
 
 
-    # Indicate a failure by returning `false` or raising an exception.
-    # If `@stop_on_error` is true, raise a `StopTestStepFailed` exception.
-    # Otherwise, simply return false.
-    #
-    # @param [String] message
-    #   Optional message to include in the exception.
-    #   Ignored if `@stop_on_error` is false.
+    # Indicate a failure by returning `false` and setting `@found_failure = true`.
     #
     # @since 0.0.6
     #
-    def failure(message='')
-      @found_failure=true
-#      if @stop_on_error
-#        raise StopTestStepFailed, message
-#      else
-        return false
-#      end
+    def failure
+      @found_failure = true
+      return false
     end
 
 
-    # Pass if the given condition is true; otherwise, fail by calling
-    # {#failure} with an optional `message`.
+    # Pass if the given condition is true; otherwise, fail with {#failure}.
     #
     # @since 0.0.6
     #
-    def pass_if(condition, message='')
+    def pass_if(condition)
       if condition
         return true
       else
-        failure message
+        failure
       end
+    end
+
+
+    # Return true if this test has been aborted.
+    #
+    # @since 0.0.9
+    #
+    def aborted?
+      return @found_failure && @stop_on_failure
     end
 
   end

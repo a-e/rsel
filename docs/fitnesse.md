@@ -49,13 +49,14 @@ selenium-server on `my.selenium.host`, port `4455`, do this:
 
     | script | selenium test | http://www.mysite.com | !{host:my.selenium.host, port:4455} |
 
-Another useful argument to pass in this hash is `stop_on_error`, which causes
+Another useful argument to pass in this hash is `stop_on_failure`, which causes
 the test to be aborted whenever any failure occurs:
 
-    | script | selenium test | http://www.mysite.com | !{stop_on_error:true} |
+    | script | selenium test | http://www.mysite.com | !{stop_on_failure:true} |
 
 By default, when an error occurs, the failing step is simply colored red, and
-the test continues. With `stop_on_error` set, an exception will be raised.
+the test continues. With `stop_on_failure` set, all steps after the failing step will
+fail automatically without being executed.
 
 The first argument after `selenium test` is the URL of the site you will be testing.
 This URL is loaded when you call `Open browser`, and all steps that follow are

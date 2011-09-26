@@ -973,12 +973,12 @@ describe Rsel::SeleniumTest do
   context "stop on error" do
     before(:each) do
       @st.visit("/").should be_true
-      @st.stop_on_error = true
+      @st.stop_on_failure = true
       @st.found_failure = false
     end
 
     after(:each) do
-      @st.stop_on_error = false
+      @st.stop_on_failure = false
     end
 
     context "causes subsequent steps to fail" do
