@@ -970,7 +970,7 @@ describe Rsel::SeleniumTest do
   end # waiting
 
 
-  context "stop on error" do
+  context "stop on failure" do
     before(:each) do
       @st.visit("/").should be_true
       @st.stop_on_failure = true
@@ -1141,7 +1141,28 @@ describe Rsel::SeleniumTest do
         @st.dropdown_equals("Tall", "Height").should be_false
       end
     end
-  end # stop on error
+
+    context "can be reset with #begin_scenario" do
+      it "when #see fails" do
+        @st.see("Nonexistent").should be_false
+        # Would pass, but previous step failed
+        @st.see("Welcome").should be_false
+        # Starting a new scenario allows #see to pass
+        @st.begin_scenario
+        @st.see("Welcome").should be_true
+      end
+
+      it "when #do_not_see fails" do
+        @st.do_not_see("Welcome").should be_false
+        # Would pass, but previous step failed
+        @st.do_not_see("Nonexistent").should be_false
+        # Starting a new scenario allows #do_not_see to pass
+        @st.begin_scenario
+        @st.do_not_see("Nonexistent").should be_true
+      end
+    end
+
+  end # stop on failure
 
 
   context "Selenium::Client::Driver wrapper" do
