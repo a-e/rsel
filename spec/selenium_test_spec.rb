@@ -115,7 +115,6 @@ describe Rsel::SeleniumTest do
     end
   end # visibility
 
-
   context "links" do
     before(:each) do
       @st.visit("/").should be_true
@@ -197,6 +196,85 @@ describe Rsel::SeleniumTest do
       end
     end
   end # links
+
+
+  context "conditionals" do
+    before(:each) do
+      @st.visit("/").should be_true
+    end
+
+    describe "#if_i_see" do
+      context "passes when" do
+        it "sees text" do
+          @st.if_i_see("About this site").should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+
+        it "is inside a passed block" do
+          @st.if_i_see("About this site").should be_true
+          @st.click("About this site").should be_true
+          @st.page_loads_in_seconds_or_less(10).should be_true
+          @st.if_i_see("This site is").should be_true
+          @st.see("is really cool.").should be_true
+          @st.end_if.should be_true
+          @st.end_if.should be_true
+        end
+      end
+
+      context "skips when" do
+        it "does not see text" do
+          @st.if_i_see("Bogus link").should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.end_if.should be_true
+        end
+
+        it "is inside a skipped block" do
+          @st.if_i_see("Bogus link").should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.if_i_see("About this site").should be_nil
+          @st.click("About this site").should be_nil
+          @st.end_if.should be_nil
+          @st.end_if.should be_true
+        end
+      end
+    end
+
+    describe "#if_else" do
+      context "skips when" do
+        it "its if was true" do
+          @st.if_i_see("About this site").should be_true
+          @st.click("About this site").should be_true
+          @st.if_else.should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.end_if.should be_true
+        end
+      end
+      context "passes when" do
+        it "its if was false" do
+          @st.if_i_see("Bogus link").should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.if_else.should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+      end
+
+      context "fails when" do
+        it "does not have a matching if" do
+          @st.if_else.should be_false
+        end
+      end
+    end
+
+    describe "#end_if" do
+      context "fails when" do
+        it "does not have a matching if" do
+          @st.end_if.should be_false
+        end
+      end
+    end
+  end # conditionals
 
 
   context "buttons" do
