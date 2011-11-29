@@ -227,6 +227,47 @@ module Rsel
     end
 
 
+    # Temporally ensure text is present or absent
+
+    # Ensure that the given text appears on the current page, eventually.
+    #
+    # @param [String] text
+    #   Plain text that should be appear on or visible on the current page
+    # @param [String] seconds
+    #   Integer number of seconds to wait.
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
+    # @example
+    #   | See | Welcome back, Marcus | within | 10 | seconds |
+    #
+    # @since 0.1.1
+    #
+    def see_within_seconds(text, seconds, scope={})
+      return skip_status? if skip_step?
+      pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
+    end
+
+    # Ensure that the given text does not appear on the current page, eventually.
+    #
+    # @param [String] text
+    #   Plain text that should disappear from or not be present on the current page
+    # @param [String] seconds
+    #   Integer number of seconds to wait.
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
+    # @example
+    #   | Do not see | I'm over you | within | 10 | seconds |
+    #
+    # @since 0.1.1
+    #
+    def do_not_see_within_seconds(text, seconds, scope={})
+      return skip_status? if skip_step?
+      pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+    end
+
+
     # Ensure that the current page has the given title text.
     #
     # @param [String] title
