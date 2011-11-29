@@ -230,8 +230,8 @@ describe Rsel::SeleniumTest do
       end
 
       it "is case-sensitive" do
-        @st.see_within_seconds("The text is here!", 10).should be_true
-        @st.see_within_seconds("The text IS HERE!", 10).should be_false
+        @st.see_within_seconds("The text is here!", 5).should be_true
+        @st.see_within_seconds("The text IS HERE!", 5).should be_false
       end
     end
 
@@ -300,6 +300,61 @@ describe Rsel::SeleniumTest do
           @st.end_if.should be_nil
           @st.end_if.should be_true
         end
+      end
+    end
+
+    describe "#if_parameter" do
+      context "passes when" do
+        it "sees yes" do
+          @st.if_parameter("yes").should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+
+        it "sees true" do
+          @st.if_parameter("true").should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+
+        it "sees YES" do
+          @st.if_parameter("YES").should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+
+        it "sees TRUE" do
+          @st.if_parameter("TRUE").should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+
+        it "is inside a passed block" do
+          @st.if_i_see("About this site").should be_true
+          @st.click("About this site").should be_true
+          @st.page_loads_in_seconds_or_less(10).should be_true
+          @st.if_parameter("True").should be_true
+          @st.see("is really cool.").should be_true
+          @st.end_if.should be_true
+          @st.end_if.should be_true
+        end
+      end
+
+      context "skips when" do
+        it "sees something other than yes or true" do
+          @st.if_parameter("Bogus").should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.end_if.should be_true
+        end
+
+        it "is inside a skipped block" do
+          @st.if_parameter("Bogus link").should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.if_parameter("TRUE").should be_nil
+          @st.click("About this site").should be_nil
+          @st.end_if.should be_nil
+          @st.end_if.should be_true
+        end 
       end
     end
 

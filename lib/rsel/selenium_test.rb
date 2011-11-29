@@ -822,17 +822,45 @@ module Rsel
     # @since 0.1.1
     def if_i_see(text)
       return false if aborted?
+      # If this if is inside a block that's not running, record that.
       if !@conditional_stack.last then
         @conditional_stack.push nil
         return nil
       end
+      
+      # Test the condition.
       @conditional_stack.push @browser.text?(text)
+
+      return true if @conditional_stack.last == true
+      return nil if @conditional_stack.last == false
+      return failure
+    end
+
+    # If the given parameter is "yes" or "true", do the steps until I see an if_else or end_if.
+    # Otherwise do not do those steps.
+    #
+    # @param [String] text
+    #   A string.  "Yes" or "true" (case-insensitive) cause the following steps to run.  Anything else does not.
+    #
+    # @since 0.1.1
+    def if_parameter(text)
+      return false if aborted?
+      if !@conditional_stack.last then
+        @conditional_stack.push nil
+        return nil
+      end
+
+      # Test the condition.
+      @conditional_stack.push /^(yes|true)$/i === text
+
       return true if @conditional_stack.last == true
       return nil if @conditional_stack.last == false
       return failure
     end
 
     # End an if block.  
+    #
+    # @since 0.1.1
     def end_if
       return false if aborted?
       # If there was no prior matching if, fail.
@@ -845,6 +873,8 @@ module Rsel
     end
 
     # The else to match any other if.
+    #
+    # @since 0.1.1
     def if_else
       return false if aborted?
       # If there was no prior matching if, fail.
@@ -953,6 +983,4 @@ module Rsel
 
   end
 end
-
-
 
