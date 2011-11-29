@@ -358,12 +358,12 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    describe "#if_else" do
+    describe "#otherwise" do
       context "skips when" do
         it "its if was true" do
           @st.if_i_see("About this site").should be_true
           @st.click("About this site").should be_true
-          @st.if_else.should be_nil
+          @st.otherwise.should be_nil
           @st.click("Bogus link").should be_nil
           @st.end_if.should be_true
         end
@@ -372,7 +372,7 @@ describe Rsel::SeleniumTest do
         it "its if was false" do
           @st.if_i_see("Bogus link").should be_nil
           @st.click("Bogus link").should be_nil
-          @st.if_else.should be_true
+          @st.otherwise.should be_true
           @st.click("About this site").should be_true
           @st.end_if.should be_true
         end
@@ -380,7 +380,7 @@ describe Rsel::SeleniumTest do
 
       context "fails when" do
         it "does not have a matching if" do
-          @st.if_else.should be_false
+          @st.otherwise.should be_false
         end
       end
     end

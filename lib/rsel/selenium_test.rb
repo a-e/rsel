@@ -155,7 +155,7 @@ module Rsel
     #   | Visit | /software |
     #
     def visit(path_or_url)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.open(path_or_url)
       end
@@ -168,7 +168,7 @@ module Rsel
     #   | Click back |
     #
     def click_back
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.go_back
       end
@@ -181,7 +181,7 @@ module Rsel
     #   | Refresh page |
     #
     def refresh_page
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.refresh
       end
@@ -208,7 +208,7 @@ module Rsel
     #   | See | Welcome, Marcus |
     #
     def see(text)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if @browser.text?(text)
     end
 
@@ -222,7 +222,7 @@ module Rsel
     #   | Do not see | Take a hike |
     #
     def do_not_see(text)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if !@browser.text?(text)
     end
 
@@ -239,12 +239,13 @@ module Rsel
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
+    #   | Click | ajax_login | button |
     #   | See | Welcome back, Marcus | within | 10 | seconds |
     #
     # @since 0.1.1
     #
     def see_within_seconds(text, seconds, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
     end
 
@@ -258,12 +259,13 @@ module Rsel
     #   Scoping keywords as understood by {#xpath}
     #
     # @example
-    #   | Do not see | I'm over you | within | 10 | seconds |
+    #   | Click | close | button | !{within:popup_ad} |
+    #   | Do not see | advertisement | within | 10 | seconds |
     #
     # @since 0.1.1
     #
     def do_not_see_within_seconds(text, seconds, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
     end
 
@@ -277,7 +279,7 @@ module Rsel
     #   | See title | Our Homepage |
     #
     def see_title(title)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if @browser.get_title == title
     end
 
@@ -291,7 +293,7 @@ module Rsel
     #   | Do not see title | Someone else's homepage |
     #
     def do_not_see_title(title)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if !(@browser.get_title == title)
     end
 
@@ -310,7 +312,7 @@ module Rsel
     # @since 0.0.2
     #
     def link_exists(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if @browser.element?(loc(locator, 'link', scope))
     end
 
@@ -329,7 +331,7 @@ module Rsel
     # @since 0.0.2
     #
     def button_exists(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       pass_if @browser.element?(loc(locator, 'button', scope))
     end
 
@@ -346,7 +348,7 @@ module Rsel
     # @since 0.0.3
     #
     def row_exists(cells)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
       pass_if @browser.element?("xpath=#{row.to_s}")
     end
@@ -367,7 +369,7 @@ module Rsel
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
     def type_into_field(text, locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       field = loc(locator, 'field', scope)
       fail_on_exception do
         ensure_editable(field) && @browser.type(field, text)
@@ -389,7 +391,7 @@ module Rsel
     #   | Fill in | First name | with | Eric |
     #
     def fill_in_with(locator, text, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       type_into_field(text, locator, scope)
     end
 
@@ -406,7 +408,7 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       begin
         field = @browser.field(loc(locator, 'field', scope))
       rescue
@@ -430,7 +432,7 @@ module Rsel
     #   | Field | First name | equals; | Eric | !{within:contact} |
     #
     def field_equals(locator, text, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       begin
         field = @browser.field(loc(locator, 'field', scope))
       rescue
@@ -452,7 +454,7 @@ module Rsel
     #   | Click; | Logout | !{within:header} |
     #
     def click(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.click(loc(locator, 'link_or_button', scope))
       end
@@ -472,7 +474,7 @@ module Rsel
     #   | Click | Edit | link | !{in_row:Eric} |
     #
     def click_link(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.click(loc(locator, 'link', scope))
       end
@@ -494,7 +496,7 @@ module Rsel
     #   | Click | Search | button | !{within:customers} |
     #
     def click_button(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       button = loc(locator, 'button', scope)
       fail_on_exception do
         ensure_editable(button) && @browser.click(button)
@@ -517,7 +519,7 @@ module Rsel
     #   | Enable | Send me spam | checkbox | !{within:opt_in} |
     #
     def enable_checkbox(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_disabled(cb) && @browser.click(cb)
@@ -539,7 +541,7 @@ module Rsel
     #   | Disable | Send me spam | checkbox | !{within:opt_in} |
     #
     def disable_checkbox(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_enabled(cb) && @browser.click(cb)
@@ -559,7 +561,7 @@ module Rsel
     #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
     #
     def checkbox_is_enabled(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -585,7 +587,7 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_enabled(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -609,7 +611,7 @@ module Rsel
     #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
     #
     def checkbox_is_disabled(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -635,7 +637,7 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_disabled(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
@@ -660,7 +662,7 @@ module Rsel
     #   | Select | female | radio | !{within:gender} |
     #
     def select_radio(locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       radio = loc(locator, 'radio_button', scope)
       fail_on_exception do
         ensure_editable(radio) && @browser.click(radio)
@@ -682,7 +684,7 @@ module Rsel
     #   | Select | Tall | from dropdown | Height |
     #
     def select_from_dropdown(option, locator, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       dropdown = loc(locator, 'select', scope)
       fail_on_exception do
         ensure_editable(dropdown) && @browser.select(dropdown, option)
@@ -703,7 +705,7 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_includes(locator, option, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       # TODO: Apply scope
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
@@ -725,7 +727,7 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_equals(locator, option, scope={})
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       begin
         selected = @browser.get_selected_label(loc(locator, 'select', scope))
       rescue
@@ -745,7 +747,7 @@ module Rsel
     #   | Pause | 5 | seconds |
     #
     def pause_seconds(seconds)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       sleep seconds.to_i
       return true
     end
@@ -762,7 +764,7 @@ module Rsel
     #   | Page loads in | 10 | seconds or less |
     #
     def page_loads_in_seconds_or_less(seconds)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.wait_for_page_to_load(seconds)
       end
@@ -778,7 +780,7 @@ module Rsel
     # @since 0.0.6
     #
     def method_missing(method, *args, &block)
-      return skip_status? if skip_step?
+      return skip_status if skip_step?
       if @browser.respond_to?(method)
         begin
           result = @browser.send(method, *args, &block)
@@ -813,11 +815,16 @@ module Rsel
 
     # Conditionals
 
-    # If I see the given text, do the steps until I see an if_else or end_if.
+    # If I see the given text, do the steps until I see an otherwise or end_if.
     # Otherwise do not do those steps.
     #
     # @param [String] text
     #   Plain text that should be visible on the current page
+    #
+    # @example
+    # | If I see | pop-over ad | 
+    # | Click | Close | button |
+    # | End if |
     #
     # @since 0.1.1
     def if_i_see(text)
@@ -836,11 +843,18 @@ module Rsel
       return failure
     end
 
-    # If the given parameter is "yes" or "true", do the steps until I see an if_else or end_if.
-    # Otherwise do not do those steps.
+    # If the given parameter is "yes" or "true", do the steps until I see an
+    # otherwise or end_if.  Otherwise do not do those steps.
     #
     # @param [String] text
     #   A string.  "Yes" or "true" (case-insensitive) cause the following steps to run.  Anything else does not.
+    #
+    # @example
+    # | If parameter | ${spam_me} |
+    # | Enable | Send me spam | checkbox |
+    # | See | Email: | within | 10 | seconds |
+    # | Type | ${spam_me_email} | into field | spammable_email |
+    # | End if |
     #
     # @since 0.1.1
     def if_parameter(text)
@@ -872,15 +886,22 @@ module Rsel
       return true
     end
 
-    # The else to match any other if.
+    # The else case to match any if.
+    #
+    # @example
+    # | if parameter | ${login_by_phone} |
+    # | type | ${login} | into field | phone_number |
+    # | otherwise |
+    # | type | ${login} | into field | login |
+    # | end if |
     #
     # @since 0.1.1
-    def if_else
+    def otherwise
       return false if aborted?
       # If there was no prior matching if, fail.
       return failure if @conditional_stack.length <= 1
 
-      # If this if_else is within an un-executed if block, don't execute it.
+      # If this otherwise is within an un-executed if block, don't execute it.
       return nil if @conditional_stack.last == nil
 
       last_stack = @conditional_stack.pop
@@ -967,7 +988,7 @@ module Rsel
     # Presuming the current step should be skipped, what status should I return?
     #
     # @since 0.1.1
-    def skip_status?
+    def skip_status
       return false if aborted?
       return nil if !@conditional_stack.last
     end
