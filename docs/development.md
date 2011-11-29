@@ -6,6 +6,29 @@ If you would like to contribute to development of Rsel, create a fork of the
 pull requests for any improvements you would like to share.
 
 
+Prerequisites
+-------------
+
+Before developing and testing Rsel, you will need to install some dependencies.
+Most of these will be handled by simply running:
+
+    $ bundle install
+
+from the git clone of Rsel. The nokogiri gem is known to fail if certain XML
+development headers are missing; if you encounter this, try:
+
+    $ sudo apt-get install libxml2-dev libxslt-dev
+
+Then re-run `bundle install`. If this still fails, or if you're on a non-Debian OS,
+consult the nokogiri
+[installation instructions](http://nokogiri.org/tutorials/installing_nokogiri.html).
+
+Aside from gem dependencies, you will need to have Java installed in order to
+run the Selenium server provided with Rsel (in the `test/server` directory).
+Startup of the server is handled automatically by the Rake tasks during
+testing; see below.
+
+
 Testing
 -------
 

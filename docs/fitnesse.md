@@ -4,10 +4,10 @@ FitNesse
 With FitNesse, some initial configuration steps are necessary. Assuming you
 have a FitNesse wiki-page hierarchy like this:
 
-- `FitNesseRoot`
-  - `SeleniumTests`
-    - `SetUp`
-    - `LoginTest`
+* `FitNesseRoot`
+  * `SeleniumTests`
+    * `SetUp`
+    * `LoginTest`
 
 Put this in your `SeleniumTests.SetUp` page:
 

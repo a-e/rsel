@@ -16,9 +16,10 @@ Gem::Specification.new do |s|
   s.add_dependency 'selenium-client'
 
   s.add_development_dependency 'rake', '0.8.7'
-  s.add_development_dependency 'sinatra'
+  s.add_development_dependency 'sinatra' # For test webapp
   s.add_development_dependency 'mongrel'
-  s.add_development_dependency 'yard'
+  s.add_development_dependency 'yard' # For documentation
+  s.add_development_dependency 'rdiscount' # For YARD / Markdown
   s.add_development_dependency 'rspec', '>= 2.2.0'
 
   s.files = `git ls-files`.split("\n")
