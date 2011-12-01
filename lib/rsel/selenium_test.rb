@@ -850,7 +850,7 @@ module Rsel
       return skip_status if skip_step?
 
       # Ignore case in the hash.
-      ids.keys.each { |key| ids[key.downcase] = ids[key] unless key.downcase == key }
+      ids.keys.each { |key| ids[key.to_s.downcase] = ids[key] unless key.to_s.downcase == key }
 
       if ids[field.downcase] then
         return set_field(ids[field.downcase], value, scope)
@@ -871,7 +871,7 @@ module Rsel
     # @since 0.1.1
     def set_fields(fields={}, scope={})
       return skip_status if skip_step?
-      fields.keys.each { |field| return failure unless set_field(field, fields[field], scope) }
+      fields.keys.each { |field| return failure unless set_field(field.to_s, fields[field], scope) }
       return true
     end
 
@@ -914,12 +914,12 @@ module Rsel
       # Ignore case in the hash.  set_field_among does this too, but doing it
       # just once this way is faster.
       ids.keys.each do |key|
-        unless key.downcase == key then
-          ids[key.downcase] = ids[key]
+        unless key.to_s.downcase == key then
+          ids[key.to_s.downcase] = ids[key]
           ids.delete(key)
         end
       end
-      fields.keys.each { |field| return failure unless set_field_among(field, fields[field], ids, scope) }
+      fields.keys.each { |field| return failure unless set_field_among(field.to_s, fields[field], ids, scope) }
       return true
     end
 

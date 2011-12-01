@@ -1812,8 +1812,8 @@ describe Rsel::SeleniumTest do
           end
 
           it "sets many fields, some from a hash" do
-            @st.set_fields_among({"Faust name" => "Ken", "Lost name" => "Brazier", "Life story" => "I get testy a lot."},
-                                 {"Faust Name" => "First name", "LOST name" => "Last name"})
+            @st.set_fields_among({"Faust name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
+                                 {"Faust Name" => "First name", :LOST => "Last name"})
             @st.field_contains("First name", "Ken").should be_true
             @st.field_contains("Last name", "Brazier").should be_true
             @st.field_contains("Life story", "testy").should be_true
