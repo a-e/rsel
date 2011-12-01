@@ -771,6 +771,159 @@ module Rsel
     end
 
 
+    # A generic way to fill in any field, of any type.  (Just about.)
+    # Kind of nasty since it needs to use Javascript on the page.
+    #
+    # Types accepted:
+    #
+    # * a*
+    # * button*
+    # * input
+    #   * type=button*
+    #   * type=checkbox
+    #   * type=image*
+    #   * type=radio*
+    #   * type=reset*
+    #   * type=submit*
+    #   * type=text
+    # * select
+    # * textarea
+    #
+    # \* Value is ignored: this control type is just clicked/selected.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the field control.  Identification by
+    #   non-Selenium methods may not work for some links and buttons.
+    # @param [String] value
+    #   Value you want to set the field to.  (Default: empty string.)
+    #   Recognized, case-insensitive values to turn a checkbox on are:
+    #   * [empty string]
+    #   * Check
+    #   * Checked
+    #   * On
+    #   * True
+    #   * Yes
+    #
+    # @since 0.1.1
+    #
+    def set_field(locator, value='', scope={})
+      return skip_status if skip_step?
+      begin
+        # First, use Javascript to find out what the field is.
+        loceval = loc(locator, 'field', scope)
+        tagname = @browser.get_eval('this.browserbot.findElement("'+loceval+'").tagName+"."+this.browserbot.findElement("'+loceval+'").type').downcase
+
+        case tagname
+        when 'input.text', /^textarea\./
+          return type_into_field(value, loceval)
+        when 'input.radio'
+          return select_radio(loceval)
+        when 'input.checkbox'
+          return enable_checkbox(loceval) if /^(yes|true|on|check(ed)?|)$/i === value
+          return disable_checkbox(loceval)
+        when /^select\./
+          return select_from_dropdown(value, loceval)
+        when /^(a|button)\./,'input.button','input.submit','input.image','input.reset'
+          return click(loceval)
+        else
+          #raise ArgumentError, "Unidentified field #{locator}."
+          return failure
+        end
+      rescue
+        failure
+      end
+    end
+
+
+    # Set a value in the named field, based on the given name/value pairs.
+    # @see set_field
+    # @param [String] field
+    #   A Locator or a name listed in the ids hash below.  If a name listed in the ids below, this field is case-insensitive.
+    # @param [String] value
+    #   Plain text to go into a field
+    # @param ids
+    #   A hash mapping common names to Locators.  (Optional, but redundant without it)
+    #   The hash keys are case-insensitive.
+    #
+    # @since 0.1.1
+    def set_field_among(field, value, ids={}, scope={})
+      return skip_status if skip_step?
+
+      # Ignore case in the hash.
+      ids.keys.each { |key| ids[key.downcase] = ids[key] unless key.downcase == key }
+
+      if ids[field.downcase] then
+        return set_field(ids[field.downcase], value, scope)
+      else
+        return set_field(field, value, scope)
+      end
+    end
+
+    # Set values in the key fields of a hash, based on the given name/value
+    # pairs.  Note: Order of entries is not guaranteed, and depends on the
+    # version of Ruby on your server!
+    # @see set_fields
+    #
+    # @param fields
+    #   A key-value hash where the keys are Locators (case-sensitive) and the
+    #   values are the string values you want in the fields.
+    #
+    # @since 0.1.1
+    def set_fields(fields={}, scope={})
+      return skip_status if skip_step?
+      fields.keys.each { |field| return failure unless set_field(field, fields[field], scope) }
+      return true
+    end
+
+    # Set values in the key fields of a hash, based on the given name/value
+    # pairs.  Note: Order of entries is not guaranteed, and depends on the
+    # version of Ruby on your server!
+    # @see set_field
+    # @param fields
+    #   A key-value hash where the keys are keys of the ids hash
+    #   (case-insensitive), or Locators (case-sensitive),
+    #   and the values are the string values you want in the fields.
+    # @param ids
+    #   A hash mapping common names to Locators.  (Optional, but redundant
+    #   without it)  The hash keys are case-insensitive.
+    #
+    # @example
+    #   Suppose you have a nasty form whose fields have nasty locators.
+    #   Suppose further that you want to fill in this form, many times, filling
+    #   in different fields different ways.
+    #   Begin by creating a Scenario table:
+    #
+    #       | scenario | Set nasty form fields | values |
+    #       | Set | @values | fields among | !{Name:id=nasty_field_name_1,Email:id=nasty_field_name_2,E-mail:id=nasty_field_name_2,Send me spam:id=nasty_checkbox_name_1} |
+    #
+    #   Using that you can now say something like:
+    #
+    #       | Set nasty form fields | !{Name:Ken,email:ken@kensaddress.com,send me spam: no} |
+    #
+    #   Or:
+    #       
+    #       | Set nasty form fields | !{Name:Ken,Send me Spam: no} |
+    #
+    #   Or:
+    #
+    #       | Set nasty form fields | !{name:Ken,e-mail:,SEND ME SPAM: yes} |
+    #
+    # @since 0.1.1
+    def set_fields_among(fields={}, ids={}, scope={})
+      return skip_status if skip_step?
+      # Ignore case in the hash.  set_field_among does this too, but doing it
+      # just once this way is faster.
+      ids.keys.each do |key|
+        unless key.downcase == key then
+          ids[key.downcase] = ids[key]
+          ids.delete(key)
+        end
+      end
+      fields.keys.each { |field| return failure unless set_field_among(field, fields[field], ids, scope) }
+      return true
+    end
+
+
     # Invoke a missing method. If a method is called on a SeleniumTest
     # instance, and that method is not explicitly defined, this method
     # will check to see whether the underlying Selenium::Client::Driver
