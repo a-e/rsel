@@ -837,8 +837,10 @@ module Rsel
 
     # Set a value in the named field, based on the given name/value pairs.
     # @see set_field
+    #
     # @param [String] field
-    #   A Locator or a name listed in the ids hash below.  If a name listed in the ids below, this field is case-insensitive.
+    #   A Locator or a name listed in the ids hash below.  If a name listed in
+    #   the ids below, this field is case-insensitive.
     # @param [String] value
     #   Plain text to go into a field
     # @param ids
@@ -879,6 +881,7 @@ module Rsel
     # pairs.  Note: Order of entries is not guaranteed, and depends on the
     # version of Ruby on your server!
     # @see set_field
+    #
     # @param fields
     #   A key-value hash where the keys are keys of the ids hash
     #   (case-insensitive), or Locators (case-sensitive),
@@ -901,7 +904,7 @@ module Rsel
     #       | Set nasty form fields | !{Name:Ken,email:ken@kensaddress.com,send me spam: no} |
     #
     #   Or:
-    #       
+    #
     #       | Set nasty form fields | !{Name:Ken,Send me Spam: no} |
     #
     #   Or:
@@ -975,7 +978,7 @@ module Rsel
     #   Plain text that should be visible on the current page
     #
     # @example
-    # | If I see | pop-over ad | 
+    # | If I see | pop-over ad |
     # | Click | Close | button |
     # | End if |
     #
@@ -987,7 +990,7 @@ module Rsel
         @conditional_stack.push nil
         return nil
       end
-      
+
       # Test the condition.
       @conditional_stack.push @browser.text?(text)
 
@@ -1000,7 +1003,8 @@ module Rsel
     # otherwise or end_if.  Otherwise do not do those steps.
     #
     # @param [String] text
-    #   A string.  "Yes" or "true" (case-insensitive) cause the following steps to run.  Anything else does not.
+    #   A string. "Yes" or "true" (case-insensitive) cause the following steps
+    #   to run. Anything else does not.
     #
     # @example
     # | If parameter | ${spam_me} |
@@ -1025,7 +1029,7 @@ module Rsel
       return failure
     end
 
-    # End an if block.  
+    # End an if block.
     #
     # @since 0.1.1
     def end_if
