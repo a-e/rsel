@@ -1,6 +1,21 @@
 Rsel History
 ============
 
+0.1.1
+-----
+
+- Conditional expressions (if_i_see, if_parameter, otherwise, end_if)
+- Temporal visibility (see|do_not_see)_within_seconds
+- Generic field fill-in (set_field, set_field_among)
+- Hash-based field fill-in (set_fields, sef_fields_among)
+
+
+0.1.0
+-----
+
+- begin_scenario and end_scenario return true
+
+
 0.0.9
 -----
 
