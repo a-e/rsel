@@ -837,8 +837,10 @@ module Rsel
 
     # Set a value in the named field, based on the given name/value pairs.
     # @see set_field
+    #
     # @param [String] field
-    #   A Locator or a name listed in the ids hash below.  If a name listed in the ids below, this field is case-insensitive.
+    #   A Locator or a name listed in the ids hash below.  If a name listed in
+    #   the ids below, this field is case-insensitive.
     # @param [String] value
     #   Plain text to go into a field
     # @param ids
@@ -879,6 +881,7 @@ module Rsel
     # pairs.  Note: Order of entries is not guaranteed, and depends on the
     # version of Ruby on your server!
     # @see set_field
+    #
     # @param fields
     #   A key-value hash where the keys are keys of the ids hash
     #   (case-insensitive), or Locators (case-sensitive),
