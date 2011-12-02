@@ -1730,12 +1730,17 @@ describe Rsel::SeleniumTest do
       context "passes when" do
         context "text field with label" do
           it "equals the page text" do
-            @st.set_field_among("First name", "Marcus", "Last name" => "nowhere")
+            @st.set_field_among("First name", "Marcus", "Last name" => "nowhere").should be_true
             @st.field_contains("First name", "Marcus").should be_true
           end
 
           it "equals the hash text" do
-            @st.set_field_among("Last name", "Marcus", "Last name" => "First name")
+            @st.set_field_among("Last name", "Marcus", "Last name" => "First name").should be_true
+            @st.field_contains("First name", "Marcus").should be_true
+          end
+
+          it "equals the escaped hash text" do
+            @st.set_field_among("Last:name", "Marcus", "Last\\;name" => "First name").should be_true
             @st.field_contains("First name", "Marcus").should be_true
           end
         end
@@ -1761,15 +1766,15 @@ describe Rsel::SeleniumTest do
       context "passes when" do
         context "text fields with labels" do
           it "sets one field" do
-            @st.set_fields("First name" => "Marcus")
+            @st.set_fields("First name" => "Marcus").should be_true
             @st.field_contains("First name", "Marcus").should be_true
           end
 
           it "sets several fields" do
-            @st.set_fields("First name" => "Ken", "Last name" => "Brazier", "Life story" => "I get testy a lot.").should be_true
+            @st.set_fields("First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot.").should be_true
             @st.field_contains("First name", "Ken").should be_true
             @st.field_contains("Last name", "Brazier").should be_true
-            @st.field_contains("Life story", "testy").should be_true
+            @st.field_contains("Life story", "story: I get testy").should be_true
           end
         end
       end
@@ -1794,15 +1799,15 @@ describe Rsel::SeleniumTest do
       context "passes when" do
         context "text fields with labels" do
           it "sets one field" do
-            @st.set_fields_among({"First name" => "Marcus"})
+            @st.set_fields_among({"First name" => "Marcus"}).should be_true
             @st.field_contains("First name", "Marcus").should be_true
           end
 
           it "sets several fields" do
-            @st.set_fields_among({"First name" => "Ken", "Last name" => "Brazier", "Life story" => "I get testy a lot."}).should be_true
+            @st.set_fields_among({"First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot."})
             @st.field_contains("First name", "Ken").should be_true
             @st.field_contains("Last name", "Brazier").should be_true
-            @st.field_contains("Life story", "testy").should be_true
+            @st.field_contains("Life story", "story: I get testy").should be_true
           end
         end
         context "text fields with labels in a hash" do
@@ -1812,8 +1817,8 @@ describe Rsel::SeleniumTest do
           end
 
           it "sets many fields, some from a hash" do
-            @st.set_fields_among({"Faust name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
-                                 {"Faust Name" => "First name", :LOST => "Last name"})
+            @st.set_fields_among({"Faust\\;name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
+                                 {"Faust\\;Name" => "First name", :LOST => "Last name"})
             @st.field_contains("First name", "Ken").should be_true
             @st.field_contains("Last name", "Brazier").should be_true
             @st.field_contains("Life story", "testy").should be_true

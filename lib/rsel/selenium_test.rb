@@ -835,8 +835,9 @@ module Rsel
     end
 
 
-    # Set a value in the named field, based on the given name/value pairs.
-    # @see set_field
+    # Set a value (with #{set_field}) in the named field, based on the given
+    # name/value pairs.  Uses #{escape_for_hash} to allow certain characters in
+    # FitNesse. 
     #
     # @param [String] field
     #   A Locator or a name listed in the ids hash below.  If a name listed in
@@ -852,19 +853,19 @@ module Rsel
       return skip_status if skip_step?
 
       # Ignore case in the hash.
-      ids.keys.each { |key| ids[key.to_s.downcase] = ids[key] unless key.to_s.downcase == key }
+      ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
 
       if ids[field.downcase] then
-        return set_field(ids[field.downcase], value, scope)
+        return set_field(escape_for_hash(ids[field.downcase]), value, scope)
       else
         return set_field(field, value, scope)
       end
     end
 
-    # Set values in the key fields of a hash, based on the given name/value
-    # pairs.  Note: Order of entries is not guaranteed, and depends on the
-    # version of Ruby on your server!
-    # @see set_fields
+    # Set values (with #{set_field}) in the named fields of a hash, based on the
+    # given name/value pairs.  Uses #{escape_for_hash} to allow certain
+    # characters in FitNesse. Note: Order of entries is not guaranteed, and
+    # depends on the version of Ruby on your server!
     #
     # @param fields
     #   A key-value hash where the keys are Locators (case-sensitive) and the
@@ -873,14 +874,15 @@ module Rsel
     # @since 0.1.1
     def set_fields(fields={}, scope={})
       return skip_status if skip_step?
-      fields.keys.each { |field| return failure unless set_field(field.to_s, fields[field], scope) }
+      fields.keys.each { |field| return failure unless set_field(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
       return true
     end
 
-    # Set values in the key fields of a hash, based on the given name/value
-    # pairs.  Note: Order of entries is not guaranteed, and depends on the
+    # Set values (with #{set_field}) in the named fields, based on the given
+    # name/value pairs, and with mapping of names in the ids field.  Uses
+    # #{escape_for_hash} to allow certain characters in FitNesse.
+    # Note: Order of entries is not guaranteed, and depends on the
     # version of Ruby on your server!
-    # @see set_field
     #
     # @param fields
     #   A key-value hash where the keys are keys of the ids hash
@@ -918,11 +920,11 @@ module Rsel
       # just once this way is faster.
       ids.keys.each do |key|
         unless key.to_s.downcase == key then
-          ids[key.to_s.downcase] = ids[key]
+          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
           ids.delete(key)
         end
       end
-      fields.keys.each { |field| return failure unless set_field_among(field.to_s, fields[field], ids, scope) }
+      fields.keys.each { |field| return failure unless set_field_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope) }
       return true
     end
 
@@ -1133,9 +1135,29 @@ module Rsel
       end
     end
 
+    # Escape certain characters to generate characters that can't otherwise be used in FitNesse hashtables.
+    # * \; becomes :
+    # * \' becomes ,
+    # * \[ becomes {
+    # * \] becomes }
+    # * \\ becomes \
+    #
+    # @since 0.1.1
+    #
+    def escape_for_hash(text)
+      # ((?:\\\\)*) allows any extra pairs of "\"s to be saved.
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*);/, '\1\2:')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)'/, '\1\2,')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\[/, '\1\2{')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\]/, '\1\2}')
+      text = text.gsub(/\\\\/, '\\')
+      return text
+    end
+
     # Conditionals
 
-    # Should the current step be skipped, either because the test was aborted or because we're in a conditional?
+    # Should the current step be skipped, either because the test was aborted or
+    # because we're in a conditional?
     #
     # @since 0.1.1
     def skip_step?
