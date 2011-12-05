@@ -3,4 +3,15 @@
 --no-highlight
 lib/rsel/*.rb
 -
-docs/*.md
+docs/index.md
+docs/install.md
+docs/usage.md
+docs/fitnesse.md
+docs/locators.md
+docs/scoping.md
+docs/examples.md
+docs/custom.md
+docs/scenarios.md
+docs/development.md
+docs/todo.md
+docs/history.md
