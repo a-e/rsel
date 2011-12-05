@@ -851,6 +851,8 @@ module Rsel
     # @since 0.1.1
     def set_field_among(field, value, ids={}, scope={})
       return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      ids = {} if ids == ""
 
       # Ignore case in the hash.
       ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
@@ -874,6 +876,8 @@ module Rsel
     # @since 0.1.1
     def set_fields(fields={}, scope={})
       return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      fields = {} if fields == ""
       fields.keys.each { |field| return failure unless set_field(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
       return true
     end
@@ -916,6 +920,10 @@ module Rsel
     # @since 0.1.1
     def set_fields_among(fields={}, ids={}, scope={})
       return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      ids = {} if ids == ""
+      fields = {} if fields == ""
+
       # Ignore case in the hash.  set_field_among does this too, but doing it
       # just once this way is faster.
       ids.keys.each do |key|

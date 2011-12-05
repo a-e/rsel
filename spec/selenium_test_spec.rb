@@ -1734,6 +1734,11 @@ describe Rsel::SeleniumTest do
             @st.field_contains("First name", "Marcus").should be_true
           end
 
+          it "equals the page text and has no ids" do
+            @st.set_field_among("First name", "Marcus", "").should be_true
+            @st.field_contains("First name", "Marcus").should be_true
+          end
+
           it "equals the hash text" do
             @st.set_field_among("Last name", "Marcus", "Last name" => "First name").should be_true
             @st.field_contains("First name", "Marcus").should be_true
@@ -1770,6 +1775,10 @@ describe Rsel::SeleniumTest do
             @st.field_contains("First name", "Marcus").should be_true
           end
 
+          it "sets zero fields" do
+            @st.set_fields("").should be_true
+          end
+
           it "sets several fields" do
             @st.set_fields("First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot.").should be_true
             @st.field_contains("First name", "Ken").should be_true
@@ -1801,6 +1810,15 @@ describe Rsel::SeleniumTest do
           it "sets one field" do
             @st.set_fields_among({"First name" => "Marcus"}).should be_true
             @st.field_contains("First name", "Marcus").should be_true
+          end
+
+          it "sets one field with string ids" do
+            @st.set_fields_among({"First name" => "Marcus"}, "").should be_true
+            @st.field_contains("First name", "Marcus").should be_true
+          end
+
+          it "does nothing, but has ids" do
+            @st.set_fields_among("", {"First name" => "Marcus"}).should be_true
           end
 
           it "sets several fields" do
