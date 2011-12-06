@@ -235,8 +235,6 @@ module Rsel
     #   Plain text that should be appear on or visible on the current page
     # @param [String] seconds
     #   Integer number of seconds to wait.
-    # @param [Hash] scope
-    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Click | ajax_login | button |
@@ -244,9 +242,11 @@ module Rsel
     #
     # @since 0.1.1
     #
-    def see_within_seconds(text, seconds, scope={})
+    def see_within_seconds(text, seconds)
       return skip_status if skip_step?
       pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
+      # This would be better if it worked:
+      # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
     end
 
     # Ensure that the given text does not appear on the current page, eventually.
@@ -255,8 +255,6 @@ module Rsel
     #   Plain text that should disappear from or not be present on the current page
     # @param [String] seconds
     #   Integer number of seconds to wait.
-    # @param [Hash] scope
-    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Click | close | button | !{within:popup_ad} |
@@ -264,9 +262,11 @@ module Rsel
     #
     # @since 0.1.1
     #
-    def do_not_see_within_seconds(text, seconds, scope={})
+    def do_not_see_within_seconds(text, seconds)
       return skip_status if skip_step?
       pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+      # This would be better if it worked:
+      # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
     end
 
 
@@ -811,7 +811,7 @@ module Rsel
       begin
         # First, use Javascript to find out what the field is.
         loceval = loc(locator, 'field', scope)
-        tagname = @browser.get_eval('this.browserbot.findElement("'+loceval+'").tagName+"."+this.browserbot.findElement("'+loceval+'").type').downcase
+        tagname = @browser.get_eval('var loceval=this.browserbot.findElement("'+loceval+'");loceval.tagName+"."+loceval.type').downcase
 
         case tagname
         when 'input.text', /^textarea\./
