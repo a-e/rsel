@@ -2432,7 +2432,13 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "method not returning Boolean" do
+    context "method returning String" do
+      it "returns the String" do
+        @st.get_text("id=salami_checkbox").should eq("I like salami")
+      end
+    end
+
+    context "method not returning Boolean or String" do
       it "passes if method doesn't raise an exception" do
         @st.get_title.should be_true
         @st.mouse_over("id=first_name").should be_true
@@ -2443,7 +2449,6 @@ describe Rsel::SeleniumTest do
         @st.mouse_over("id=bogus_id").should be_false
       end
     end
-
   end # Selenium::Client::Driver wrapper
 
 end
