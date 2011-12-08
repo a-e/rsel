@@ -296,7 +296,7 @@ module Rsel
     #
     def see_title(title)
       return skip_status if skip_step?
-      pass_if @browser.get_title == title
+      pass_if @browser.get_title == title, "Page title is '#{@browser.get_title}', not '#{title}'"
     end
 
 

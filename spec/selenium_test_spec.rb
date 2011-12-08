@@ -82,8 +82,10 @@ describe Rsel::SeleniumTest do
 
       context "fails when" do
         it "text is absent" do
+          @st.errors
           @st.see("Nonexistent").should be_false
           @st.see("Some bogus text").should be_false
+          @st.errors.should eq('')
         end
       end
 
@@ -103,8 +105,10 @@ describe Rsel::SeleniumTest do
 
       context "fails when" do
         it "text is present" do
+          @st.errors
           @st.do_not_see("Welcome").should be_false
           @st.do_not_see("This is a Sinatra webapp").should be_false
+          @st.errors.should eq('')
         end
       end
 
@@ -2211,7 +2215,6 @@ describe Rsel::SeleniumTest do
     end
   end # waiting
 
-
   context "stop on failure" do
     before(:each) do
       @st.visit("/").should be_true
@@ -2237,9 +2240,12 @@ describe Rsel::SeleniumTest do
       end
 
       it "when #see_title fails" do
+        @st.errors # clear errors
         @st.see_title("Wrong Title").should be_false
         # Would pass, but previous step failed
         @st.see_title("Rsel Test Site").should be_false
+        # Should see one and only one error.
+        @st.errors.should eq("Page title is 'Rsel Test Site', not 'Wrong Title'")
       end
 
       it "when #do_not_see_title fails" do
