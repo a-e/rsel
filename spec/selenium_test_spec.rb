@@ -7,7 +7,7 @@ describe Rsel::SeleniumTest do
   end
 
   after(:all) do
-    @st.close_browser
+    @st.close_browser('without showing errors')
   end
 
   context "initialization" do
@@ -1181,10 +1181,6 @@ describe Rsel::SeleniumTest do
 
           context "fails when" do
             context "text field with label" do
-              it "does not exist" do
-                @st.field_contains("Third name", "Smith").should be_false
-              end
-
               it "does not contain the text" do
                 @st.set_field("First name", "Marcus")
                 @st.field_contains("First name", "Eric").should be_false
@@ -1200,30 +1196,30 @@ describe Rsel::SeleniumTest do
           end
         end
 
-        context "#set_field with #field_equals" do
+        context "#set_field with #generic_field_equals" do
           context "passes when" do
             context "text field with label" do
               it "equals the text" do
                 @st.set_field("First name", "Ken")
-                @st.field_equals("First name", "Ken").should be_true
+                @st.generic_field_equals("First name", "Ken").should be_true
               end
 
               it "equals the text, and is within scope" do
                 @st.set_field("First name", "Eric", :within => "person_form")
-                @st.field_equals("First name", "Eric", :within => "person_form")
+                @st.generic_field_equals("First name", "Eric", :within => "person_form")
               end
             end
 
             context "textarea with label" do
               it "equals the text" do
                 @st.set_field("Life story", "Blah dee blah")
-                @st.field_equals("Life story", "Blah dee blah").should be_true
+                @st.generic_field_equals("Life story", "Blah dee blah").should be_true
               end
 
               it "equals the text, and is within scope" do
                 @st.set_field("Life story", "Blah dee blah",
                               :within => "person_form")
-                @st.field_equals("Life story", "Blah dee blah",
+                @st.generic_field_equals("Life story", "Blah dee blah",
                                  :within => "person_form").should be_true
               end
 
@@ -1237,23 +1233,23 @@ describe Rsel::SeleniumTest do
             context "text field with label" do
               it "does not exactly equal the text" do
                 @st.set_field("First name", "Marcus")
-                @st.field_equals("First name", "Marc").should be_false
+                @st.generic_field_equals("First name", "Marc").should be_false
               end
             end
 
             context "textarea with label" do
               it "does not exist" do
-                @st.field_equals("Third name", "Smith").should be_false
+                @st.generic_field_equals("Third name", "Smith").should be_false
               end
 
               it "does not exactly equal the text" do
                 @st.set_field("Life story", "Blah dee blah")
-                @st.field_equals("Life story", "Blah dee").should be_false
+                @st.generic_field_equals("Life story", "Blah dee").should be_false
               end
 
               it "exactly equals the text, but is not within scope" do
                 @st.set_field("First name", "Eric", :within => "person_form")
-                @st.field_equals("First name", "Eric", :within => "spouse_form").should be_false
+                @st.generic_field_equals("First name", "Eric", :within => "spouse_form").should be_false
               end
 
               it "exactly equals the text, but is not in table row" do
@@ -1276,33 +1272,41 @@ describe Rsel::SeleniumTest do
               it "exists" do
                 @st.set_field("I like cheese", "on").should be_true
                 @st.set_field("I like salami", "on").should be_true
+                @st.generic_field_equals("I like cheese", "on").should be_true
+                @st.generic_field_equals("I like salami", "on").should be_true
               end
 
               it "exists and is already checked" do
                 @st.set_field("I like cheese", "on").should be_true
                 @st.set_field("I like cheese", "on").should be_true
+                @st.generic_field_equals("I like cheese", "on").should be_true
               end
 
               it "exists within scope" do
                 @st.set_field("I like cheese", "on", :within => "cheese_checkbox").should be_true
                 @st.set_field("I like salami", "on", :within => "salami_checkbox").should be_true
+                @st.generic_field_equals("I like cheese", "on", :within => "cheese_checkbox").should be_true
+                @st.generic_field_equals("I like salami", "on", :within => "salami_checkbox").should be_true
               end
 
               it "exists in table row" do
                 @st.visit("/table")
                 @st.set_field("Like", "on", :in_row => "Marcus").should be_true
+                @st.generic_field_equals("Like", "on", :in_row => "Marcus").should be_true
               end
             end
 
             context "checkbox with id=" do
               it "exists" do
                 @st.set_field("id=like_cheese", "on").should be_true
+                @st.generic_field_equals("id=like_cheese", "on").should be_true
               end
             end
 
             context "checkbox with xpath=" do
               it "exists" do
                 @st.set_field("xpath=//input[@id='like_cheese']", "on").should be_true
+                @st.generic_field_equals("xpath=//input[@id='like_cheese']", "on").should be_true
               end
             end
           end
@@ -1338,33 +1342,41 @@ describe Rsel::SeleniumTest do
               it "exists" do
                 @st.set_field("I like cheese", "off").should be_true
                 @st.set_field("I like salami", "off").should be_true
+                @st.generic_field_equals("I like cheese", "off").should be_true
+                @st.generic_field_equals("I like salami", "off").should be_true
               end
 
               it "exists and is already unchecked" do
-                @st.set_field("I like cheese", "off")
                 @st.set_field("I like cheese", "off").should be_true
+                @st.set_field("I like cheese", "off").should be_true
+                @st.generic_field_equals("I like cheese", "off").should be_true
               end
 
               it "exists within scope" do
                 @st.set_field("I like cheese", "off", :within => "cheese_checkbox").should be_true
                 @st.set_field("I like salami", "off", :within => "preferences_form").should be_true
+                @st.generic_field_equals("I like cheese", "off", :within => "cheese_checkbox").should be_true
+                @st.generic_field_equals("I like salami", "off", :within => "preferences_form").should be_true
               end
 
               it "exists in table row" do
                 @st.visit("/table")
                 @st.set_field("Like", "off", :in_row => "Marcus").should be_true
+                @st.generic_field_equals("Like", "off", :in_row => "Marcus").should be_true
               end
             end
 
             context "checkbox with id=" do
               it "exists" do
                 @st.set_field("id=like_cheese", "off").should be_true
+                @st.generic_field_equals("id=like_cheese", "off").should be_true
               end
             end
 
             context "checkbox with xpath=" do
               it "exists" do
                 @st.set_field("xpath=//input[@id='like_cheese']", "off").should be_true
+                @st.generic_field_equals("xpath=//input[@id='like_cheese']", "off").should be_true
               end
             end
           end
@@ -1578,6 +1590,43 @@ describe Rsel::SeleniumTest do
               end
             end
           end
+
+        context "#set_field with #generic_field_equals for #radio_is_enabled" do
+          context "passes when" do
+            context "radiobutton with label" do
+              it "exists, and is enabled" do
+                @st.set_field("Briefs")
+                @st.generic_field_equals("Briefs", "on").should be_true
+              end
+
+              it "exists within scope, and is enabled" do
+                @st.set_field("Briefs", "", :within => "clothing")
+                @st.generic_field_equals("Briefs", "on", :within => "clothing").should be_true
+              end
+
+              it "exists in table row, and is enabled" do
+                # TODO
+              end
+            end
+          end
+
+          context "fails when" do
+            context "radiobutton with label" do
+              it "does not exist" do
+                @st.generic_field_equals("Naked", "on").should be_false
+              end
+
+              it "exists, but is not enabled" do
+                @st.set_field("Briefs", "")
+                @st.generic_field_equals("Boxers", "on").should be_false
+              end
+
+              it "exists and is enabled, but not within scope" do
+                @st.set_field("Briefs", "", :within => "clothing")
+                @st.generic_field_equals("Briefs", "on", :within => "food").should be_false
+              end
+            end
+          end
         end
       end # radiobuttons
 
@@ -1718,6 +1767,70 @@ describe Rsel::SeleniumTest do
             end
           end
         end
+
+        context "#set_field with #generic_field_equals for #dropdown_equals" do
+          context "passes when" do
+            it "option is selected in the dropdown" do
+              ["Short", "Average", "Tall"].each do |height|
+                @st.set_field("Height", height)
+                @st.generic_field_equals("Height", height).should be_true
+              end
+            end
+
+            it "option is selected in a read-only dropdown" do
+              @st.visit("/readonly_form").should be_true
+              @st.generic_field_equals("Height", "Average").should be_true
+            end
+
+            it "option is selected in the dropdown, within scope" do
+              ["Short", "Average", "Tall"].each do |height|
+                @st.set_field("Height", height, :within => "spouse_form")
+                @st.generic_field_equals("Height", height, :within => "spouse_form").should be_true
+              end
+            end
+
+            it "option is selected in the dropdown, in table row" do
+              @st.visit("/table")
+              ["Male", "Female"].each do |gender|
+                @st.set_field("Gender", gender, :in_row => "Eric")
+                @st.generic_field_equals("Gender", gender, :in_row => "Eric")
+              end
+            end
+          end
+
+          context "fails when" do
+            it "no such dropdown exists" do
+              @st.generic_field_equals("Eggs", "Over easy").should be_false
+            end
+
+            it "dropdown exists, but the option is not selected" do
+              @st.set_field("Height", "Short")
+              @st.generic_field_equals("Height", "Average").should be_false
+              @st.generic_field_equals("Height", "Tall").should be_false
+
+              @st.set_field("Height", "Average")
+              @st.generic_field_equals("Height", "Short").should be_false
+              @st.generic_field_equals("Height", "Tall").should be_false
+
+              @st.set_field("Height", "Tall")
+              @st.generic_field_equals("Height", "Short").should be_false
+              @st.generic_field_equals("Height", "Average").should be_false
+            end
+
+            it "dropdown exists, and option is selected, but not within scope" do
+              @st.set_field("Height", "Tall", :within => "person_form")
+              @st.set_field("Height", "Short", :within => "spouse_form")
+              @st.generic_field_equals("Height", "Tall", :within => "spouse_form").should be_false
+            end
+
+            it "dropdown exists, and option is selected, but not in table row" do
+              @st.visit("/table")
+              @st.set_field("Gender", "Female", :in_row => "Eric")
+              @st.set_field("Gender", "Male", :in_row => "Marcus")
+              @st.generic_field_equals("Gender", "Female", :in_row => "Marcus").should be_false
+            end
+          end
+        end
       end # dropdowns
     end # set_field
 
@@ -1764,6 +1877,51 @@ describe Rsel::SeleniumTest do
       end
     end # set_field_among
 
+    describe "#field_equals_among" do
+      before(:each) do
+        @st.visit("/form").should be_true
+      end
+      context "passes when" do
+        context "text field with label" do
+          it "equals the page text" do
+            @st.set_field_among("First name", "Marcus", "Last name" => "nowhere").should be_true
+            @st.field_equals_among("First name", "Marcus", "Last name" => "nowhere").should be_true
+          end
+
+          it "equals the page text and has no ids" do
+            @st.set_field_among("First name", "Marcus", "").should be_true
+            @st.field_equals_among("First name", "Marcus", "").should be_true
+          end
+
+          it "equals the hash text" do
+            @st.set_field_among("Last name", "Marcus", "Last name" => "First name").should be_true
+            @st.field_equals_among("Last name", "Marcus", "Last name" => "First name").should be_true
+          end
+
+          it "equals the escaped hash text" do
+            @st.set_field_among("Last:name", "Marcus", "Last\\;name" => "First name").should be_true
+            @st.field_equals_among("Last:name", "Marcus", "Last\\;name" => "First name").should be_true
+          end
+        end
+      end
+
+      context "fails when" do
+        context "text field with label" do
+          it "does not exist" do
+            @st.field_equals_among("Third name", "").should be_false
+          end
+
+          it "has a hash value that does not exist" do
+            @st.field_equals_among("Last name", "", "Last name" => "Third name").should be_false
+          end
+
+          it "does not equal the expected text" do
+            @st.field_equals_among("Last name", "Marcus", "Last name" => "First name").should be_false
+          end
+        end
+      end
+    end # field_equals_among
+
     describe "#set_fields" do
       before(:each) do
         @st.visit("/form").should be_true
@@ -1801,6 +1959,46 @@ describe Rsel::SeleniumTest do
       end
     end # set_fields
 
+    describe "#fields_equal" do
+      before(:each) do
+        @st.visit("/form").should be_true
+      end
+      context "passes when" do
+        context "text fields with labels" do
+          it "sets one field" do
+            @st.set_fields("First name" => "Marcus").should be_true
+            @st.fields_equal("First name" => "Marcus").should be_true
+          end
+
+          it "sets zero fields" do
+            @st.fields_equal("").should be_true
+          end
+
+          it "sets several fields" do
+            @st.set_fields("First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot.").should be_true
+            @st.fields_equal("First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot.").should be_true
+          end
+        end
+      end
+
+      context "fails when" do
+        context "text fields with labels" do
+          it "cant find the first field" do
+            @st.fields_equal("Faust name" => "", "Last name" => "").should be_false
+          end
+
+          it "cant find the last field" do
+            @st.fields_equal("First name" => "", "Lost name" => "").should be_false
+          end
+
+          it "fields are not equal" do
+            @st.fields_equal("First name" => "Ken", "Last name" => "Brazier").should be_false
+          end
+        end
+      end
+    end # fields_equal
+
+    
     describe "#set_fields_among" do
       before(:each) do
         @st.visit("/form").should be_true
@@ -1830,13 +2028,13 @@ describe Rsel::SeleniumTest do
         end
         context "text fields with labels in a hash" do
           it "sets one field from a hash" do
-            @st.set_fields_among({"Faust name" => "Marcus"}, {"Faust Name" => "First name", "LOST name" => "Last name"})
+            @st.set_fields_among({"Faust name" => "Marcus"}, {"Faust Name" => "First name", "LOST name" => "Last name"}).should be_true
             @st.field_contains("First name", "Marcus").should be_true
           end
 
           it "sets many fields, some from a hash" do
             @st.set_fields_among({"Faust\\;name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
-                                 {"Faust\\;Name" => "First name", :LOST => "Last name"})
+                                 {"Faust\\;Name" => "First name", :LOST => "Last name"}).should be_true
             @st.field_contains("First name", "Ken").should be_true
             @st.field_contains("Last name", "Brazier").should be_true
             @st.field_contains("Life story", "testy").should be_true
@@ -1863,6 +2061,79 @@ describe Rsel::SeleniumTest do
           it "cant find the last field" do
             @st.set_fields_among({"Faust name" => "Ken", "Lost name" => "Brazier"},
                                  {"Faust Name" => "First name", "Lost name" => "Faust name"}).should be_false
+          end
+        end
+      end
+    end # set_fields_among
+  end # generic_fields
+
+    
+    describe "#fields_equal_among" do
+      before(:each) do
+        @st.visit("/form").should be_true
+      end
+      context "passes when" do
+        context "text fields with labels" do
+          it "sets one field" do
+            @st.set_fields_among({"First name" => "Marcus"}).should be_true
+            @st.fields_equal_among({"First name" => "Marcus"}).should be_true
+          end
+
+          it "sets one field with string ids" do
+            @st.set_fields_among({"First name" => "Marcus"}, "").should be_true
+            @st.fields_equal_among({"First name" => "Marcus"}, "").should be_true
+          end
+
+          it "does nothing, but has ids" do
+            @st.fields_equal_among("", {"First name" => "Marcus"}).should be_true
+          end
+
+          it "sets several fields" do
+            @st.set_fields_among({"First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot."}).should be_true
+            @st.fields_equal_among({"First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot."}).should be_true
+          end
+        end
+        context "text fields with labels in a hash" do
+          it "sets one field from a hash" do
+            @st.set_fields_among({"Faust name" => "Marcus"}, {"Faust Name" => "First name", "LOST name" => "Last name"}).should be_true
+            @st.fields_equal_among({"Faust name" => "Marcus"}, {"Faust Name" => "First name", "LOST name" => "Last name"}).should be_true
+          end
+
+          it "sets many fields, some from a hash" do
+            @st.set_fields_among({"Faust\\;name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
+                                 {"Faust\\;Name" => "First name", :LOST => "Last name"}).should be_true
+            @st.fields_equal_among({"Faust\\;name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
+                                 {"Faust\\;Name" => "First name", :LOST => "Last name"}).should be_true
+          end
+        end
+      end
+
+      context "fails when" do
+        context "text fields with labels" do
+          it "cant find the first field" do
+            @st.fields_equal_among({"Faust name" => "Ken", "Last name" => "Brazier"}).should be_false
+          end
+
+          it "cant find the last field" do
+            @st.fields_equal_among({"First name" => "Ken", "Lost name" => "Brazier"}).should be_false
+          end
+          it "does not equal the expected values" do
+            @st.fields_equal_among({"First name" => "Ken", "Last name" => "Brazier", "Life story" => "My story\\; I get testy a lot."}).should be_false
+          end
+        end
+        context "text fields with labels in a hash" do
+          it "cant find the first field" do
+            @st.fields_equal_among({"Faust name" => "Ken", "Lost name" => "Brazier"},
+                                 {"Faust Name" => "Lost name", "Lost name" => "Last name"}).should be_false
+          end
+
+          it "cant find the last field" do
+            @st.fields_equal_among({"Faust name" => "Ken", "Lost name" => "Brazier"},
+                                 {"Faust Name" => "First name", "Lost name" => "Faust name"}).should be_false
+          end
+          it "does not equal the expected values" do
+            @st.fields_equal_among({"Faust\\;name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
+                                 {"Faust\\;Name" => "First name", :LOST => "Last name"}).should be_false
           end
         end
       end
