@@ -115,7 +115,9 @@ module Rsel
     end
 
 
-    # Escape certain characters to generate characters that can't otherwise be used in FitNesse hashtables.
+    # Escape certain characters to generate characters that can't otherwise be
+    # used in FitNesse hashtables.
+    #
     # * \; becomes :
     # * \' becomes ,
     # * \[ becomes {

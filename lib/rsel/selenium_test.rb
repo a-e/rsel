@@ -873,7 +873,9 @@ module Rsel
       ids = {} if ids == ""
 
       # Ignore case in the hash.
-      ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
+      ids.keys.each do |key|
+        ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key
+      end
 
       if ids[field.downcase] then
         return set_field(escape_for_hash(ids[field.downcase]), value, scope)
@@ -896,7 +898,13 @@ module Rsel
       return skip_status if skip_step?
       # FitNesse passes in "" for an empty field.  Fix it.
       fields = {} if fields == ""
-      fields.keys.each { |field| return failure "Failed to set field #{escape_for_hash(field.to_s)} to #{escape_for_hash(fields[field])}" unless set_field(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
+      fields.each do |key, value|
+        key_esc = escape_for_hash(key.to_s)
+        value_esc = escape_for_hash(value.to_s)
+        unless set_field(key_esc, value_esc, scope)
+          return failure "Failed to set field #{key_esc} to #{value_esc}"
+        end
+      end
       return true
     end
 
@@ -950,7 +958,13 @@ module Rsel
           ids.delete(key)
         end
       end
-      fields.keys.each { |field| return failure("Failed to set #{escape_for_hash(field.to_s)} (#{ids[escape_for_hash(field.to_s)]}) to #{escape_for_hash(fields[field])}") unless set_field_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope) }
+      fields.each do |key, value|
+        key_esc = escape_for_hash(key.to_s)
+        value_esc = escape_for_hash(value.to_s)
+        unless set_field_among(key_esc, value_esc, ids, scope)
+          return failure("Failed to set #{key_esc} (#{ids[key_esc]}) to #{value_esc}")
+        end
+      end
       return true
     end
 
@@ -1041,7 +1055,9 @@ module Rsel
       ids = {} if ids == ""
 
       # Ignore case in the hash.
-      ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
+      ids.keys.each do |key|
+        ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key
+      end
 
       if ids[field.downcase] then
         return generic_field_equals(escape_for_hash(ids[field.downcase]), value, scope)
@@ -1064,7 +1080,9 @@ module Rsel
       return skip_status if skip_step?
       # FitNesse passes in "" for an empty field.  Fix it.
       fields = {} if fields == ""
-      fields.keys.each { |field| return failure unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
+      fields.keys.each do |field|
+        return failure unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope)
+      end
       return true
     end
 
@@ -1118,7 +1136,9 @@ module Rsel
           ids.delete(key)
         end
       end
-      fields.keys.each { |field| return failure unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope) }
+      fields.keys.each do |field|
+        return failure unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope)
+      end
       return true
     end
 
