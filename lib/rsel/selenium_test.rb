@@ -24,6 +24,7 @@ module Rsel
 
     include Support
 
+
     # Initialize a test, connecting to the given Selenium server.
     #
     # @param [String] url
@@ -68,6 +69,9 @@ module Rsel
         @stop_on_failure = false
       end
       @found_failure = false
+      @conditional_stack = [ true ]
+      # A list of error messages:
+      @errors = []
     end
 
     attr_reader :url, :browser, :stop_on_failure, :found_failure
@@ -103,15 +107,29 @@ module Rsel
 
 
     # Stop the session and close the browser window.
+    # Show error messages in an exception if requested.
     #
     # @example
     #   | Close browser |
     #
-    def close_browser
+    def close_browser(show_errors='')
       @browser.close_current_browser_session
+      # Show errors in an exception if requested.
+      raise StopTestStepFailed, @errors.join("\n").gsub('<','&lt;') if(!(/not|without/i === show_errors) && @errors.length > 0)
       return true
     end
 
+    # Show any current error messages.
+    #
+    # @example
+    #   | Show | errors |
+    #
+    #@since 0.1.1
+    def errors
+      current_errors = @errors
+      @errors = []
+      return current_errors.join("\n")
+    end
 
     # Begin a new scenario, and forget about any previous failures.
     # This allows you to modularize your tests into standalone sections
@@ -153,7 +171,7 @@ module Rsel
     #   | Visit | /software |
     #
     def visit(path_or_url)
-      return false if aborted?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.open(strip_tags(path_or_url))
       end
@@ -166,7 +184,7 @@ module Rsel
     #   | Click back |
     #
     def click_back
-      return false if aborted?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.go_back
       end
@@ -179,7 +197,7 @@ module Rsel
     #   | Refresh page |
     #
     def refresh_page
-      return false if aborted?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.refresh
       end
@@ -206,7 +224,7 @@ module Rsel
     #   | See | Welcome, Marcus |
     #
     def see(text)
-      return false if aborted?
+      return skip_status if skip_step?
       pass_if @browser.text?(text)
     end
 
@@ -220,8 +238,51 @@ module Rsel
     #   | Do not see | Take a hike |
     #
     def do_not_see(text)
-      return false if aborted?
+      return skip_status if skip_step?
       pass_if !@browser.text?(text)
+    end
+
+
+    # Temporally ensure text is present or absent
+
+    # Ensure that the given text appears on the current page, eventually.
+    #
+    # @param [String] text
+    #   Plain text that should be appear on or visible on the current page
+    # @param [String] seconds
+    #   Integer number of seconds to wait.
+    #
+    # @example
+    #   | Click | ajax_login | button |
+    #   | See | Welcome back, Marcus | within | 10 | seconds |
+    #
+    # @since 0.1.1
+    #
+    def see_within_seconds(text, seconds)
+      return skip_status if skip_step?
+      pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
+      # This would be better if it worked:
+      # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
+    end
+
+    # Ensure that the given text does not appear on the current page, eventually.
+    #
+    # @param [String] text
+    #   Plain text that should disappear from or not be present on the current page
+    # @param [String] seconds
+    #   Integer number of seconds to wait.
+    #
+    # @example
+    #   | Click | close | button | !{within:popup_ad} |
+    #   | Do not see | advertisement | within | 10 | seconds |
+    #
+    # @since 0.1.1
+    #
+    def do_not_see_within_seconds(text, seconds)
+      return skip_status if skip_step?
+      pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+      # This would be better if it worked:
+      # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
     end
 
 
@@ -234,8 +295,8 @@ module Rsel
     #   | See title | Our Homepage |
     #
     def see_title(title)
-      return false if aborted?
-      pass_if @browser.get_title == title
+      return skip_status if skip_step?
+      pass_if @browser.get_title == title, "Page title is '#{@browser.get_title}', not '#{title}'"
     end
 
 
@@ -248,7 +309,7 @@ module Rsel
     #   | Do not see title | Someone else's homepage |
     #
     def do_not_see_title(title)
-      return false if aborted?
+      return skip_status if skip_step?
       pass_if !(@browser.get_title == title)
     end
 
@@ -267,7 +328,7 @@ module Rsel
     # @since 0.0.2
     #
     def link_exists(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       pass_if @browser.element?(loc(locator, 'link', scope))
     end
 
@@ -286,7 +347,7 @@ module Rsel
     # @since 0.0.2
     #
     def button_exists(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       pass_if @browser.element?(loc(locator, 'button', scope))
     end
 
@@ -303,7 +364,7 @@ module Rsel
     # @since 0.0.3
     #
     def row_exists(cells)
-      return false if aborted?
+      return skip_status if skip_step?
       row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
       pass_if @browser.element?("xpath=#{row.to_s}")
     end
@@ -324,7 +385,7 @@ module Rsel
     #   | Type | Dale | into | First name | field | !{within:contact} |
     #
     def type_into_field(text, locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       field = loc(locator, 'field', scope)
       fail_on_exception do
         ensure_editable(field) && @browser.type(field, text)
@@ -346,7 +407,7 @@ module Rsel
     #   | Fill in | First name | with | Eric |
     #
     def fill_in_with(locator, text, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       type_into_field(text, locator, scope)
     end
 
@@ -363,13 +424,13 @@ module Rsel
     #   | Field | First name | contains | Eric |
     #
     def field_contains(locator, text, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       begin
         field = @browser.field(loc(locator, 'field', scope))
       rescue
-        failure
+        failure "Can't identify field #{locator}"
       else
-        pass_if field.include?(text)
+        pass_if field.include?(text), "Field contains '#{field}', not '#{text}'"
       end
     end
 
@@ -387,13 +448,13 @@ module Rsel
     #   | Field | First name | equals; | Eric | !{within:contact} |
     #
     def field_equals(locator, text, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       begin
         field = @browser.field(loc(locator, 'field', scope))
       rescue
-        failure
+        failure "Can't identify field #{locator}" 
       else
-        pass_if field == text
+        pass_if field == text, "Field contains '#{field}', not '#{text}'"
       end
     end
 
@@ -409,7 +470,7 @@ module Rsel
     #   | Click; | Logout | !{within:header} |
     #
     def click(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.click(loc(locator, 'link_or_button', scope))
       end
@@ -429,7 +490,7 @@ module Rsel
     #   | Click | Edit | link | !{in_row:Eric} |
     #
     def click_link(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.click(loc(locator, 'link', scope))
       end
@@ -451,7 +512,7 @@ module Rsel
     #   | Click | Search | button | !{within:customers} |
     #
     def click_button(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       button = loc(locator, 'button', scope)
       fail_on_exception do
         ensure_editable(button) && @browser.click(button)
@@ -474,7 +535,7 @@ module Rsel
     #   | Enable | Send me spam | checkbox | !{within:opt_in} |
     #
     def enable_checkbox(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_disabled(cb) && @browser.click(cb)
@@ -496,7 +557,7 @@ module Rsel
     #   | Disable | Send me spam | checkbox | !{within:opt_in} |
     #
     def disable_checkbox(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       cb = loc(locator, 'checkbox', scope)
       fail_on_exception do
         ensure_editable(cb) && checkbox_is_enabled(cb) && @browser.click(cb)
@@ -516,12 +577,12 @@ module Rsel
     #   | Checkbox | send me spam | is enabled | !{within:opt_in} |
     #
     def checkbox_is_enabled(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure
+        failure "Can't identify checkbox #{locator}" 
       else
         return enabled
       end
@@ -542,12 +603,12 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_enabled(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure
+        failure "Can't identify radio #{locator}" 
       else
         return enabled
       end
@@ -566,12 +627,12 @@ module Rsel
     #   | Checkbox | send me spam | is disabled | !{within:opt_in} |
     #
     def checkbox_is_disabled(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       xp = loc(locator, 'checkbox', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure
+        failure "Can't identify checkbox #{locator}" 
       else
         return !enabled
       end
@@ -592,12 +653,12 @@ module Rsel
     # @since 0.0.4
     #
     def radio_is_disabled(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       xp = loc(locator, 'radio_button', scope)
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure
+        failure "Can't identify radio #{locator}" 
       else
         return !enabled
       end
@@ -617,7 +678,7 @@ module Rsel
     #   | Select | female | radio | !{within:gender} |
     #
     def select_radio(locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       radio = loc(locator, 'radio_button', scope)
       fail_on_exception do
         ensure_editable(radio) && @browser.click(radio)
@@ -639,7 +700,7 @@ module Rsel
     #   | Select | Tall | from dropdown | Height |
     #
     def select_from_dropdown(option, locator, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       dropdown = loc(locator, 'select', scope)
       fail_on_exception do
         ensure_editable(dropdown) && @browser.select(dropdown, option)
@@ -660,7 +721,7 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_includes(locator, option, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       # TODO: Apply scope
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
@@ -682,13 +743,13 @@ module Rsel
     # @since 0.0.2
     #
     def dropdown_equals(locator, option, scope={})
-      return false if aborted?
+      return skip_status if skip_step?
       begin
         selected = @browser.get_selected_label(loc(locator, 'select', scope))
       rescue
-        failure
+        failure "Can't identify dropdown #{locator}"
       else
-        return selected == option
+        pass_if selected == option, "Dropdown equals '#{selected}', not '#{option}'"
       end
     end
 
@@ -702,7 +763,7 @@ module Rsel
     #   | Pause | 5 | seconds |
     #
     def pause_seconds(seconds)
-      return false if aborted?
+      return skip_status if skip_step?
       sleep seconds.to_i
       return true
     end
@@ -719,12 +780,347 @@ module Rsel
     #   | Page loads in | 10 | seconds or less |
     #
     def page_loads_in_seconds_or_less(seconds)
-      return false if aborted?
+      return skip_status if skip_step?
       fail_on_exception do
         @browser.wait_for_page_to_load(seconds)
       end
     end
 
+
+    # A generic way to fill in any field, of any type.  (Just about.)
+    # Kind of nasty since it needs to use Javascript on the page.
+    #
+    # Types accepted:
+    #
+    # * a*
+    # * button*
+    # * input
+    #   * type=button*
+    #   * type=checkbox
+    #   * type=image*
+    #   * type=radio*
+    #   * type=reset*
+    #   * type=submit*
+    #   * type=text
+    # * select
+    # * textarea
+    #
+    # \* Value is ignored: this control type is just clicked/selected.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the field control.  Identification by
+    #   non-Selenium methods may not work for some links and buttons.
+    # @param [String] value
+    #   Value you want to set the field to.  (Default: empty string.)
+    #   Recognized, case-insensitive values to turn a checkbox on are:
+    #   * [empty string]
+    #   * Check
+    #   * Checked
+    #   * On
+    #   * True
+    #   * Yes
+    #
+    # @since 0.1.1
+    #
+    def set_field(locator, value='', scope={})
+      return skip_status if skip_step?
+      fail_on_exception do
+        # First, use Javascript to find out what the field is.
+        begin
+          loceval = loc(locator, 'field', scope)
+        rescue
+          loceval = loc(locator, 'link_or_button', scope)
+        end
+        tagname = @browser.get_eval('var loceval=this.browserbot.findElement("'+loceval+'");loceval.tagName+"."+loceval.type').downcase
+
+        case tagname
+        when 'input.text', /^textarea\./
+          return type_into_field(value, loceval)
+        when 'input.radio'
+          return select_radio(loceval)
+        when 'input.checkbox'
+          return enable_checkbox(loceval) if /^(yes|true|on|check(ed)?|)$/i === value
+          return disable_checkbox(loceval)
+        when /^select\./
+          return select_from_dropdown(value, loceval)
+        when /^(a|button)\./,'input.button','input.submit','input.image','input.reset'
+          return click(loceval)
+        else
+          #raise ArgumentError, "Unidentified field #{locator}."
+          return failure("Unidentified field #{locator}.")
+        end
+      end
+    end
+
+
+    # Set a value (with #{set_field}) in the named field, based on the given
+    # name/value pairs.  Uses #{escape_for_hash} to allow certain characters in
+    # FitNesse. 
+    #
+    # @param [String] field
+    #   A Locator or a name listed in the ids hash below.  If a name listed in
+    #   the ids below, this field is case-insensitive.
+    # @param [String] value
+    #   Plain text to go into a field
+    # @param ids
+    #   A hash mapping common names to Locators.  (Optional, but redundant without it)
+    #   The hash keys are case-insensitive.
+    #
+    # @since 0.1.1
+    def set_field_among(field, value, ids={}, scope={})
+      return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      ids = {} if ids == ""
+
+      # Ignore case in the hash.
+      ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
+
+      if ids[field.downcase] then
+        return set_field(escape_for_hash(ids[field.downcase]), value, scope)
+      else
+        return set_field(field, value, scope)
+      end
+    end
+
+    # Set values (with #{set_field}) in the named fields of a hash, based on the
+    # given name/value pairs.  Uses #{escape_for_hash} to allow certain
+    # characters in FitNesse. Note: Order of entries is not guaranteed, and
+    # depends on the version of Ruby on your server!
+    #
+    # @param fields
+    #   A key-value hash where the keys are Locators (case-sensitive) and the
+    #   values are the string values you want in the fields.
+    #
+    # @since 0.1.1
+    def set_fields(fields={}, scope={})
+      return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      fields = {} if fields == ""
+      fields.keys.each { |field| return failure "Failed to set field #{escape_for_hash(field.to_s)} to #{escape_for_hash(fields[field])}" unless set_field(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
+      return true
+    end
+
+    # Set values (with #{set_field}) in the named fields, based on the given
+    # name/value pairs, and with mapping of names in the ids field.  Uses
+    # #{escape_for_hash} to allow certain characters in FitNesse.
+    # Note: Order of entries is not guaranteed, and depends on the
+    # version of Ruby on your server!
+    #
+    # @param fields
+    #   A key-value hash where the keys are keys of the ids hash
+    #   (case-insensitive), or Locators (case-sensitive),
+    #   and the values are the string values you want in the fields.
+    # @param ids
+    #   A hash mapping common names to Locators.  (Optional, but redundant
+    #   without it)  The hash keys are case-insensitive.
+    #
+    # @example
+    #   Suppose you have a nasty form whose fields have nasty locators.
+    #   Suppose further that you want to fill in this form, many times, filling
+    #   in different fields different ways.
+    #   Begin by creating a Scenario table:
+    #
+    #       | scenario | Set nasty form fields | values |
+    #       | Set | @values | fields among | !{Name:id=nasty_field_name_1,Email:id=nasty_field_name_2,E-mail:id=nasty_field_name_2,Send me spam:id=nasty_checkbox_name_1} |
+    #
+    #   Using that you can now say something like:
+    #
+    #       | Set nasty form fields | !{Name:Ken,email:ken@kensaddress.com,send me spam: no} |
+    #
+    #   Or:
+    #
+    #       | Set nasty form fields | !{Name:Ken,Send me Spam: no} |
+    #
+    #   Or:
+    #
+    #       | Set nasty form fields | !{name:Ken,e-mail:,SEND ME SPAM: yes} |
+    #
+    # @since 0.1.1
+    def set_fields_among(fields={}, ids={}, scope={})
+      return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      ids = {} if ids == ""
+      fields = {} if fields == ""
+
+      # Ignore case in the hash.  set_field_among does this too, but doing it
+      # just once this way is faster.
+      ids.keys.each do |key|
+        unless key.to_s.downcase == key then
+          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
+          ids.delete(key)
+        end
+      end
+      fields.keys.each { |field| return failure("Failed to set #{escape_for_hash(field.to_s)} (#{ids[escape_for_hash(field.to_s)]}) to #{escape_for_hash(fields[field])}") unless set_field_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope) }
+      return true
+    end
+
+    # A generic way to check any field, of any type.  (Just about.)
+    # Kind of nasty since it needs to use Javascript on the page.
+    #
+    # Types accepted:
+    #
+    # * a*
+    # * button*
+    # * input
+    #   * type=button*
+    #   * type=checkbox
+    #   * type=image*
+    #   * type=radio*
+    #   * type=reset*
+    #   * type=submit*
+    #   * type=text
+    # * select
+    # * textarea
+    #
+    # \* Value is ignored: this control type is just clicked/selected.
+    #
+    # @param [String] locator
+    #   Label, name, or id of the field control.  Identification by
+    #   non-Selenium methods may not work for some links and buttons.
+    # @param [String] value
+    #   Value you want to verify the field equal to.  (Default: empty string.)
+    #   Recognized, case-insensitive values to verify a selected checkbox or
+    #   radio button are:
+    #   * [empty string]
+    #   * Check
+    #   * Checked
+    #   * Select
+    #   * Selected
+    #   * On
+    #   * True
+    #   * Yes
+    #
+    # @since 0.1.1
+    #
+    def generic_field_equals(locator, value='', scope={})
+      return skip_status if skip_step?
+      fail_on_exception do
+        # First, use Javascript to find out what the field is.
+        begin
+          loceval = loc(locator, 'field', scope)
+        rescue
+          loceval = loc(locator, 'link_or_button', scope)
+        end
+        tagname = @browser.get_eval('var loceval=this.browserbot.findElement("'+loceval+'");loceval.tagName+"."+loceval.type').downcase
+
+        case tagname
+        when 'input.text', /^textarea\./
+          return field_equals(loceval, value)
+        when 'input.radio'
+          return radio_is_enabled(loceval) if /^(yes|true|on|(check|select)(ed)?|)$/i === value
+          return radio_is_disabled(loceval)
+        when 'input.checkbox'
+          return checkbox_is_enabled(loceval) if /^(yes|true|on|(check|select)(ed)?|)$/i === value
+          return checkbox_is_disabled(loceval)
+        when /^select\./
+          return dropdown_equals(loceval, value)
+        else
+          #raise ArgumentError, "Unidentified field #{locator}."
+          return failure("Unidentified field for comparison: #{locator}.")
+        end
+      end
+    end
+
+    # Check a value (with #{set_field}) in the named field, based on the given
+    # name/value pairs.  Uses #{escape_for_hash} to allow certain characters in
+    # FitNesse. 
+    #
+    # @param [String] field
+    #   A Locator or a name listed in the ids hash below.  If a name listed in
+    #   the ids below, this field is case-insensitive.
+    # @param [String] value
+    #   Plain text to go into a field
+    # @param ids
+    #   A hash mapping common names to Locators.  (Optional, but redundant without it)
+    #   The hash keys are case-insensitive.
+    #
+    # @since 0.1.1
+    def field_equals_among(field, value, ids={}, scope={})
+      return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      ids = {} if ids == ""
+
+      # Ignore case in the hash.
+      ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
+
+      if ids[field.downcase] then
+        return generic_field_equals(escape_for_hash(ids[field.downcase]), value, scope)
+      else
+        return generic_field_equals(field, value, scope)
+      end
+    end
+
+    # Check values (with #{set_field}) in the named fields of a hash, based on the
+    # given name/value pairs.  Uses #{escape_for_hash} to allow certain
+    # characters in FitNesse. Note: Order of entries is not guaranteed, and
+    # depends on the version of Ruby on your server!
+    #
+    # @param fields
+    #   A key-value hash where the keys are Locators (case-sensitive) and the
+    #   values are the string values you want in the fields.
+    #
+    # @since 0.1.1
+    def fields_equal(fields={}, scope={})
+      return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      fields = {} if fields == ""
+      fields.keys.each { |field| return failure unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
+      return true
+    end
+
+    # Check values (with #{set_field}) in the named fields, based on the given
+    # name/value pairs, and with mapping of names in the ids field.  Uses
+    # #{escape_for_hash} to allow certain characters in FitNesse.
+    # Note: Order of entries is not guaranteed, and depends on the
+    # version of Ruby on your server!
+    #
+    # @param fields
+    #   A key-value hash where the keys are keys of the ids hash
+    #   (case-insensitive), or Locators (case-sensitive),
+    #   and the values are the string values you want in the fields.
+    # @param ids
+    #   A hash mapping common names to Locators.  (Optional, but redundant
+    #   without it)  The hash keys are case-insensitive.
+    #
+    # @example
+    #   Suppose you have a nasty form whose fields have nasty locators.
+    #   Suppose further that you want to fill in this form, many times, filling
+    #   in different fields different ways.
+    #   Begin by creating a Scenario table:
+    #
+    #       | scenario | Check nasty form fields | values |
+    #       | fields equal | @values | among | !{Name:id=nasty_field_name_1,Email:id=nasty_field_name_2,E-mail:id=nasty_field_name_2,Send me spam:id=nasty_checkbox_name_1} |
+    #
+    #   Using that you can now say something like:
+    #
+    #       | Check nasty form fields | !{Name:Ken,email:ken@kensaddress.com,send me spam: no} |
+    #
+    #   Or:
+    #
+    #       | Check nasty form fields | !{Name:Ken,Send me Spam: no} |
+    #
+    #   Or:
+    #
+    #       | Check nasty form fields | !{name:Ken,e-mail:,SEND ME SPAM: yes} |
+    #
+    # @since 0.1.1
+    def fields_equal_among(fields={}, ids={}, scope={})
+      return skip_status if skip_step?
+      # FitNesse passes in "" for an empty field.  Fix it.
+      ids = {} if ids == ""
+      fields = {} if fields == ""
+
+      # Ignore case in the hash.  set_field_among does this too, but doing it
+      # just once this way is faster.
+      ids.keys.each do |key|
+        unless key.to_s.downcase == key then
+          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
+          ids.delete(key)
+        end
+      end
+      fields.keys.each { |field| return failure unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope) }
+      return true
+    end
 
     # Invoke a missing method. If a method is called on a SeleniumTest
     # instance, and that method is not explicitly defined, this method
@@ -735,15 +1131,18 @@ module Rsel
     # @since 0.0.6
     #
     def method_missing(method, *args, &block)
+      return skip_status if skip_step?
       if @browser.respond_to?(method)
         begin
           result = @browser.send(method, *args, &block)
         rescue
-          failure
+          failure "Method #{method} error"
         else
           # The method call succeeded; did it return true or false?
-          return result if [true, false].include? result
-          # Not a Boolean return value--assume passing
+          return failure if result == false
+          # If a string, return that.  We might Check or Show it.
+          return result if result == true || (result.is_a? String)
+          # Not a Boolean return value or string--assume passing
           return true
         end
       else
@@ -767,6 +1166,105 @@ module Rsel
       end
     end
 
+    # Conditionals
+
+    # If I see the given text, do the steps until I see an otherwise or end_if.
+    # Otherwise do not do those steps.
+    #
+    # @param [String] text
+    #   Plain text that should be visible on the current page
+    #
+    # @example
+    # | If I see | pop-over ad |
+    # | Click | Close | button |
+    # | End if |
+    #
+    # @since 0.1.1
+    def if_i_see(text)
+      return false if aborted?
+      # If this if is inside a block that's not running, record that.
+      if !@conditional_stack.last then
+        @conditional_stack.push nil
+        return nil
+      end
+
+      # Test the condition.
+      @conditional_stack.push @browser.text?(text)
+
+      return true if @conditional_stack.last == true
+      return nil if @conditional_stack.last == false
+      return failure
+    end
+
+    # If the given parameter is "yes" or "true", do the steps until I see an
+    # otherwise or end_if.  Otherwise do not do those steps.
+    #
+    # @param [String] text
+    #   A string. "Yes" or "true" (case-insensitive) cause the following steps
+    #   to run. Anything else does not.
+    #
+    # @example
+    # | If parameter | ${spam_me} |
+    # | Enable | Send me spam | checkbox |
+    # | See | Email: | within | 10 | seconds |
+    # | Type | ${spam_me_email} | into field | spammable_email |
+    # | End if |
+    #
+    # @since 0.1.1
+    def if_parameter(text)
+      return false if aborted?
+      if !@conditional_stack.last then
+        @conditional_stack.push nil
+        return nil
+      end
+
+      # Test the condition.
+      @conditional_stack.push /^(yes|true)$/i === text
+
+      return true if @conditional_stack.last == true
+      return nil if @conditional_stack.last == false
+      return failure
+    end
+
+    # End an if block.
+    #
+    # @since 0.1.1
+    def end_if
+      return false if aborted?
+      # If there was no prior matching if, fail.
+      return failure if @conditional_stack.length <= 1
+
+      last_status = @conditional_stack.pop
+      # If this end_if is within an un-executed if block, don't execute it.
+      return nil if last_status == nil
+      return true
+    end
+
+    # The else case to match any if.
+    #
+    # @example
+    # | if parameter | ${login_by_phone} |
+    # | type | ${login} | into field | phone_number |
+    # | otherwise |
+    # | type | ${login} | into field | login |
+    # | end if |
+    #
+    # @since 0.1.1
+    def otherwise
+      return false if aborted?
+      # If there was no prior matching if, fail.
+      return failure if @conditional_stack.length <= 1
+
+      # If this otherwise is within an un-executed if block, don't execute it.
+      return nil if @conditional_stack.last == nil
+
+      last_stack = @conditional_stack.pop
+      @conditional_stack.push !last_stack
+      return true if @conditional_stack.last == true
+      return nil if @conditional_stack.last == false
+      return failure
+    end
+
 
     private
 
@@ -784,7 +1282,7 @@ module Rsel
       rescue => e
         #puts e.message
         #puts e.backtrace
-        failure
+        failure("#{e.message}")
       else
         return true
       end
@@ -814,8 +1312,9 @@ module Rsel
     #
     # @since 0.0.6
     #
-    def failure
+    def failure(reason='')
       @found_failure = true
+      @errors.push(reason) unless (reason == '')
       return false
     end
 
@@ -824,12 +1323,49 @@ module Rsel
     #
     # @since 0.0.6
     #
-    def pass_if(condition)
+    def pass_if(condition, errormsg='')
       if condition
         return true
       else
-        failure
+        failure(errormsg)
       end
+    end
+
+    # Escape certain characters to generate characters that can't otherwise be used in FitNesse hashtables.
+    # * \; becomes :
+    # * \' becomes ,
+    # * \[ becomes {
+    # * \] becomes }
+    # * \\ becomes \
+    #
+    # @since 0.1.1
+    #
+    def escape_for_hash(text)
+      # ((?:\\\\)*) allows any extra pairs of "\"s to be saved.
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*);/, '\1\2:')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)'/, '\1\2,')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\[/, '\1\2{')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\]/, '\1\2}')
+      text = text.gsub(/\\\\/, '\\')
+      return text
+    end
+
+    # Conditionals
+
+    # Should the current step be skipped, either because the test was aborted or
+    # because we're in a conditional?
+    #
+    # @since 0.1.1
+    def skip_step?
+      return aborted? || !@conditional_stack.last
+    end
+
+    # Presuming the current step should be skipped, what status should I return?
+    #
+    # @since 0.1.1
+    def skip_status
+      return false if aborted?
+      return nil if !@conditional_stack.last
     end
 
 
@@ -843,6 +1379,4 @@ module Rsel
 
   end
 end
-
-
 

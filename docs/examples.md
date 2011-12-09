@@ -115,5 +115,32 @@ Tables
     | See title | Editing Eric |
     | Close browser |
 
+Conditionals
+-------------
+
+    !define do_bad_stuff {false}
+    | script | selenium test | http://localhost:8070 |
+    | Open browser |
+    | Maximize browser |
+    | If parameter | ${do_bad_stuff} |
+    | Click | Nonexistent link |
+    | Page loads in | 30 | seconds or less |
+    | If I see | About this site |
+    | Click | About this site |
+    | Page loads in | 30 | seconds or less |
+    | End If |
+    | Otherwise |
+    | If I see | About this site |
+    | Click | About this site |
+    | Page loads in | 30 | seconds or less |
+    | Otherwise |
+    | Click | Nonexistent link |
+    | Page loads in | 30 | seconds or less |
+    | End If |
+    | End If |
+    | See | This site is really cool. |
+    | Do not see | This is a Sinatra webapp for unit testing Rsel. |
+    | Close browser |
+
 
 Next: [Customization](custom.md)

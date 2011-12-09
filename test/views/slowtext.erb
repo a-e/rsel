@@ -1,0 +1,27 @@
+<html>
+  <head><title>Late text page</title>
+    <script>
+      function createtext() {
+        var mydiv = document.createElement('P');
+        mydiv.id = 'newtext';
+        mydiv.innerHTML = 'The text is here!';
+        document.body.appendChild(mydiv);
+        setTimeout(hidetext, 2000);
+      }
+      function showtext() {
+        document.getElementById('newtext').style.display = '';
+        setTimeout(hidetext, 2000);
+      }
+      function hidetext() {
+        document.getElementById('newtext').style.display = 'none';
+        setTimeout(showtext, 2000);
+      }
+    </script>
+  </head>
+<body onload="setTimeout(createtext, 2000);">
+  <h1>Late text page</h1>
+  <p>The text is coming...</p>
+</body>
+</html>
+
+
