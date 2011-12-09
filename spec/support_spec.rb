@@ -44,5 +44,17 @@ describe Rsel::Support do
       end.should raise_error
     end
   end
+
+  describe "#strip_tags" do
+    it "strips anchor tags from links" do
+      html = '<a href="http://example.com/">http://example.com</a>'
+      strip_tags(html).should == 'http://example.com'
+    end
+
+    it "leaves plain text alone" do
+      html = 'http://example.com'
+      strip_tags(html).should == 'http://example.com'
+    end
+  end
 end
 

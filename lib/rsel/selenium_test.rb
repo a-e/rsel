@@ -54,7 +54,7 @@ module Rsel
     #
     def initialize(url, options={})
       # Strip HTML tags from URL
-      @url = url.gsub(/<\/?[^>]*>/, '')
+      @url = strip_tags(url)
       @browser = Selenium::Client::Driver.new(
         :host => options[:host] || 'localhost',
         :port => options[:port] || 4444,
@@ -155,7 +155,7 @@ module Rsel
     def visit(path_or_url)
       return false if aborted?
       fail_on_exception do
-        @browser.open(path_or_url)
+        @browser.open(strip_tags(path_or_url))
       end
     end
 

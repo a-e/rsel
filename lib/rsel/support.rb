@@ -113,6 +113,20 @@ module Rsel
         return [union]
       end
     end
+
+
+    # Strip HTML tags from the given text. This can be used for converting
+    # URLs that FitNesse has marked up back into plain URLs.
+    #
+    # @param [String] text
+    #   Text, possibly including markup, that you want to strip
+    #
+    # @since 0.1.1
+    #
+    def strip_tags(text)
+      return text.gsub(/<\/?[^>]*>/, '')
+    end
+
   end
 end
 
