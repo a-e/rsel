@@ -115,6 +115,26 @@ module Rsel
     end
 
 
+    # Escape certain characters to generate characters that can't otherwise be used in FitNesse hashtables.
+    # * \; becomes :
+    # * \' becomes ,
+    # * \[ becomes {
+    # * \] becomes }
+    # * \\ becomes \
+    #
+    # @since 0.1.1
+    #
+    def escape_for_hash(text)
+      # ((?:\\\\)*) allows any extra pairs of "\"s to be saved.
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*);/, '\1\2:')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)'/, '\1\2,')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\[/, '\1\2{')
+      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\]/, '\1\2}')
+      text = text.gsub(/\\\\/, '\\')
+      return text
+    end
+
+
     # Strip HTML tags from the given text. This can be used for converting
     # URLs that FitNesse has marked up back into plain URLs.
     #

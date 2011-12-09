@@ -45,6 +45,28 @@ describe Rsel::Support do
     end
   end
 
+  describe "#escape_for_hash" do
+    it "escapes semicolon to colon" do
+      escape_for_hash('\\' + ";").should == ":"
+    end
+
+    it "escapes single-quote to comma" do
+      escape_for_hash('\\' + "'").should == ","
+    end
+
+    it "escapes left-bracket to left-brace" do
+      escape_for_hash('\\' + "[").should == "{"
+    end
+
+    it "escapes right-bracket to right-brace" do
+      escape_for_hash('\\' + "]").should == "}"
+    end
+
+    it "escapes backslash" do
+      escape_for_hash('\\\\').should == '\\'
+    end
+  end
+
   describe "#strip_tags" do
     it "strips anchor tags from links" do
       html = '<a href="http://example.com/">http://example.com</a>'

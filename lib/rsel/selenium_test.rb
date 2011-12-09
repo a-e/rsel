@@ -452,7 +452,7 @@ module Rsel
       begin
         field = @browser.field(loc(locator, 'field', scope))
       rescue
-        failure "Can't identify field #{locator}" 
+        failure "Can't identify field #{locator}"
       else
         pass_if field == text, "Field contains '#{field}', not '#{text}'"
       end
@@ -582,7 +582,7 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure "Can't identify checkbox #{locator}" 
+        failure "Can't identify checkbox #{locator}"
       else
         return enabled
       end
@@ -608,7 +608,7 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure "Can't identify radio #{locator}" 
+        failure "Can't identify radio #{locator}"
       else
         return enabled
       end
@@ -632,7 +632,7 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure "Can't identify checkbox #{locator}" 
+        failure "Can't identify checkbox #{locator}"
       else
         return !enabled
       end
@@ -658,7 +658,7 @@ module Rsel
       begin
         enabled = @browser.checked?(xp)
       rescue
-        failure "Can't identify radio #{locator}" 
+        failure "Can't identify radio #{locator}"
       else
         return !enabled
       end
@@ -855,7 +855,7 @@ module Rsel
 
     # Set a value (with #{set_field}) in the named field, based on the given
     # name/value pairs.  Uses #{escape_for_hash} to allow certain characters in
-    # FitNesse. 
+    # FitNesse.
     #
     # @param [String] field
     #   A Locator or a name listed in the ids hash below.  If a name listed in
@@ -1023,7 +1023,7 @@ module Rsel
 
     # Check a value (with #{set_field}) in the named field, based on the given
     # name/value pairs.  Uses #{escape_for_hash} to allow certain characters in
-    # FitNesse. 
+    # FitNesse.
     #
     # @param [String] field
     #   A Locator or a name listed in the ids hash below.  If a name listed in
@@ -1331,24 +1331,6 @@ module Rsel
       end
     end
 
-    # Escape certain characters to generate characters that can't otherwise be used in FitNesse hashtables.
-    # * \; becomes :
-    # * \' becomes ,
-    # * \[ becomes {
-    # * \] becomes }
-    # * \\ becomes \
-    #
-    # @since 0.1.1
-    #
-    def escape_for_hash(text)
-      # ((?:\\\\)*) allows any extra pairs of "\"s to be saved.
-      text = text.gsub(/(^|[^\\])\\((?:\\\\)*);/, '\1\2:')
-      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)'/, '\1\2,')
-      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\[/, '\1\2{')
-      text = text.gsub(/(^|[^\\])\\((?:\\\\)*)\]/, '\1\2}')
-      text = text.gsub(/\\\\/, '\\')
-      return text
-    end
 
     # Conditionals
 
