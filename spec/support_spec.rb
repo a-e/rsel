@@ -46,25 +46,70 @@ describe Rsel::Support do
   end
 
   describe "#escape_for_hash" do
-    it "escapes semicolon to colon" do
-      escape_for_hash('\\' + ";").should == ":"
+    context "escapes when" do
+      it "escapes semicolon to colon" do
+        escape_for_hash('\\' + ";").should == ":"
+      end
+
+      it "escapes single-quote to comma" do
+        escape_for_hash('\\' + "'").should == ","
+      end
+
+      it "escapes left-bracket to left-brace" do
+        escape_for_hash('\\' + "[").should == "{"
+      end
+
+      it "escapes right-bracket to right-brace" do
+        escape_for_hash('\\' + "]").should == "}"
+      end
+
+      it "escapes backslash" do
+        escape_for_hash('\\\\').should == '\\'
+      end
+
+      it "handles a DOS path" do
+        escape_for_hash('c\\;\\*.bat').should == 'c:\\*.bat'
+      end
     end
 
-    it "escapes single-quote to comma" do
-      escape_for_hash('\\' + "'").should == ","
+    context "does not escape when" do
+      it "sees a lone semicolon" do
+        escape_for_hash(";").should == ";"
+      end
+
+      it "sees a lone single-quote" do
+        escape_for_hash("'").should == "'"
+      end
+
+      it "sees a lone left-bracket" do
+        escape_for_hash("[").should == "["
+      end
+
+      it "sees a lone right-bracket" do
+        escape_for_hash("]").should == "]"
+      end
+
+      it "sees a backslash before semicolon" do
+        escape_for_hash('\\\\' + ";").should == "\\;"
+      end
+
+      it "sees a backslash before single-quote" do
+        escape_for_hash('\\\\' + "'").should == "\\'"
+      end
+
+      it "sees a backslash before left-bracket" do
+        escape_for_hash('\\\\' + "[").should == "\\["
+      end
+
+      it "sees a backslash before right-bracket" do
+        escape_for_hash('\\\\' + "]").should == "\\]"
+      end
+
+      it "handles a single backslash" do
+        escape_for_hash('\\').should == '\\'
+      end
     end
 
-    it "escapes left-bracket to left-brace" do
-      escape_for_hash('\\' + "[").should == "{"
-    end
-
-    it "escapes right-bracket to right-brace" do
-      escape_for_hash('\\' + "]").should == "}"
-    end
-
-    it "escapes backslash" do
-      escape_for_hash('\\\\').should == '\\'
-    end
   end
 
   describe "#strip_tags" do
