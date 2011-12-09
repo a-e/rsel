@@ -883,7 +883,7 @@ module Rsel
         end
       end
 
-      if ids[field.downcase] then
+      if ids[field.downcase]
         return set_field(escape_for_hash(ids[field.downcase]), value, scope)
       else
         return set_field(field, value, scope)
@@ -960,7 +960,7 @@ module Rsel
       # Ignore case in the hash. set_field_among does this too, but doing it
       # just once this way is faster.
       ids.keys.each do |key|
-        unless key.to_s.downcase == key then
+        unless key.to_s.downcase == key
           ids[escape_for_hash(key.to_s.downcase)] = ids[key]
           ids.delete(key)
         end
@@ -1079,7 +1079,7 @@ module Rsel
         ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key
       end
 
-      if ids[field.downcase] then
+      if ids[field.downcase]
         return generic_field_equals(escape_for_hash(ids[field.downcase]), value, scope)
       else
         return generic_field_equals(field, value, scope)
@@ -1153,7 +1153,7 @@ module Rsel
       # Ignore case in the hash. set_field_among does this too, but doing it
       # just once this way is faster.
       ids.keys.each do |key|
-        unless key.to_s.downcase == key then
+        unless key.to_s.downcase == key
           ids[escape_for_hash(key.to_s.downcase)] = ids[key]
           ids.delete(key)
         end
@@ -1226,7 +1226,7 @@ module Rsel
     def if_i_see(text)
       return false if aborted?
       # If this if is inside a block that's not running, record that.
-      if !@conditional_stack.last then
+      if !@conditional_stack.last
         @conditional_stack.push nil
         return nil
       end
@@ -1257,7 +1257,7 @@ module Rsel
     #
     def if_parameter(text)
       return false if aborted?
-      if !@conditional_stack.last then
+      if !@conditional_stack.last
         @conditional_stack.push nil
         return nil
       end
