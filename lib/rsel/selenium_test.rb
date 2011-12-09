@@ -124,7 +124,8 @@ module Rsel
     # @example
     #   | Show | errors |
     #
-    #@since 0.1.1
+    # @since 0.1.1
+    #
     def errors
       current_errors = @errors
       @errors = []
@@ -787,7 +788,7 @@ module Rsel
     end
 
 
-    # A generic way to fill in any field, of any type.  (Just about.)
+    # A generic way to fill in any field, of any type. (Just about.)
     # Kind of nasty since it needs to use Javascript on the page.
     #
     # Types accepted:
@@ -808,10 +809,10 @@ module Rsel
     # \* Value is ignored: this control type is just clicked/selected.
     #
     # @param [String] locator
-    #   Label, name, or id of the field control.  Identification by
+    #   Label, name, or id of the field control. Identification by
     #   non-Selenium methods may not work for some links and buttons.
     # @param [String] value
-    #   Value you want to set the field to.  (Default: empty string.)
+    #   Value you want to set the field to. (Default: empty string.)
     #   Recognized, case-insensitive values to turn a checkbox on are:
     #   * [empty string]
     #   * Check
@@ -831,16 +832,18 @@ module Rsel
         rescue
           loceval = loc(locator, 'link_or_button', scope)
         end
-        tagname = @browser.get_eval('var loceval=this.browserbot.findElement("'+loceval+'");loceval.tagName+"."+loceval.type').downcase
 
-        case tagname
+        case tagname(loceval)
         when 'input.text', /^textarea\./
           return type_into_field(value, loceval)
         when 'input.radio'
           return select_radio(loceval)
         when 'input.checkbox'
-          return enable_checkbox(loceval) if /^(yes|true|on|check(ed)?|)$/i === value
-          return disable_checkbox(loceval)
+          if /^(yes|true|on|check(ed)?|)$/i === value
+            return enable_checkbox(loceval)
+          else
+            return disable_checkbox(loceval)
+          end
         when /^select\./
           return select_from_dropdown(value, loceval)
         when /^(a|button)\./,'input.button','input.submit','input.image','input.reset'
@@ -853,37 +856,37 @@ module Rsel
     end
 
 
-    # Set a value (with #{set_field}) in the named field, based on the given
-    # name/value pairs.  Uses #{escape_for_hash} to allow certain characters in
+    # Set a value (with {#set_field}) in the named field, based on the given
+    # name/value pairs. Uses {#escape_for_hash} to allow certain characters in
     # FitNesse.
     #
     # @param [String] field
-    #   A Locator or a name listed in the ids hash below.  If a name listed in
+    #   A Locator or a name listed in the ids hash below. If a name listed in
     #   the ids below, this field is case-insensitive.
     # @param [String] value
     #   Plain text to go into a field
     # @param ids
-    #   A hash mapping common names to Locators.  (Optional, but redundant without it)
-    #   The hash keys are case-insensitive.
+    #   A hash mapping common names to Locators. (Optional, but redundant
+    #   without it) The hash keys are case-insensitive.
     #
     # @since 0.1.1
+    #
     def set_field_among(field, value, ids={}, scope={})
       return skip_status if skip_step?
-      # FitNesse passes in "" for an empty field.  Fix it.
+      # FitNesse passes in "" for an empty field. Fix it.
       ids = {} if ids == ""
 
-      # Ignore case in the hash.
-      ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
+      normalize_ids(ids)
 
-      if ids[field.downcase] then
+      if ids[field.downcase]
         return set_field(escape_for_hash(ids[field.downcase]), value, scope)
       else
         return set_field(field, value, scope)
       end
     end
 
-    # Set values (with #{set_field}) in the named fields of a hash, based on the
-    # given name/value pairs.  Uses #{escape_for_hash} to allow certain
+    # Set values (with {#set_field}) in the named fields of a hash, based on the
+    # given name/value pairs. Uses {#escape_for_hash} to allow certain
     # characters in FitNesse. Note: Order of entries is not guaranteed, and
     # depends on the version of Ruby on your server!
     #
@@ -892,33 +895,39 @@ module Rsel
     #   values are the string values you want in the fields.
     #
     # @since 0.1.1
+    #
     def set_fields(fields={}, scope={})
       return skip_status if skip_step?
-      # FitNesse passes in "" for an empty field.  Fix it.
+      # FitNesse passes in "" for an empty field. Fix it.
       fields = {} if fields == ""
-      fields.keys.each { |field| return failure "Failed to set field #{escape_for_hash(field.to_s)} to #{escape_for_hash(fields[field])}" unless set_field(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
+      fields.each do |key, value|
+        key_esc = escape_for_hash(key.to_s)
+        value_esc = escape_for_hash(value.to_s)
+        unless set_field(key_esc, value_esc, scope)
+          return failure "Failed to set field #{key_esc} to #{value_esc}"
+        end
+      end
       return true
     end
 
-    # Set values (with #{set_field}) in the named fields, based on the given
-    # name/value pairs, and with mapping of names in the ids field.  Uses
-    # #{escape_for_hash} to allow certain characters in FitNesse.
-    # Note: Order of entries is not guaranteed, and depends on the
-    # version of Ruby on your server!
+    # Set values (with {#set_field}) in the named fields, based on the given
+    # name/value pairs, and with mapping of names in the ids field. Uses
+    # {#escape_for_hash} to allow certain characters in FitNesse. Note: Order
+    # of entries is not guaranteed, and depends on the version of Ruby on your
+    # server!
     #
     # @param fields
     #   A key-value hash where the keys are keys of the ids hash
-    #   (case-insensitive), or Locators (case-sensitive),
-    #   and the values are the string values you want in the fields.
+    #   (case-insensitive), or Locators (case-sensitive), and the values are
+    #   the string values you want in the fields.
     # @param ids
-    #   A hash mapping common names to Locators.  (Optional, but redundant
+    #   A hash mapping common names to Locators. (Optional, but redundant
     #   without it)  The hash keys are case-insensitive.
     #
     # @example
-    #   Suppose you have a nasty form whose fields have nasty locators.
-    #   Suppose further that you want to fill in this form, many times, filling
-    #   in different fields different ways.
-    #   Begin by creating a Scenario table:
+    #   Suppose you have a nasty form whose fields have nasty locators. Suppose
+    #   further that you want to fill in this form, many times, filling in
+    #   different fields different ways. Begin by creating a Scenario table:
     #
     #       | scenario | Set nasty form fields | values |
     #       | Set | @values | fields among | !{Name:id=nasty_field_name_1,Email:id=nasty_field_name_2,E-mail:id=nasty_field_name_2,Send me spam:id=nasty_checkbox_name_1} |
@@ -936,26 +945,25 @@ module Rsel
     #       | Set nasty form fields | !{name:Ken,e-mail:,SEND ME SPAM: yes} |
     #
     # @since 0.1.1
+    #
     def set_fields_among(fields={}, ids={}, scope={})
       return skip_status if skip_step?
-      # FitNesse passes in "" for an empty field.  Fix it.
+      # FitNesse passes in "" for an empty field. Fix it.
       ids = {} if ids == ""
       fields = {} if fields == ""
 
-      # Ignore case in the hash.  set_field_among does this too, but doing it
-      # just once this way is faster.
-      ids.keys.each do |key|
-        unless key.to_s.downcase == key then
-          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
-          ids.delete(key)
+      fields.each do |key, value|
+        key_esc = escape_for_hash(key.to_s)
+        value_esc = escape_for_hash(value.to_s)
+        unless set_field_among(key_esc, value_esc, ids, scope)
+          return failure("Failed to set #{key_esc} (#{ids[key_esc]}) to #{value_esc}")
         end
       end
-      fields.keys.each { |field| return failure("Failed to set #{escape_for_hash(field.to_s)} (#{ids[escape_for_hash(field.to_s)]}) to #{escape_for_hash(fields[field])}") unless set_field_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope) }
       return true
     end
 
-    # A generic way to check any field, of any type.  (Just about.)
-    # Kind of nasty since it needs to use Javascript on the page.
+    # A generic way to check any field, of any type. (Just about.) Kind of
+    # nasty since it needs to use Javascript on the page.
     #
     # Types accepted:
     #
@@ -975,10 +983,10 @@ module Rsel
     # \* Value is ignored: this control type is just clicked/selected.
     #
     # @param [String] locator
-    #   Label, name, or id of the field control.  Identification by
+    #   Label, name, or id of the field control. Identification by
     #   non-Selenium methods may not work for some links and buttons.
     # @param [String] value
-    #   Value you want to verify the field equal to.  (Default: empty string.)
+    #   Value you want to verify the field equal to. (Default: empty string.)
     #   Recognized, case-insensitive values to verify a selected checkbox or
     #   radio button are:
     #   * [empty string]
@@ -1001,17 +1009,22 @@ module Rsel
         rescue
           loceval = loc(locator, 'link_or_button', scope)
         end
-        tagname = @browser.get_eval('var loceval=this.browserbot.findElement("'+loceval+'");loceval.tagName+"."+loceval.type').downcase
 
-        case tagname
+        case tagname(loceval)
         when 'input.text', /^textarea\./
           return field_equals(loceval, value)
         when 'input.radio'
-          return radio_is_enabled(loceval) if /^(yes|true|on|(check|select)(ed)?|)$/i === value
-          return radio_is_disabled(loceval)
+          if /^(yes|true|on|(check|select)(ed)?|)$/i === value
+            return radio_is_enabled(loceval)
+          else
+            return radio_is_disabled(loceval)
+          end
         when 'input.checkbox'
-          return checkbox_is_enabled(loceval) if /^(yes|true|on|(check|select)(ed)?|)$/i === value
-          return checkbox_is_disabled(loceval)
+          if /^(yes|true|on|(check|select)(ed)?|)$/i === value
+            return checkbox_is_enabled(loceval)
+          else
+            return checkbox_is_disabled(loceval)
+          end
         when /^select\./
           return dropdown_equals(loceval, value)
         else
@@ -1021,37 +1034,44 @@ module Rsel
       end
     end
 
-    # Check a value (with #{set_field}) in the named field, based on the given
-    # name/value pairs.  Uses #{escape_for_hash} to allow certain characters in
+
+    def tagname(loceval)
+      return @browser.get_eval(
+        'var loceval=this.browserbot.findElement("' +
+        loceval + '");loceval.tagName+"."+loceval.type').downcase
+    end
+
+    # Check a value (with {#set_field}) in the named field, based on the given
+    # name/value pairs. Uses {#escape_for_hash} to allow certain characters in
     # FitNesse.
     #
     # @param [String] field
-    #   A Locator or a name listed in the ids hash below.  If a name listed in
+    #   A Locator or a name listed in the ids hash below. If a name listed in
     #   the ids below, this field is case-insensitive.
     # @param [String] value
     #   Plain text to go into a field
     # @param ids
-    #   A hash mapping common names to Locators.  (Optional, but redundant without it)
-    #   The hash keys are case-insensitive.
+    #   A hash mapping common names to Locators. (Optional, but redundant
+    #   without it) The hash keys are case-insensitive.
     #
     # @since 0.1.1
+    #
     def field_equals_among(field, value, ids={}, scope={})
       return skip_status if skip_step?
-      # FitNesse passes in "" for an empty field.  Fix it.
+      # FitNesse passes in "" for an empty field. Fix it.
       ids = {} if ids == ""
 
-      # Ignore case in the hash.
-      ids.keys.each { |key| ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key }
+      normalize_ids(ids)
 
-      if ids[field.downcase] then
+      if ids[field.downcase]
         return generic_field_equals(escape_for_hash(ids[field.downcase]), value, scope)
       else
         return generic_field_equals(field, value, scope)
       end
     end
 
-    # Check values (with #{set_field}) in the named fields of a hash, based on the
-    # given name/value pairs.  Uses #{escape_for_hash} to allow certain
+    # Check values (with {#set_field}) in the named fields of a hash, based on
+    # the given name/value pairs. Uses {#escape_for_hash} to allow certain
     # characters in FitNesse. Note: Order of entries is not guaranteed, and
     # depends on the version of Ruby on your server!
     #
@@ -1060,26 +1080,29 @@ module Rsel
     #   values are the string values you want in the fields.
     #
     # @since 0.1.1
+    #
     def fields_equal(fields={}, scope={})
       return skip_status if skip_step?
-      # FitNesse passes in "" for an empty field.  Fix it.
+      # FitNesse passes in "" for an empty field. Fix it.
       fields = {} if fields == ""
-      fields.keys.each { |field| return failure unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope) }
+      fields.keys.each do |field|
+        return failure unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope)
+      end
       return true
     end
 
-    # Check values (with #{set_field}) in the named fields, based on the given
-    # name/value pairs, and with mapping of names in the ids field.  Uses
-    # #{escape_for_hash} to allow certain characters in FitNesse.
-    # Note: Order of entries is not guaranteed, and depends on the
-    # version of Ruby on your server!
+    # Check values (with {#set_field}) in the named fields, based on the given
+    # name/value pairs, and with mapping of names in the ids field. Uses
+    # {#escape_for_hash} to allow certain characters in FitNesse. Note: Order
+    # of entries is not guaranteed, and depends on the version of Ruby on your
+    # server!
     #
     # @param fields
     #   A key-value hash where the keys are keys of the ids hash
     #   (case-insensitive), or Locators (case-sensitive),
     #   and the values are the string values you want in the fields.
     # @param ids
-    #   A hash mapping common names to Locators.  (Optional, but redundant
+    #   A hash mapping common names to Locators. (Optional, but redundant
     #   without it)  The hash keys are case-insensitive.
     #
     # @example
@@ -1104,21 +1127,16 @@ module Rsel
     #       | Check nasty form fields | !{name:Ken,e-mail:,SEND ME SPAM: yes} |
     #
     # @since 0.1.1
+    #
     def fields_equal_among(fields={}, ids={}, scope={})
       return skip_status if skip_step?
-      # FitNesse passes in "" for an empty field.  Fix it.
+      # FitNesse passes in "" for an empty field. Fix it.
       ids = {} if ids == ""
       fields = {} if fields == ""
 
-      # Ignore case in the hash.  set_field_among does this too, but doing it
-      # just once this way is faster.
-      ids.keys.each do |key|
-        unless key.to_s.downcase == key then
-          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
-          ids.delete(key)
-        end
+      fields.keys.each do |field|
+        return failure unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope)
       end
-      fields.keys.each { |field| return failure unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope) }
       return true
     end
 
@@ -1140,7 +1158,7 @@ module Rsel
         else
           # The method call succeeded; did it return true or false?
           return failure if result == false
-          # If a string, return that.  We might Check or Show it.
+          # If a string, return that. We might Check or Show it.
           return result if result == true || (result.is_a? String)
           # Not a Boolean return value or string--assume passing
           return true
@@ -1175,15 +1193,16 @@ module Rsel
     #   Plain text that should be visible on the current page
     #
     # @example
-    # | If I see | pop-over ad |
-    # | Click | Close | button |
-    # | End if |
+    #   | If I see | pop-over ad |
+    #   | Click | Close | button |
+    #   | End if |
     #
     # @since 0.1.1
+    #
     def if_i_see(text)
       return false if aborted?
       # If this if is inside a block that's not running, record that.
-      if !@conditional_stack.last then
+      if !@conditional_stack.last
         @conditional_stack.push nil
         return nil
       end
@@ -1197,23 +1216,24 @@ module Rsel
     end
 
     # If the given parameter is "yes" or "true", do the steps until I see an
-    # otherwise or end_if.  Otherwise do not do those steps.
+    # otherwise or end_if. Otherwise do not do those steps.
     #
     # @param [String] text
     #   A string. "Yes" or "true" (case-insensitive) cause the following steps
     #   to run. Anything else does not.
     #
     # @example
-    # | If parameter | ${spam_me} |
-    # | Enable | Send me spam | checkbox |
-    # | See | Email: | within | 10 | seconds |
-    # | Type | ${spam_me_email} | into field | spammable_email |
-    # | End if |
+    #   | If parameter | ${spam_me} |
+    #   | Enable | Send me spam | checkbox |
+    #   | See | Email: | within | 10 | seconds |
+    #   | Type | ${spam_me_email} | into field | spammable_email |
+    #   | End if |
     #
     # @since 0.1.1
+    #
     def if_parameter(text)
       return false if aborted?
-      if !@conditional_stack.last then
+      if !@conditional_stack.last
         @conditional_stack.push nil
         return nil
       end
@@ -1229,6 +1249,7 @@ module Rsel
     # End an if block.
     #
     # @since 0.1.1
+    #
     def end_if
       return false if aborted?
       # If there was no prior matching if, fail.
@@ -1250,6 +1271,7 @@ module Rsel
     # | end if |
     #
     # @since 0.1.1
+    #
     def otherwise
       return false if aborted?
       # If there was no prior matching if, fail.
@@ -1338,6 +1360,7 @@ module Rsel
     # because we're in a conditional?
     #
     # @since 0.1.1
+    #
     def skip_step?
       return aborted? || !@conditional_stack.last
     end
@@ -1345,6 +1368,7 @@ module Rsel
     # Presuming the current step should be skipped, what status should I return?
     #
     # @since 0.1.1
+    #
     def skip_status
       return false if aborted?
       return nil if !@conditional_stack.last
