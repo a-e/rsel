@@ -8,6 +8,7 @@ Rsel History
 - Temporal visibility (see|do_not_see)_within_seconds
 - Generic field fill-in (set_field, set_field_among)
 - Hash-based field fill-in (set_fields, sef_fields_among)
+- Allow visit to accept URLs containing markup
 
 
 0.1.0
