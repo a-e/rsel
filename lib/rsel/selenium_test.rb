@@ -876,12 +876,7 @@ module Rsel
       # FitNesse passes in "" for an empty field. Fix it.
       ids = {} if ids == ""
 
-      # Ignore case in the hash.
-      ids.keys.each do |key|
-        unless key.to_s.downcase == key
-          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
-        end
-      end
+      normalize_ids(ids)
 
       if ids[field.downcase]
         return set_field(escape_for_hash(ids[field.downcase]), value, scope)
@@ -957,14 +952,6 @@ module Rsel
       ids = {} if ids == ""
       fields = {} if fields == ""
 
-      # Ignore case in the hash. set_field_among does this too, but doing it
-      # just once this way is faster.
-      ids.keys.each do |key|
-        unless key.to_s.downcase == key
-          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
-          ids.delete(key)
-        end
-      end
       fields.each do |key, value|
         key_esc = escape_for_hash(key.to_s)
         value_esc = escape_for_hash(value.to_s)
@@ -1074,10 +1061,7 @@ module Rsel
       # FitNesse passes in "" for an empty field. Fix it.
       ids = {} if ids == ""
 
-      # Ignore case in the hash.
-      ids.keys.each do |key|
-        ids[escape_for_hash(key.to_s.downcase)] = ids[key] unless key.to_s.downcase == key
-      end
+      normalize_ids(ids)
 
       if ids[field.downcase]
         return generic_field_equals(escape_for_hash(ids[field.downcase]), value, scope)
@@ -1150,14 +1134,6 @@ module Rsel
       ids = {} if ids == ""
       fields = {} if fields == ""
 
-      # Ignore case in the hash. set_field_among does this too, but doing it
-      # just once this way is faster.
-      ids.keys.each do |key|
-        unless key.to_s.downcase == key
-          ids[escape_for_hash(key.to_s.downcase)] = ids[key]
-          ids.delete(key)
-        end
-      end
       fields.keys.each do |field|
         return failure unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope)
       end

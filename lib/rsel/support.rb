@@ -137,6 +137,23 @@ module Rsel
     end
 
 
+    # Normalize the given hash of name => locator mappings.
+    # Converts all keys to lowercase and calls {#escape_for_hash} on them.
+    #
+    def normalize_ids(ids)
+      ids.keys.each do |key|
+        new_key = escape_for_hash(key.to_s.downcase)
+        new_value = escape_for_hash(ids[key])
+        ids[new_key] = new_value
+
+        # Delete the old key if necessary
+        if new_key != key
+          ids.delete(key)
+        end
+      end
+    end
+
+
     # Strip HTML tags from the given text. This can be used for converting
     # URLs that FitNesse has marked up back into plain URLs.
     #

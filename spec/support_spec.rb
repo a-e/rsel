@@ -67,6 +67,40 @@ describe Rsel::Support do
     end
   end
 
+  describe "#normalize_ids" do
+    it "converts keys to lowercase" do
+      ids = {
+        "First Name" => "Eric",
+        "PIN" => "123",
+      }
+      normalize_ids(ids)
+      ids.should == {
+        "first name" => "Eric",
+        "pin" => "123",
+      }
+    end
+
+    it "escapes all keys using #escape_for_hash" do
+      ids = {
+        'with\[brackets\]' => 'Foo',
+      }
+      normalize_ids(ids)
+      ids.should == {
+        'with{brackets}' => 'Foo',
+      }
+    end
+
+    it "escapes values but leaves case alone" do
+      ids = {
+        'foo' => 'with\;colon',
+      }
+      normalize_ids(ids)
+      ids.should == {
+        'foo' => 'with:colon',
+      }
+    end
+  end
+
   describe "#strip_tags" do
     it "strips anchor tags from links" do
       html = '<a href="http://example.com/">http://example.com</a>'
