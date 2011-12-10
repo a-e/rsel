@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'yard' # For documentation
   s.add_development_dependency 'rdiscount' # For YARD / Markdown
   s.add_development_dependency 'rspec', '>= 2.2.0'
+  s.add_development_dependency 'rcov'
 
   s.files = `git ls-files`.split("\n")
   # Don't include .jar files in distribution

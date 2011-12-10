@@ -4,3 +4,5 @@ Gemfile.lock
 selenium-rc.log
 pkg/*
 *~
+coverage/*
+doc/*

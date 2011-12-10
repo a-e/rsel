@@ -50,6 +50,32 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = ['--color', '--format doc']
 end
 
+namespace 'rcov' do
+  desc "Run support spec tests with coverage analysis"
+  RSpec::Core::RakeTask.new(:support) do |t|
+    t.pattern = 'spec/support_spec.rb'
+    t.rspec_opts = ['--color', '--format doc']
+    t.rcov = true
+    t.rcov_opts = [
+      '--exclude /.gem/,/gems/,spec',
+      '--include lib/**/*.rb',
+    ]
+  end
+
+  desc "Run support spec tests with coverage analysis"
+  RSpec::Core::RakeTask.new(:all) do |t|
+    t.pattern = 'spec/**/*.rb'
+    t.rspec_opts = ['--color', '--format doc']
+    t.rcov = true
+    t.rcov_opts = [
+      '--exclude /.gem/,/gems/,spec',
+      '--include lib/**/*.rb',
+      # Ensure the main .rb file gets included
+      '--include-file lib/rsel/selenium_test.rb',
+    ]
+  end
+end
+
 namespace 'servers' do
   desc "Start the Selenium and testapp servers"
   task :start do
