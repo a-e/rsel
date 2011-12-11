@@ -1,5 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + "/spec_helper")
 
+require 'xpath'
+
 describe Rsel::Support do
   describe "#loc" do
     it "returns Selenium-style locators unchanged" do
@@ -42,6 +44,16 @@ describe Rsel::Support do
       lambda do
         xpath('junk', 'hello')
       end.should raise_error
+    end
+
+    it "applies within scope" do
+      # Quick-and-dirty: Just ensure the scoping phrase appears in the xpath
+      xpath('link', 'Edit', :within => '#first_div').should include('#first_div')
+    end
+
+    it "applies in_row scope" do
+      # Quick-and-dirty: Just ensure the scoping phrase appears in the xpath
+      xpath('link', 'Edit', :in_row => 'Eric').should include('Eric')
     end
   end
 
@@ -155,6 +167,30 @@ describe Rsel::Support do
     it "leaves plain text alone" do
       html = 'http://example.com'
       strip_tags(html).should == 'http://example.com'
+    end
+  end
+
+  describe "#xpath_expressions" do
+    it "breaks down XPath::Union into XPath::Expressions" do
+      foo = XPath::HTML.option('foo')
+      bar = XPath::HTML.option('bar')
+      baz = XPath::HTML.option('baz')
+      union = XPath::Union.new(foo, bar, baz)
+      xpath_expressions(union).should == [foo, bar, baz]
+    end
+
+    it "returns [expr] for a single XPath::Expression" do
+      foo = XPath::HTML.option('foo')
+      xpath_expressions(foo).should == [foo]
+    end
+  end
+
+  describe "#apply_scope" do
+    it "returns an xpath string with one element scoped inside another" do
+      row = XPath::HTML.send('table_row', 'foo')
+      link = XPath::HTML.send('link', 'bar')
+      union = XPath::Union.new(row.child(link))
+      apply_scope(row, link).should == union.to_s
     end
   end
 end
