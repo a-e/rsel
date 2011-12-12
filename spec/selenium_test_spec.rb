@@ -358,7 +358,7 @@ describe Rsel::SeleniumTest do
           @st.click("About this site").should be_nil
           @st.end_if.should be_nil
           @st.end_if.should be_true
-        end 
+        end
       end
     end
 
@@ -1150,7 +1150,7 @@ describe Rsel::SeleniumTest do
             end
 
             it "field exists, but not within scope" do
-              @st.set_field("Life story", "Long story", 
+              @st.set_field("Life story", "Long story",
                             :within => 'spouse_form').should be_false
             end
 
@@ -2002,7 +2002,7 @@ describe Rsel::SeleniumTest do
       end
     end # fields_equal
 
-    
+
     describe "#set_fields_among" do
       before(:each) do
         @st.visit("/form").should be_true
@@ -2071,7 +2071,7 @@ describe Rsel::SeleniumTest do
     end # set_fields_among
   end # generic_fields
 
-    
+
     describe "#fields_equal_among" do
       before(:each) do
         @st.visit("/form").should be_true
@@ -2213,7 +2213,32 @@ describe Rsel::SeleniumTest do
         end
       end
     end
+
+    describe "#pause_seconds" do
+      it "returns true" do
+        @st.pause_seconds(0).should == true
+        @st.pause_seconds(1).should == true
+      end
+    end
   end # waiting
+
+
+  context "method inspection" do
+    describe "respond_to?" do
+      it "returns true if a method is explicitly defined" do
+        @st.respond_to?('see').should == true
+      end
+
+      it "returns true if the Selenium::Client::Driver defines the method" do
+        @st.respond_to?('is_element_present').should == true
+      end
+
+      it "returns false if the method isn't defined" do
+        @st.respond_to?('junk').should == false
+      end
+    end
+  end
+
 
   context "stop on failure" do
     before(:each) do
