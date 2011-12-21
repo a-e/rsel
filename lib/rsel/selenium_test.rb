@@ -120,6 +120,7 @@ module Rsel
     end
 
     # Show any current error messages.
+    # Also clears the error message log.
     #
     # @example
     #   | Show | errors |
@@ -144,6 +145,7 @@ module Rsel
     #
     def begin_scenario
       @found_failure = false
+      @errors = []
       return true
     end
 
@@ -1240,6 +1242,40 @@ module Rsel
 
       # Test the condition.
       @conditional_stack.push /^(yes|true)$/i === text
+
+      return true if @conditional_stack.last == true
+      return nil if @conditional_stack.last == false
+      return failure
+    end
+
+    # If the first parameter is the same as the second, do the steps until I see an
+    # otherwise or end_if. Otherwise do not do those steps.
+    #
+    # @param [String] text
+    #   A string.
+    #
+    # @param [String] expected
+    #   Another string.
+    #
+    # @example
+    #   | $name= | Get value | id=response_field |
+    #   | If | $name | is | George |
+    #   | Type | Hi, George. | into | chat | field |
+    #   | Otherwise |
+    #   | Type | Go away! Bring me George! | into | chat | field |
+    #   | End if |
+    #
+    # @since 0.1.2
+    #
+    def if_is(text, expected)
+      return false if aborted?
+      if !@conditional_stack.last
+        @conditional_stack.push nil
+        return nil
+      end
+
+      # Test the condition.
+      @conditional_stack.push text == expected
 
       return true if @conditional_stack.last == true
       return nil if @conditional_stack.last == false

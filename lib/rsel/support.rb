@@ -141,6 +141,7 @@ module Rsel
     # Converts all keys to lowercase and calls {#escape_for_hash} on them.
     #
     def normalize_ids(ids)
+      ids = {} unless ids.is_a? Hash
       ids.keys.each do |key|
         new_key = escape_for_hash(key.to_s.downcase)
         new_value = escape_for_hash(ids[key])
