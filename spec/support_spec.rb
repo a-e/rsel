@@ -37,6 +37,14 @@ describe Rsel::Support do
         loc('foo')
       end.should raise_error
     end
+
+    it "accepts within for css locators" do
+      loc("css=.boss", '', {:within => "employees"}).should == "css=#employees .boss"
+    end
+
+    it "accepts in_row for css locators" do
+      loc("css=td.salary", '', {:in_row => "Eric"}).should == "css=tr:contains(\"Eric\") td.salary"
+    end
   end
 
   describe "#xpath" do

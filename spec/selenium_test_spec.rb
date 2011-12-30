@@ -363,6 +363,48 @@ describe Rsel::SeleniumTest do
     end
 
     # TODO: if_is
+    describe "#if_is" do
+      context "passes when" do
+        it "sees the same string" do
+          @st.if_is("yes", 'yes').should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+
+        it "sees a matching empty string" do
+          @st.if_is("",'').should be_true
+          @st.click("About this site").should be_true
+          @st.end_if.should be_true
+        end
+
+        it "is inside a passed block" do
+          @st.if_i_see("About this site").should be_true
+          @st.click("About this site").should be_true
+          @st.page_loads_in_seconds_or_less(10).should be_true
+          @st.if_is("True", "True").should be_true
+          @st.see("is really cool.").should be_true
+          @st.end_if.should be_true
+          @st.end_if.should be_true
+        end
+      end
+
+      context "skips when" do
+        it "sees different strings" do
+          @st.if_is("Ken", "Bogus").should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.end_if.should be_true
+        end
+
+        it "is inside a skipped block" do
+          @st.if_is("Ken", "Bogus").should be_nil
+          @st.click("Bogus link").should be_nil
+          @st.if_is("True", "True").should be_nil
+          @st.click("About this site").should be_nil
+          @st.end_if.should be_nil
+          @st.end_if.should be_true
+        end
+      end
+    end
 
     describe "#otherwise" do
       context "skips when" do
@@ -2172,16 +2214,16 @@ describe Rsel::SeleniumTest do
           @st.row_exists("Eric, Pierce").should be_true
           @st.row_exists("Pierce, epierce@example.com").should be_true
         end
+
+        it "cell values are not consecutive" do
+          @st.row_exists("First name, Email").should be_true
+          @st.row_exists("Eric, epierce@example.com").should be_true
+        end
       end
 
       context "fails when" do
         it "no row exists" do
           @st.row_exists("Middle name, Maiden name, Email").should be_false
-        end
-
-        it "cell values are not consecutive" do
-          @st.row_exists("First name, Email").should be_false
-          @st.row_exists("Eric, epierce@example.com").should be_false
         end
       end
     end

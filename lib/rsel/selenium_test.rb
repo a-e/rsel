@@ -4,7 +4,6 @@ require 'rubygems'
 require 'xpath'
 require 'selenium/client'
 require 'rsel/support'
-require 'rsel/xpath'
 require 'rsel/exceptions'
 
 module Rsel
@@ -24,7 +23,6 @@ module Rsel
   class SeleniumTest
 
     include Support
-    include Xpaths
 
     # Initialize a test, connecting to the given Selenium server.
     #
@@ -358,20 +356,21 @@ module Rsel
 
 
     # Ensure that a table row with the given cell values exists.
+    # Order does not matter as of v0.1.2.
     #
     # @param [String] cells
-    #   Comma-separated cell values you expect to see
+    #   Comma-separated cell values you expect to see.  If you need to include a
+    #   literal comma, use the {#escape_for_hash} syntax, \'.
     #
     # @example
     #   | Row exists | First, Middle, Last, Email |
-    #   | Row | First, Middle, Last, Email | exists |
+    #   | Row | First, Last, Middle, Email | exists |
     #
     # @since 0.0.3
     #
     def row_exists(cells)
       return skip_status if skip_step?
-      row = XPath.descendant(:tr)[XPath::HTML.table_row(cells.split(/, */))]
-      pass_if @browser.element?("xpath=#{row.to_s}")
+      pass_if @browser.element?("xpath=#{xpath_row_containing(cells.split(/, */).map{|s| escape_for_hash(s)})}")
     end
 
     # 
