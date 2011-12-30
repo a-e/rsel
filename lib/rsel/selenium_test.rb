@@ -4,6 +4,7 @@ require 'rubygems'
 require 'xpath'
 require 'selenium/client'
 require 'rsel/support'
+require 'rsel/xpath'
 require 'rsel/exceptions'
 
 module Rsel
@@ -23,7 +24,7 @@ module Rsel
   class SeleniumTest
 
     include Support
-
+    include Xpaths
 
     # Initialize a test, connecting to the given Selenium server.
     #
@@ -289,6 +290,7 @@ module Rsel
     end
 
 
+
     # Ensure that the current page has the given title text.
     #
     # @param [String] title
@@ -372,6 +374,7 @@ module Rsel
       pass_if @browser.element?("xpath=#{row.to_s}")
     end
 
+    # 
 
     # Type a value into the given field. Passes if the field exists and is
     # editable. Fails if the field is not found, or is not editable.

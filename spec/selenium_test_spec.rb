@@ -362,6 +362,8 @@ describe Rsel::SeleniumTest do
       end
     end
 
+    # TODO: if_is
+
     describe "#otherwise" do
       context "skips when" do
         it "its if was true" do
