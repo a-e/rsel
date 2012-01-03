@@ -264,7 +264,7 @@ module Rsel
     #
     def see_within_seconds(text, seconds=-1)
       return skip_status if skip_step?
-      seconds = @browser.default_timeout_in_seconds if seconds < 0
+      seconds = @browser.default_timeout_in_seconds if seconds == -1
       pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
       # This would be better if it worked:
       # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
@@ -285,7 +285,7 @@ module Rsel
     #
     def do_not_see_within_seconds(text, seconds=-1)
       return skip_status if skip_step?
-      seconds = @browser.default_timeout_in_seconds if seconds < 0
+      seconds = @browser.default_timeout_in_seconds if seconds == -1
       pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
       # This would be better if it worked:
       # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
