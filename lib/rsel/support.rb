@@ -227,6 +227,45 @@ module Rsel
         return "concat('#{result}')"
       end
     end
+
+    # Convert a string like "yes", "true", "1", etc.
+    # Values currently recognized as true, case-insensitive:
+    # * [empty string]
+    # * 1
+    # * Check
+    # * Checked
+    # * On
+    # * Select
+    # * Selected
+    # * True
+    # * Yes
+    def string_to_boolean(s)
+      return /^(?:yes|true|on|(?:check|select)(?:ed)?|1|)$/i === s
+    end
+    def string_to_boolean?(s)
+      return string_to_boolean(s)
+    end
+
+    # Compare values like Selenium does, with regexpi? and globs.
+    # @param [String] text
+    #   A string.
+    #
+    # @param [String] expected
+    #   Another string.  This one may have glob:, regexp:, etc.
+    #
+    def selenium_compare(text, expected) 
+      if expected.sub!(/^regexp:/, '')
+        return /#{expected}/ === text
+      elsif expected.sub!(/^regexpi:/, '')
+        return /#{expected}/i === text
+      elsif expected.sub!(/^exact:/, '')
+        return text == expected
+      else
+        # Default is glob, whether or not glob: is present.
+        expected.sub!(/^glob:/, '')
+        return File.fnmatch(expected, text)
+      end
+    end
   end
 end
 

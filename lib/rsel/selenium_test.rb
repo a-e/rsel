@@ -257,11 +257,14 @@ module Rsel
     # @example
     #   | Click | ajax_login | button |
     #   | See | Welcome back, Marcus | within | 10 | seconds |
+    #   | Note | The following uses the Selenium default timeout: |
+    #   | See | How do you feel? | within seconds |
     #
     # @since 0.1.1
     #
-    def see_within_seconds(text, seconds)
+    def see_within_seconds(text, seconds=-1)
       return skip_status if skip_step?
+      seconds = @browser.default_timeout_in_seconds if seconds < 0
       pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
       # This would be better if it worked:
       # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
@@ -280,8 +283,9 @@ module Rsel
     #
     # @since 0.1.1
     #
-    def do_not_see_within_seconds(text, seconds)
+    def do_not_see_within_seconds(text, seconds=-1)
       return skip_status if skip_step?
+      seconds = @browser.default_timeout_in_seconds if seconds < 0
       pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
       # This would be better if it worked:
       # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
@@ -817,13 +821,7 @@ module Rsel
     #   non-Selenium methods may not work for some links and buttons.
     # @param [String] value
     #   Value you want to set the field to. (Default: empty string.)
-    #   Recognized, case-insensitive values to turn a checkbox on are:
-    #   * [empty string]
-    #   * Check
-    #   * Checked
-    #   * On
-    #   * True
-    #   * Yes
+    #   Parsed by `string_to_boolean'
     #
     # @since 0.1.1
     #
@@ -843,7 +841,7 @@ module Rsel
         when 'input.radio'
           return select_radio(loceval)
         when 'input.checkbox'
-          if /^(yes|true|on|check(ed)?|)$/i === value
+          if string_to_boolean(value)
             return enable_checkbox(loceval)
           else
             return disable_checkbox(loceval)
@@ -991,16 +989,7 @@ module Rsel
     #   non-Selenium methods may not work for some links and buttons.
     # @param [String] value
     #   Value you want to verify the field equal to. (Default: empty string.)
-    #   Recognized, case-insensitive values to verify a selected checkbox or
-    #   radio button are:
-    #   * [empty string]
-    #   * Check
-    #   * Checked
-    #   * Select
-    #   * Selected
-    #   * On
-    #   * True
-    #   * Yes
+    #   Parsed by `string_to_boolean'
     #
     # @since 0.1.1
     #
@@ -1018,13 +1007,13 @@ module Rsel
         when 'input.text', /^textarea\./
           return field_equals(loceval, value)
         when 'input.radio'
-          if /^(yes|true|on|(check|select)(ed)?|)$/i === value
+          if string_to_boolean(value)
             return radio_is_enabled(loceval)
           else
             return radio_is_disabled(loceval)
           end
         when 'input.checkbox'
-          if /^(yes|true|on|(check|select)(ed)?|)$/i === value
+          if string_to_boolean(value)
             return checkbox_is_enabled(loceval)
           else
             return checkbox_is_disabled(loceval)
@@ -1223,8 +1212,8 @@ module Rsel
     # otherwise or end_if. Otherwise do not do those steps.
     #
     # @param [String] text
-    #   A string. "Yes" or "true" (case-insensitive) cause the following steps
-    #   to run. Anything else does not.
+    #   A string. Parsed by `string_to_boolean'. True values cause the
+    #   following steps to run. Anything else does not.
     #
     # @example
     #   | If parameter | ${spam_me} |
@@ -1243,7 +1232,7 @@ module Rsel
       end
 
       # Test the condition.
-      @conditional_stack.push /^(yes|true)$/i === text
+      @conditional_stack.push string_to_boolean(text)
 
       return true if @conditional_stack.last == true
       return nil if @conditional_stack.last == false
@@ -1258,6 +1247,7 @@ module Rsel
     #
     # @param [String] expected
     #   Another string.
+    #   Uses `selenium_compare', so glob, regexp, etc. are accepted.
     #
     # @example
     #   | $name= | Get value | id=response_field |
@@ -1277,7 +1267,7 @@ module Rsel
       end
 
       # Test the condition.
-      @conditional_stack.push text == expected
+      @conditional_stack.push selenium_compare(text, expected)
 
       return true if @conditional_stack.last == true
       return nil if @conditional_stack.last == false

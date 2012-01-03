@@ -220,6 +220,12 @@ describe Rsel::SeleniumTest do
           @st.see_within_seconds("The text is here!", 10).should be_true
           @st.see("The text is here!").should be_true
         end
+        it "text appears within default time" do
+          @st.see("The text is coming...").should be_true
+          @st.do_not_see("The text is here!").should be_true
+          @st.see_within_seconds("The text is here!").should be_true
+          @st.see("The text is here!").should be_true
+        end
       end
 
       context "fails when" do
@@ -248,6 +254,11 @@ describe Rsel::SeleniumTest do
         it "text disappears in time" do
           @st.see_within_seconds("The text is here!", 10).should be_true
           @st.do_not_see_within_seconds("The text is here!", 10).should be_true
+          @st.do_not_see("The text is here!").should be_true
+        end
+        it "text disappears within default time" do
+          @st.see_within_seconds("The text is here!", 10).should be_true
+          @st.do_not_see_within_seconds("The text is here!").should be_true
           @st.do_not_see("The text is here!").should be_true
         end
       end
