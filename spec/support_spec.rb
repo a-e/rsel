@@ -275,5 +275,29 @@ describe Rsel::Support do
       end
     end
   end
+
+  describe "#xpath_sanitize" do
+    it "escapes one single-quote" do
+      result = xpath_sanitize("Bob's water")
+      result.should == %Q{concat('Bob', "'", 's water')}
+    end
+
+    it "escapes two single-quotes" do
+      result = xpath_sanitize("Bob's on the water's edge")
+      result.should == %Q{concat('Bob', "'", 's on the water', "'", 's edge')}
+    end
+
+    it "leaves strings without single-quotes alone" do
+      result = xpath_sanitize("bobs in the water")
+      result.should == %Q{'bobs in the water'}
+    end
+  end
+
+  describe "#xpath_row_containing" do
+    it "returns an XPath for a table row containing multiple strings" do
+      result = xpath_row_containing(['abc', 'def'])
+      result.should == %Q{//tr[contains(., 'abc') and contains(., 'def')]}
+    end
+  end
 end
 
