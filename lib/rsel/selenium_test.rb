@@ -360,7 +360,7 @@ module Rsel
 
 
     # Ensure that a table row with the given cell values exists.
-    # Order does not matter as of v0.1.2.
+    # Order does not matter as of v0.1.1.
     #
     # @param [String] cells
     #   Comma-separated cell values you expect to see.  If you need to include a
@@ -377,7 +377,7 @@ module Rsel
       pass_if @browser.element?("xpath=#{xpath_row_containing(cells.split(/, */).map{|s| escape_for_hash(s)})}")
     end
 
-    # 
+    #
 
     # Type a value into the given field. Passes if the field exists and is
     # editable. Fails if the field is not found, or is not editable.
@@ -1257,7 +1257,7 @@ module Rsel
     #   | Type | Go away! Bring me George! | into | chat | field |
     #   | End if |
     #
-    # @since 0.1.2
+    # @since 0.1.1
     #
     def if_is(text, expected)
       return false if aborted?

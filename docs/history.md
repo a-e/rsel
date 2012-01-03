@@ -4,11 +4,15 @@ Rsel History
 0.1.1
 -----
 
-- Conditional expressions (if_i_see, if_parameter, otherwise, end_if)
+- Conditional expressions (if_is, if_i_see, if_parameter, otherwise, end_if)
 - Temporal visibility (see|do_not_see)_within_seconds
+- Generic field equality (generic_field_equals)
 - Generic field fill-in (set_field, set_field_among)
 - Hash-based field fill-in (set_fields, sef_fields_among)
+- Hash-based field equality (fields_equal, field_equals_among, fields_equal_among)
 - Allow visit to accept URLs containing markup
+- Show error messages in FitNesse: | Show | errors |
+- row_exists now ignores cell order
 
 
 0.1.0
