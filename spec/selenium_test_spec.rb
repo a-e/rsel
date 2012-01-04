@@ -19,6 +19,79 @@ describe Rsel::SeleniumTest do
       @st.url.should == "http://localhost:8070/"
       @st.browser.host.should == "localhost"
       @st.browser.port.should == 4444
+      @st.stop_on_failure.should == false
+      @st.found_failure.should == false
+    end
+
+    context "stop_on_failure option" do
+      it "can be initialized with a string" do
+        st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => 'true')
+        st.stop_on_failure.should be_true
+        st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => 'FALSE')
+        st.stop_on_failure.should be_false
+      end
+
+      it "can be initialized with a boolean" do
+        st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => true)
+        st.stop_on_failure.should be_true
+        st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => false)
+        st.stop_on_failure.should be_false
+      end
+    end
+
+  end
+
+  context "opening, closing, and maximizing" do
+    describe "#open_browser" do
+      # FIXME: This blows up for some unknown reason
+      #it "raises StopTestCannotConnect if the connection fails" do
+        #st = Rsel::SeleniumTest.new('bogus_host')
+        #lambda do
+          #st.open_browser
+        #end.should raise(Rsel::StopTestCannotConnect)
+      #end
+
+      # TODO: Find a cross-platform way of testing this
+      #it "uses the javascript-xpath library for *iexplore" do
+        #st = Rsel::SeleniumTest.new('localhost', :browser => '*iexplore')
+        #st.open_browser
+      #end
+    end
+
+    describe "#maximize_browser" do
+      it "returns true" do
+        st = Rsel::SeleniumTest.new('http://localhost:8070')
+        st.open_browser
+        st.maximize_browser.should be_true
+        st.close_browser
+      end
+    end
+
+    describe "#close_browser" do
+      before(:each) do
+        @st_temp = Rsel::SeleniumTest.new('http://localhost:8070')
+        @st_temp.open_browser
+      end
+
+      it "returns true if there are no errors" do
+        @st_temp.close_browser('and show errors').should be_true
+      end
+
+      it "returns true if there are errors, but show_errors is unset" do
+        @st_temp.see("Nonexistent words")
+        @st_temp.close_browser('').should be_true
+      end
+
+      # FIXME: Figure out why this fails. All rspec says is:
+      #   Failure/Error: end.should raise(Rsel::StopTestStepFailed)
+      #   Rsel::StopTestStepFailed:
+      #     Rsel::StopTestStepFailed
+      #it "raises StopTestStepFailed if there are errors and show_errors is set" do
+        #@st_temp.see("Nonexistent words")
+        #lambda do
+          #@st_temp.close_browser('and show errors')
+        #end.should raise(Rsel::StopTestStepFailed)
+      #end
     end
   end
 
@@ -965,7 +1038,7 @@ describe Rsel::SeleniumTest do
       end
     end
 
-    context "#radio_is_enabled" do
+    describe "#radio_is_enabled" do
       context "passes when" do
         context "radiobutton with label" do
           it "exists, and is enabled" do
@@ -998,6 +1071,44 @@ describe Rsel::SeleniumTest do
           it "exists and is enabled, but not within scope" do
             @st.select_radio("Briefs", :within => "clothing")
             @st.radio_is_enabled("Briefs", :within => "food").should be_false
+          end
+        end
+      end
+    end
+
+    describe "#radio_is_disabled" do
+      context "passes when" do
+        context "radiobutton with label" do
+          it "exists, and is disabled" do
+            @st.select_radio("Briefs")
+            @st.radio_is_disabled("Boxers").should be_true
+          end
+
+          it "exists within scope, and is disabled" do
+            @st.select_radio("Briefs", :within => "clothing")
+            @st.radio_is_disabled("Boxers", :within => "clothing").should be_true
+          end
+
+          it "exists in table row, and is disabled" do
+            # TODO
+          end
+        end
+      end
+
+      context "fails when" do
+        context "radiobutton with label" do
+          it "does not exist" do
+            @st.radio_is_disabled("Naked").should be_false
+          end
+
+          it "exists, but is enabled" do
+            @st.select_radio("Briefs")
+            @st.radio_is_disabled("Briefs").should be_false
+          end
+
+          it "exists and is disabled, but not within scope" do
+            @st.select_radio("Briefs", :within => "clothing")
+            @st.radio_is_disabled("Briefs", :within => "food").should be_false
           end
         end
       end
@@ -2482,43 +2593,53 @@ describe Rsel::SeleniumTest do
   end # stop on failure
 
 
-  context "Selenium::Client::Driver wrapper" do
-    before(:each) do
-      @st.visit("/form").should be_true
+  describe "#method_missing" do
+    context "method is defined in Selenium::Client::Driver" do
+      before(:each) do
+        @st.visit("/form").should be_true
+      end
+
+      context "method returning Boolean" do
+        it "passes if method returns true" do
+          @st.is_element_present("id=first_name").should be_true
+          @st.is_visible("id=first_name").should be_true
+          @st.is_text_present("This page has some random forms").should be_true
+        end
+
+        it "fails if method returns false" do
+          @st.is_element_present("id=bogus_id").should be_false
+          @st.is_visible("id=bogus_id").should be_false
+          @st.is_text_present("This text is not there").should be_false
+        end
+      end
+
+      context "method returning String" do
+        it "returns the String" do
+          @st.get_text("id=salami_checkbox").should eq("I like salami")
+        end
+      end
+
+      context "method not returning Boolean or String" do
+        it "passes if method doesn't raise an exception" do
+          @st.get_title.should be_true
+          @st.mouse_over("id=first_name").should be_true
+        end
+
+        it "fails if method raises an exception" do
+          @st.double_click("id=bogus_id").should be_false
+          @st.mouse_over("id=bogus_id").should be_false
+        end
+      end
+    end # Selenium::Client::Driver
+
+    context "method is not defined in Selenium::Client::Driver" do
+      it "raises an exception" do
+        lambda do
+          @st.really_undefined_method
+        end.should raise_error
+      end
     end
-
-    context "method returning Boolean" do
-      it "passes if method returns true" do
-        @st.is_element_present("id=first_name").should be_true
-        @st.is_visible("id=first_name").should be_true
-        @st.is_text_present("This page has some random forms").should be_true
-      end
-
-      it "fails if method returns false" do
-        @st.is_element_present("id=bogus_id").should be_false
-        @st.is_visible("id=bogus_id").should be_false
-        @st.is_text_present("This text is not there").should be_false
-      end
-    end
-
-    context "method returning String" do
-      it "returns the String" do
-        @st.get_text("id=salami_checkbox").should eq("I like salami")
-      end
-    end
-
-    context "method not returning Boolean or String" do
-      it "passes if method doesn't raise an exception" do
-        @st.get_title.should be_true
-        @st.mouse_over("id=first_name").should be_true
-      end
-
-      it "fails if method raises an exception" do
-        @st.double_click("id=bogus_id").should be_false
-        @st.mouse_over("id=bogus_id").should be_false
-      end
-    end
-  end # Selenium::Client::Driver wrapper
+  end # method_missing
 
 end
 
