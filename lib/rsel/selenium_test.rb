@@ -110,11 +110,15 @@ module Rsel
     #
     # @example
     #   | Close browser |
+    #   | Close browser | and show errors |
+    #   | Close browser | without showing errors |
     #
     def close_browser(show_errors='')
       @browser.close_current_browser_session
       # Show errors in an exception if requested.
-      raise StopTestStepFailed, @errors.join("\n").gsub('<','&lt;') if(!(/not|without/i === show_errors) && @errors.length > 0)
+      if (!(/not|without/i === show_errors) && @errors.length > 0)
+        raise StopTestStepFailed, @errors.join("\n").gsub('<','&lt;')
+      end
       return true
     end
 
