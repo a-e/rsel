@@ -202,6 +202,80 @@ describe Rsel::Support do
     end
   end
 
+  describe "#string_to_boolean" do
+    it "returns true for true strings" do
+      [ "", "1", "check", "checked", "on", "select", "selected", "true", "yes" ].each { |s| string_to_boolean(s).should be_true }
+    end
+    it "is case-insensitive" do
+      [ "Check", "Checked", "On", "Select", "Selected", "True", "Yes" ].each { |s| string_to_boolean(s).should be_true }
+    end
+    it "returns false for other strings" do
+      [ "False", "WRONG!", "NoNSEnSe$%$@^@!^!%", "0", "null" ].each { |s| string_to_boolean(s).should be_false }
+    end
+  end
+
+  describe "#selenium_compare" do
+    context "returns true when" do
+      it "gets most identical strings" do
+        selenium_compare("","").should be_true
+        selenium_compare("This","This").should be_true
+      end
+      it "gets exact:ly identical strings" do
+        selenium_compare("","exact:").should be_true
+        selenium_compare("This","exact:This").should be_true
+      end
+      it "gets matching globs" do 
+        selenium_compare("", "*").should be_true
+        selenium_compare("anything", "*").should be_true
+        selenium_compare("Neffing", "Nef*").should be_true
+      end
+      it "gets matching labeled globs" do 
+        selenium_compare("", "glob:*").should be_true
+        selenium_compare("anything", "glob:*").should be_true
+        selenium_compare("Neffing", "glob:Nef*").should be_true
+      end
+      it "gets matching regexes" do 
+        selenium_compare("", "regexp:.*").should be_true
+        selenium_compare("anything", "regexp:.*").should be_true
+        selenium_compare("Neffing", "regexp:^Nef[a-z]*$").should be_true
+      end
+      it "gets matching case-insensitive regexes" do 
+        selenium_compare("", "regexpi:.*").should be_true
+        selenium_compare("Neffing", "regexpi:^nef[A-Z]*$").should be_true
+      end
+    end
+
+    context "returns false when" do
+      it "gets most differing strings" do
+        selenium_compare("","!").should be_false
+        selenium_compare("&","").should be_false
+        selenium_compare("This","That").should be_false
+      end
+      it "gets exact:ly different strings" do
+        selenium_compare("","exact:!").should be_false
+        selenium_compare("&","exact:").should be_false
+        selenium_compare("This","exact:That").should be_false
+      end
+      it "gets non-matching globs" do 
+        selenium_compare("No", "?").should be_false
+        selenium_compare("Netting", "Nef*").should be_false
+      end
+      it "gets non-matching labeled globs" do 
+        selenium_compare("No", "glob:?").should be_false
+        selenium_compare("Netting", "glob:Nef*").should be_false
+      end
+      it "gets non-matching regexes" do 
+        selenium_compare("1", "regexp:^[a-z]*$").should be_false
+        selenium_compare("Netting", "regexp:^Nef[a-z]*$").should be_false
+        selenium_compare("Neffing", "regexp:^nef[A-Z]*$").should be_false
+      end
+      it "gets non-matching case-insensitive regexes" do 
+        selenium_compare("1", "regexpi:^[a-z]*$").should be_false
+        selenium_compare("Netting", "regexpi:^nef[A-Z]*$").should be_false
+      end
+    end
+  end
+
   describe "#xpath_sanitize" do
     it "escapes one single-quote" do
       result = xpath_sanitize("Bob's water")
