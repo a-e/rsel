@@ -1175,9 +1175,9 @@ module Rsel
     #
     # @since 0.0.6
     #
-    def respond_to?(method, include_private=false)
+    def respond_to?(orgmethod, include_private=false)
       # Allow methods like "Type" that have Ruby homonyms to be called with a "selenium" prefix.
-      method.sub!(/^selenium_/,'')
+      method = orgmethod.sub(/^selenium_/,'')
       if @browser.respond_to?(method)
         true
       else
