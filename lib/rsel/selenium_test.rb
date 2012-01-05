@@ -110,11 +110,15 @@ module Rsel
     #
     # @example
     #   | Close browser |
+    #   | Close browser | and show errors |
+    #   | Close browser | without showing errors |
     #
     def close_browser(show_errors='')
       @browser.close_current_browser_session
       # Show errors in an exception if requested.
-      raise StopTestStepFailed, @errors.join("\n").gsub('<','&lt;') if(!(/not|without/i === show_errors) && @errors.length > 0)
+      if (!(/not|without/i === show_errors) && @errors.length > 0)
+        raise StopTestStepFailed, @errors.join("\n").gsub('<','&lt;')
+      end
       return true
     end
 
@@ -821,7 +825,7 @@ module Rsel
     #   non-Selenium methods may not work for some links and buttons.
     # @param [String] value
     #   Value you want to set the field to. (Default: empty string.)
-    #   Parsed by `string_to_boolean'
+    #   Parsed by {#string_is_true?}
     #
     # @since 0.1.1
     #
@@ -841,7 +845,7 @@ module Rsel
         when 'input.radio'
           return select_radio(loceval)
         when 'input.checkbox'
-          if string_to_boolean(value)
+          if string_is_true?(value)
             return enable_checkbox(loceval)
           else
             return disable_checkbox(loceval)
@@ -989,7 +993,7 @@ module Rsel
     #   non-Selenium methods may not work for some links and buttons.
     # @param [String] value
     #   Value you want to verify the field equal to. (Default: empty string.)
-    #   Parsed by `string_to_boolean'
+    #   Parsed by {#string_is_true?}
     #
     # @since 0.1.1
     #
@@ -1007,13 +1011,13 @@ module Rsel
         when 'input.text', /^textarea\./
           return field_equals(loceval, value)
         when 'input.radio'
-          if string_to_boolean(value)
+          if string_is_true?(value)
             return radio_is_enabled(loceval)
           else
             return radio_is_disabled(loceval)
           end
         when 'input.checkbox'
-          if string_to_boolean(value)
+          if string_is_true?(value)
             return checkbox_is_enabled(loceval)
           else
             return checkbox_is_disabled(loceval)
@@ -1216,7 +1220,7 @@ module Rsel
     # otherwise or end_if. Otherwise do not do those steps.
     #
     # @param [String] text
-    #   A string. Parsed by `string_to_boolean'. True values cause the
+    #   A string. Parsed by {#string_is_true?}. True values cause the
     #   following steps to run. Anything else does not.
     #
     # @example
@@ -1236,7 +1240,7 @@ module Rsel
       end
 
       # Test the condition.
-      @conditional_stack.push string_to_boolean(text)
+      @conditional_stack.push string_is_true?(text)
 
       return true if @conditional_stack.last == true
       return nil if @conditional_stack.last == false

@@ -202,15 +202,21 @@ describe Rsel::Support do
     end
   end
 
-  describe "#string_to_boolean" do
+  describe "#string_is_true?" do
     it "returns true for true strings" do
-      [ "", "1", "check", "checked", "on", "select", "selected", "true", "yes" ].each { |s| string_to_boolean(s).should be_true }
+      ["", "1", "check", "checked", "on", "select", "selected", "true", "yes"].each do |s|
+        string_is_true?(s).should be_true
+      end
     end
     it "is case-insensitive" do
-      [ "Check", "Checked", "On", "Select", "Selected", "True", "Yes" ].each { |s| string_to_boolean(s).should be_true }
+      ["Check", "Checked", "On", "Select", "Selected", "True", "Yes"].each do |s|
+        string_is_true?(s).should be_true
+      end
     end
     it "returns false for other strings" do
-      [ "False", "WRONG!", "NoNSEnSe$%$@^@!^!%", "0", "null" ].each { |s| string_to_boolean(s).should be_false }
+      ["False", "WRONG!", "NoNSEnSe$%$@^@!^!%", "0", "null"].each do |s|
+        string_is_true?(s).should be_false
+      end
     end
   end
 
@@ -224,22 +230,22 @@ describe Rsel::Support do
         selenium_compare("","exact:").should be_true
         selenium_compare("This","exact:This").should be_true
       end
-      it "gets matching globs" do 
+      it "gets matching globs" do
         selenium_compare("", "*").should be_true
         selenium_compare("anything", "*").should be_true
         selenium_compare("Neffing", "Nef*").should be_true
       end
-      it "gets matching labeled globs" do 
+      it "gets matching labeled globs" do
         selenium_compare("", "glob:*").should be_true
         selenium_compare("anything", "glob:*").should be_true
         selenium_compare("Neffing", "glob:Nef*").should be_true
       end
-      it "gets matching regexes" do 
+      it "gets matching regexes" do
         selenium_compare("", "regexp:.*").should be_true
         selenium_compare("anything", "regexp:.*").should be_true
         selenium_compare("Neffing", "regexp:^Nef[a-z]*$").should be_true
       end
-      it "gets matching case-insensitive regexes" do 
+      it "gets matching case-insensitive regexes" do
         selenium_compare("", "regexpi:.*").should be_true
         selenium_compare("Neffing", "regexpi:^nef[A-Z]*$").should be_true
       end
@@ -256,20 +262,20 @@ describe Rsel::Support do
         selenium_compare("&","exact:").should be_false
         selenium_compare("This","exact:That").should be_false
       end
-      it "gets non-matching globs" do 
+      it "gets non-matching globs" do
         selenium_compare("No", "?").should be_false
         selenium_compare("Netting", "Nef*").should be_false
       end
-      it "gets non-matching labeled globs" do 
+      it "gets non-matching labeled globs" do
         selenium_compare("No", "glob:?").should be_false
         selenium_compare("Netting", "glob:Nef*").should be_false
       end
-      it "gets non-matching regexes" do 
+      it "gets non-matching regexes" do
         selenium_compare("1", "regexp:^[a-z]*$").should be_false
         selenium_compare("Netting", "regexp:^Nef[a-z]*$").should be_false
         selenium_compare("Neffing", "regexp:^nef[A-Z]*$").should be_false
       end
-      it "gets non-matching case-insensitive regexes" do 
+      it "gets non-matching case-insensitive regexes" do
         selenium_compare("1", "regexpi:^[a-z]*$").should be_false
         selenium_compare("Netting", "regexpi:^nef[A-Z]*$").should be_false
       end

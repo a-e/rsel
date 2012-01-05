@@ -60,7 +60,7 @@ module Rsel
     #   xpath('field', 'First name')
     #   xpath('table_row', ['First', 'Last'])
     #
-    def csspath(locator, scope={}) 
+    def csspath(locator, scope={})
       return locator unless locator =~ /^css=/ && scope != {}
       if scope[:within]
         locator[4,0] = "##{scope[:within]} "
@@ -239,11 +239,8 @@ module Rsel
     # * Selected
     # * True
     # * Yes
-    def string_to_boolean(s)
+    def string_is_true?(s)
       return /^(?:yes|true|on|(?:check|select)(?:ed)?|1|)$/i === s
-    end
-    def string_to_boolean?(s)
-      return string_to_boolean(s)
     end
 
     # Compare values like Selenium does, with regexpi? and globs.
@@ -253,7 +250,7 @@ module Rsel
     # @param [String] expected
     #   Another string.  This one may have glob:, regexp:, etc.
     #
-    def selenium_compare(text, expected) 
+    def selenium_compare(text, expected)
       if expected.sub!(/^regexp:/, '')
         return /#{expected}/ === text
       elsif expected.sub!(/^regexpi:/, '')
