@@ -1143,6 +1143,8 @@ module Rsel
     #
     def method_missing(method, *args, &block)
       return skip_status if skip_step?
+      # Allow methods like "Type" that have Ruby homonyms to be called with a "selenium" prefix.
+      method = method.to_s.sub(/^selenium_/,'').to_sym if /^selenium_/ === method.to_s
       if @browser.respond_to?(method)
         begin
           result = @browser.send(method, *args, &block)
@@ -1170,6 +1172,8 @@ module Rsel
     # @since 0.0.6
     #
     def respond_to?(method, include_private=false)
+      # Allow methods like "Type" that have Ruby homonyms to be called with a "selenium" prefix.
+      method.sub!(/^selenium_/,'')
       if @browser.respond_to?(method)
         true
       else
@@ -1281,7 +1285,7 @@ module Rsel
     def end_if
       return false if aborted?
       # If there was no prior matching if, fail.
-      return failure if @conditional_stack.length <= 1
+      return failure "End if without matching if" if @conditional_stack.length <= 1
 
       last_status = @conditional_stack.pop
       # If this end_if is within an un-executed if block, don't execute it.
@@ -1303,7 +1307,7 @@ module Rsel
     def otherwise
       return false if aborted?
       # If there was no prior matching if, fail.
-      return failure if @conditional_stack.length <= 1
+      return failure "Otherwise without matching if" if @conditional_stack.length <= 1
 
       # If this otherwise is within an un-executed if block, don't execute it.
       return nil if @conditional_stack.last == nil

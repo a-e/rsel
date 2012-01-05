@@ -2529,6 +2529,17 @@ describe Rsel::SeleniumTest do
         @st.mouse_over("id=bogus_id").should be_false
       end
     end
+
+    context "method prefixed with selenium_" do
+      it "works for regular methods" do
+        @st.selenium_get_text("id=salami_checkbox").should eq("I like salami")
+      end
+      it "works for methods with Ruby homonyms" do
+        @st.selenium_type("id=first_name","Ken")
+        @st.field_contains("First name", "Ken").should be_true
+      end
+    end
+
   end # Selenium::Client::Driver wrapper
 
 end
