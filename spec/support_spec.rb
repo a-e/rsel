@@ -226,7 +226,7 @@ describe Rsel::Support do
         selenium_compare("","").should be_true
         selenium_compare("This","This").should be_true
       end
-      it "gets exact:ly identical strings" do
+      it "gets exactly identical strings" do
         selenium_compare("","exact:").should be_true
         selenium_compare("This","exact:This").should be_true
       end
