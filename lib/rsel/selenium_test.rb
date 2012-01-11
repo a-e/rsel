@@ -833,13 +833,9 @@ module Rsel
       return skip_status if skip_step?
       fail_on_exception do
         # First, use Javascript to find out what the field is.
-        begin
-          loceval = loc(locator, 'field', scope)
-        rescue
-          loceval = loc(locator, 'link_or_button', scope)
-        end
-
+        loceval = field_or_link_or_button(locator, scope)
         case tagname(loceval)
+
         when 'input.text', /^textarea\./
           return type_into_field(value, loceval)
         when 'input.radio'
@@ -1001,13 +997,9 @@ module Rsel
       return skip_status if skip_step?
       fail_on_exception do
         # First, use Javascript to find out what the field is.
-        begin
-          loceval = loc(locator, 'field', scope)
-        rescue
-          loceval = loc(locator, 'link_or_button', scope)
-        end
-
+        loceval = field_or_link_or_button(locator, scope)
         case tagname(loceval)
+
         when 'input.text', /^textarea\./
           return field_equals(loceval, value)
         when 'input.radio'
@@ -1198,18 +1190,7 @@ module Rsel
     #
     def if_i_see(text)
       return false if aborted?
-      # If this if is inside a block that's not running, record that.
-      if !@conditional_stack.last
-        @conditional_stack.push nil
-        return nil
-      end
-
-      # Test the condition.
-      @conditional_stack.push @browser.text?(text)
-
-      return true if @conditional_stack.last == true
-      return nil if @conditional_stack.last == false
-      return failure
+      return push_conditional(@browser.text?(text))
     end
 
     # If the given parameter is "yes" or "true", do the steps until I see an
@@ -1230,17 +1211,7 @@ module Rsel
     #
     def if_parameter(text)
       return false if aborted?
-      if !@conditional_stack.last
-        @conditional_stack.push nil
-        return nil
-      end
-
-      # Test the condition.
-      @conditional_stack.push string_is_true?(text)
-
-      return true if @conditional_stack.last == true
-      return nil if @conditional_stack.last == false
-      return failure
+      return push_conditional(string_is_true?(text))
     end
 
     # If the first parameter is the same as the second, do the steps until I see an
@@ -1265,17 +1236,7 @@ module Rsel
     #
     def if_is(text, expected)
       return false if aborted?
-      if !@conditional_stack.last
-        @conditional_stack.push nil
-        return nil
-      end
-
-      # Test the condition.
-      @conditional_stack.push selenium_compare(text, expected)
-
-      return true if @conditional_stack.last == true
-      return nil if @conditional_stack.last == false
-      return failure
+      return push_conditional(selenium_compare(text, expected))
     end
 
     # End an if block.
@@ -1285,7 +1246,7 @@ module Rsel
     def end_if
       return false if aborted?
       # If there was no prior matching if, fail.
-      return failure if @conditional_stack.length <= 1
+      return failure if !in_conditional?
 
       last_status = @conditional_stack.pop
       # If this end_if is within an un-executed if block, don't execute it.
@@ -1307,10 +1268,10 @@ module Rsel
     def otherwise
       return false if aborted?
       # If there was no prior matching if, fail.
-      return failure if @conditional_stack.length <= 1
+      return failure if !in_conditional?
 
       # If this otherwise is within an un-executed if block, don't execute it.
-      return nil if @conditional_stack.last == nil
+      return nil if in_nil_conditional?
 
       last_stack = @conditional_stack.pop
       @conditional_stack.push !last_stack
@@ -1319,8 +1280,82 @@ module Rsel
       return failure
     end
 
+    def reset_conditionals
+      @conditional_stack = [true]
+    end
 
     private
+
+    # Return true if we're inside a conditional block, false otherwise.
+    #
+    # @since 0.1.2
+    #
+    def in_conditional?
+      return @conditional_stack.length > 1
+    end
+
+    # Return true if we're inside a nil conditional block (one whose evaluation
+    # doesn't matter because it was precluded by an outer conditional block
+    # that was false).
+    #
+    # @since 0.1.2
+    #
+    def in_nil_conditional?
+      return in_conditional? && @conditional_stack.last == nil
+    end
+
+    # Return true if we're inside a conditional block that was skipped,
+    # either because it evaluated false, or because it was inside another
+    # conditional that evaluated false.
+    #
+    # @since 0.1.2
+    #
+    def in_skipped_conditional?
+      return in_conditional? && !@conditional_stack.last
+    end
+
+    # Push a conditional result onto the stack.
+    #
+    # @param [Boolean] result
+    #   The result of the conditional expression you're pushing.
+    #
+    # @return [Boolean, nil]
+    #   true if the result is true, false otherwise.
+    #
+    # @since 0.1.2
+    #
+    def push_conditional(result)
+      # If this if is inside a block that's not running, record that.
+      if in_skipped_conditional?
+        @conditional_stack.push nil
+        return nil
+      end
+
+      # Test the condition.
+      @conditional_stack.push result
+
+      return true if @conditional_stack.last == true
+      return nil if @conditional_stack.last == false
+      return failure
+    end
+
+    # Return a Selenium-style locator for a field, link, or button
+    # matching the given locator and scope.
+    #
+    # @param [String] locator
+    #   Locator in the same format accepted by {#loc}
+    # @param [String] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
+    # @since 0.1.2
+    #
+    def field_or_link_or_button(locator, scope)
+      begin
+        loceval = loc(locator, 'field', scope)
+      rescue
+        loceval = loc(locator, 'link_or_button', scope)
+      end
+    end
 
     # Execute the given block, and return false if it raises an exception.
     # Otherwise, return true.
@@ -1394,7 +1429,7 @@ module Rsel
     # @since 0.1.1
     #
     def skip_step?
-      return aborted? || !@conditional_stack.last
+      return aborted? || in_skipped_conditional?
     end
 
     # Presuming the current step should be skipped, what status should I return?
@@ -1403,7 +1438,7 @@ module Rsel
     #
     def skip_status
       return false if aborted?
-      return nil if !@conditional_stack.last
+      return nil if in_skipped_conditional?
     end
 
 

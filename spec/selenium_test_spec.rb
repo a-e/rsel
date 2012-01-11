@@ -352,6 +352,7 @@ describe Rsel::SeleniumTest do
   context "conditionals" do
     before(:each) do
       @st.visit("/").should be_true
+      @st.reset_conditionals
     end
 
     describe "#if_i_see" do
