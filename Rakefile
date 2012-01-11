@@ -62,7 +62,7 @@ namespace 'rcov' do
     ]
   end
 
-  desc "Run support spec tests with coverage analysis"
+  desc "Run all spec tests with coverage analysis"
   RSpec::Core::RakeTask.new(:all) do |t|
     t.pattern = 'spec/**/*.rb'
     t.rspec_opts = ['--color', '--format doc']
