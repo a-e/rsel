@@ -9,13 +9,18 @@ RSpec.configure do |config|
   config.formatter = :documentation
   config.include Rsel
   config.include Rsel::Support
+
   config.before(:suite) do
-    @@st = Rsel::SeleniumTest.new('http://localhost:8070')
+    # For some reason, RSpec runs this twice; work around possible duplicate
+    # browser windows by only intializing @@st if it hasn't been already
+    @@st ||= Rsel::SeleniumTest.new('http://localhost:8070')
     @@st.open_browser
   end
+
   config.after(:suite) do
     @@st.close_browser('without showing errors')
   end
+
   config.before(:all) do
     @st = @@st
   end

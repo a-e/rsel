@@ -78,7 +78,7 @@ module Rsel
 
 
     # Start the session and open a browser to the URL defined at the start of
-    # the test.
+    # the test. If a browser session is already open, just return true.
     #
     # @example
     #   | Open browser |
@@ -86,6 +86,7 @@ module Rsel
     # @raise [StopTestCannotConnect] if Selenium connection cannot be made
     #
     def open_browser
+      return true if @browser.session_started?
       begin
         @browser.start_new_browser_session
       rescue
