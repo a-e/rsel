@@ -6,7 +6,6 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test', 'app'))
 
 RSpec.configure do |config|
   config.color_enabled = true
-  config.formatter = :documentation
   config.include Rsel
   config.include Rsel::Support
 
