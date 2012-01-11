@@ -4,8 +4,11 @@ describe 'initialization' do
   it "sets correct default configuration" do
     st = Rsel::SeleniumTest.new('http://some.host.org:8070/')
     st.url.should == "http://some.host.org:8070/"
-    st.browser.host.should == "some.host.org"
+    # Defaults
+    st.browser.host.should == "localhost"
     st.browser.port.should == 4444
+    st.browser.browser_string.should == "*firefox"
+    st.browser.default_timeout_in_seconds.should == 300
     st.stop_on_failure.should == false
     st.found_failure.should == false
   end
