@@ -32,9 +32,15 @@ describe Rsel::Support do
       end.should raise_error
     end
 
-    it "requires element kind for Rsel-style locators" do
+    it "requires non-empty element kind for Rsel-style locators" do
       lambda do
         loc('foo')
+      end.should raise_error
+    end
+
+    it "requires a known element kind for Rsel-style locators" do
+      lambda do
+        loc('foo', 'bogus_kind')
       end.should raise_error
     end
 
@@ -48,9 +54,13 @@ describe Rsel::Support do
   end
 
   describe "#xpath" do
-    it "requires a valid kind" do
+    it "requires a valid, non-empty kind" do
       lambda do
         xpath('junk', 'hello')
+      end.should raise_error
+
+      lambda do
+        xpath('', 'hello')
       end.should raise_error
     end
 

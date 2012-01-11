@@ -36,7 +36,11 @@ module Rsel
       elsif locator =~ /^(id=|name=|dom=|xpath=|link=|css=)/
         return locator
       else
-        return xpath(kind, locator, scope)
+        if kind.empty?
+          raise ArgumentError, "kind is required for Rsel-style locators"
+        else
+          return xpath(kind, locator, scope)
+        end
       end
     end
 
