@@ -832,10 +832,8 @@ module Rsel
     def set_field(locator, value='', scope={})
       return skip_status if skip_step?
       fail_on_exception do
-        # First, use Javascript to find out what the field is.
         loceval = field_or_link_or_button(locator, scope)
         case tagname(loceval)
-
         when 'input.text', /^textarea\./
           return type_into_field(value, loceval)
         when 'input.radio'
@@ -996,10 +994,8 @@ module Rsel
     def generic_field_equals(locator, value='', scope={})
       return skip_status if skip_step?
       fail_on_exception do
-        # First, use Javascript to find out what the field is.
         loceval = field_or_link_or_button(locator, scope)
         case tagname(loceval)
-
         when 'input.text', /^textarea\./
           return field_equals(loceval, value)
         when 'input.radio'
@@ -1021,13 +1017,6 @@ module Rsel
           return failure("Unidentified field for comparison: #{locator}.")
         end
       end
-    end
-
-
-    def tagname(loceval)
-      return @browser.get_eval(
-        'var loceval=this.browserbot.findElement("' +
-        loceval + '");loceval.tagName+"."+loceval.type').downcase
     end
 
     # Check a value (with {#set_field}) in the named field, based on the given
@@ -1355,6 +1344,19 @@ module Rsel
       rescue
         loceval = loc(locator, 'link_or_button', scope)
       end
+    end
+
+    # Use Javascript to determine the type of field referenced by loceval.
+    #
+    # @param [String] loceval
+    #   Selenium-style locator
+    #
+    # @since 0.1.1
+    #
+    def tagname(loceval)
+      return @browser.get_eval(
+        'var loceval=this.browserbot.findElement("' +
+        loceval + '");loceval.tagName+"."+loceval.type').downcase
     end
 
     # Execute the given block, and return false if it raises an exception.
