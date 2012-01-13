@@ -1,4 +1,5 @@
 require 'rspec'
+require 'rspec/autorun' # needed for RSpec 2.6.x
 require 'rsel'
 require 'selenium/client'
 
