@@ -71,7 +71,7 @@ namespace 'rcov' do
       '--exclude /.gem/,/gems/,spec',
       '--include-file lib/**/*.rb',
       # Ensure the main .rb file gets included
-      #'--include-file lib/rsel/selenium_test.rb',
+      '--include-file lib/rsel/selenium_test.rb',
     ]
   end
 end
