@@ -733,7 +733,7 @@ describe "#set_field" do
         it "option is selected in the dropdown, in table row" do
           @st.visit("/table")
           ["Male", "Female"].each do |gender|
-            @st.set_field("Gender", gender, :in_row => "Eric")
+            @st.set_field("Gender", gender, :in_row => "Eric").should be_true
             @st.generic_field_equals("Gender", gender, :in_row => "Eric")
           end
         end
@@ -759,20 +759,44 @@ describe "#set_field" do
         end
 
         it "dropdown exists, and option is selected, but not within scope" do
-          @st.set_field("Height", "Tall", :within => "person_form")
-          @st.set_field("Height", "Short", :within => "spouse_form")
+          @st.set_field("Height", "Tall", :within => "person_form").should be_true
+          @st.set_field("Height", "Short", :within => "spouse_form").should be_true
           @st.generic_field_equals("Height", "Tall", :within => "spouse_form").should be_false
         end
 
         it "dropdown exists, and option is selected, but not in table row" do
           @st.visit("/table")
-          @st.set_field("Gender", "Female", :in_row => "Eric")
-          @st.set_field("Gender", "Male", :in_row => "Marcus")
+          @st.set_field("Gender", "Female", :in_row => "Eric").should be_true
+          @st.set_field("Gender", "Male", :in_row => "Marcus").should be_true
           @st.generic_field_equals("Gender", "Female", :in_row => "Marcus").should be_false
         end
       end
     end # set_field with generic_field_equals for dropdown_equals
   end # dropdowns
+
+
+  context "#set_field with button click" do
+    before(:each) do
+      @st.visit("/form").should be_true
+    end
+
+    it "clicks a button" do
+      @st.set_field("Submit person form", "clicked").should be_true
+      @st.page_loads_in_seconds_or_less(10).should be_true
+      @st.see("We appreciate your feedback").should be_true
+    end
+  end
+
+  context "#set_field with link click" do
+    before(:each) do
+      @st.visit("/").should be_true
+    end
+    it "clicks a link" do
+      @st.set_field("About this site", "clicked").should be_true
+      @st.page_loads_in_seconds_or_less(10).should be_true
+      @st.see("This site is really cool.").should be_true
+    end
+  end
 
 end # set_field
 

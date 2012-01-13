@@ -833,8 +833,15 @@ module Rsel
     def set_field(locator, value='', scope={})
       return skip_status if skip_step?
       fail_on_exception do
-        loceval = field_or_link_or_button(locator, scope)
-        case tagname(loceval)
+        loceval = loc(locator, 'field', scope)
+        mytagname = ''
+        begin
+          mytagname = tagname(loceval)
+        rescue
+          loceval = loc(locator, 'link_or_button', scope)
+          mytagname = tagname(loceval)
+        end
+        case mytagname
         when 'input.text', /^textarea\./
           return type_into_field(value, loceval)
         when 'input.radio'
@@ -850,7 +857,6 @@ module Rsel
         when /^(a|button)\./,'input.button','input.submit','input.image','input.reset'
           return click(loceval)
         else
-          #raise ArgumentError, "Unidentified field #{locator}."
           return failure("Unidentified field #{locator}.")
         end
       end
@@ -995,7 +1001,7 @@ module Rsel
     def generic_field_equals(locator, value='', scope={})
       return skip_status if skip_step?
       fail_on_exception do
-        loceval = field_or_link_or_button(locator, scope)
+        loceval = loc(locator, 'field', scope)
         case tagname(loceval)
         when 'input.text', /^textarea\./
           return field_equals(loceval, value)
@@ -1327,24 +1333,6 @@ module Rsel
       return true if @conditional_stack.last == true
       return nil if @conditional_stack.last == false
       return failure
-    end
-
-    # Return a Selenium-style locator for a field, link, or button
-    # matching the given locator and scope.
-    #
-    # @param [String] locator
-    #   Locator in the same format accepted by {#loc}
-    # @param [String] scope
-    #   Scoping keywords as understood by {#xpath}
-    #
-    # @since 0.1.2
-    #
-    def field_or_link_or_button(locator, scope)
-      begin
-        loceval = loc(locator, 'field', scope)
-      rescue
-        loceval = loc(locator, 'link_or_button', scope)
-      end
     end
 
     # Use Javascript to determine the type of field referenced by loceval.

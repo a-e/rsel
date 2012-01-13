@@ -24,8 +24,18 @@ describe 'navigation' do
     #end
   end
 
-  context "reload the current page" do
-    # TODO
+  describe "#refresh_page" do
+    before(:each) do
+      @st.visit("/slowtext").should be_true
+    end
+
+    it "reloads the page" do
+      @st.see("The text is coming...").should be_true
+      @st.do_not_see("The text is here!").should be_true
+      @st.see_within_seconds("The text is here!").should be_true
+      @st.refresh_page
+      @st.do_not_see("The text is here!").should be_true
+    end
   end
 
   describe "#click_back" do
