@@ -35,7 +35,7 @@ describe 'browser window' do
 
   describe "#close_browser" do
     before(:each) do
-      @st_temp = Rsel::SeleniumTest.new('http://localhost:8070')
+      @st_temp = Rsel::SeleniumTest.new('http://localhost:8070/')
       @st_temp.open_browser
     end
 
@@ -44,19 +44,15 @@ describe 'browser window' do
     end
 
     it "returns true if there are errors, but show_errors is unset" do
-      @st_temp.see("Nonexistent words")
-      @st_temp.close_browser('').should be_true
+      @st_temp.field_equals("Nonexistent field", "Nonexistent words")
+      @st_temp.close_browser('without showing errors').should be_true
     end
 
-    # FIXME: Figure out why this fails. All rspec says is:
-    #   Failure/Error: end.should raise(Rsel::StopTestStepFailed)
-    #   Rsel::StopTestStepFailed:
-    #     Rsel::StopTestStepFailed
-    #it "raises StopTestStepFailed if there are errors and show_errors is set" do
-      #@st_temp.see("Nonexistent words")
-      #lambda do
-        #@st_temp.close_browser('and show errors')
-      #end.should raise(Rsel::StopTestStepFailed)
-    #end
+    it "raises StopTestStepFailed if there are errors and show_errors is set" do
+      @st_temp.field_equals("Nonexistent field", "Nonexistent words")
+      lambda do
+        @st_temp.close_browser('and show errors')
+      end.should raise_error(Rsel::StopTestStepFailed)
+    end
   end
 end
