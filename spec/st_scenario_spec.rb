@@ -19,7 +19,7 @@ describe 'scenarios' do
 
   describe "#end_scenario" do
     it "returns true" do
-      @st.begin_scenario.should be_true
+      @st.end_scenario.should be_true
     end
   end
 end
