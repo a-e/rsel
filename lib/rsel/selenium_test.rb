@@ -1020,7 +1020,6 @@ module Rsel
         when /^select\./
           return dropdown_equals(loceval, value)
         else
-          #raise ArgumentError, "Unidentified field #{locator}."
           return failure("Unidentified field for comparison: #{locator}.")
         end
       end
@@ -1276,6 +1275,12 @@ module Rsel
       return failure
     end
 
+    # Reset the conditional stack to its initial state. This method is included
+    # mainly for unit testing purposes, and is not intended to be called by
+    # normal test scripts.
+    #
+    # @since 0.1.2
+    #
     def reset_conditionals
       @conditional_stack = [true]
     end

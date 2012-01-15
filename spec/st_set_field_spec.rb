@@ -56,6 +56,15 @@ describe "#set_field" do
           @st.visit("/readonly_form").should be_true
           @st.set_field("First name", "Eric").should be_false
         end
+
+        it "field exists but is hidden" do
+          pending "selenium-client thinks hidden fields are editable" do
+            # FIXME: This test fails, because the selenium-client 'is_editable'
+            # method returns true for hidden fields. Rsel should work around
+            # this; hidden fields should not be editable.
+            @st.set_field("secret", "whisper").should be_false
+          end
+        end
       end
     end # set_field with type_into_field
 
@@ -136,6 +145,16 @@ describe "#set_field" do
           it "does not exactly equal the text" do
             @st.set_field("First name", "Marcus")
             @st.generic_field_equals("First name", "Marc").should be_false
+          end
+        end
+
+        context "text field with id" do
+          it "exactly equals the text, but is an unsupported type" do
+            pending "hidden fields should be unsupported" do
+              # FIXME: This test fails, because generic_field_equals does
+              # in fact allow inspecting the value of a hidden field.
+              @st.generic_field_equals("secret", "psst").should be_false
+            end
           end
         end
 
