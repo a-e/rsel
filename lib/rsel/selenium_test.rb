@@ -227,12 +227,22 @@ module Rsel
     # @param [String] text
     #   Plain text that should be visible on the current page
     #
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
     # @example
     #   | See | Welcome, Marcus |
     #
-    def see(text)
+    def see(text, scope=nil)
       return skip_status if skip_step?
-      pass_if @browser.text?(text)
+      if scope == nil
+        return pass_if @browser.text?(text)
+      else
+        selector = loc("css=", '', scope).strip
+        fail_on_exception do
+          return pass_if @browser.get_text(selector).include?(text), "'#{text}' not found in '#{@browser.get_text(selector)}'"
+        end
+      end
     end
 
 
@@ -241,12 +251,25 @@ module Rsel
     # @param [String] text
     #   Plain text that should not be visible on the current page
     #
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
     # @example
     #   | Do not see | Take a hike |
     #
-    def do_not_see(text)
+    def do_not_see(text, scope=nil)
       return skip_status if skip_step?
-      pass_if !@browser.text?(text)
+      if scope == nil
+        return pass_if !@browser.text?(text)
+      else
+        selector = loc("css=", '', scope).strip
+        begin
+          return pass_if !@browser.get_text(selector).include?(text), "'#{text}' found in '#{@browser.get_text(selector)}'"
+        rescue
+          # Do not see the selector, so do not see the text within it.
+          return true
+        end
+      end
     end
 
 
@@ -258,21 +281,33 @@ module Rsel
     #   Plain text that should be appear on or visible on the current page
     # @param [String] seconds
     #   Integer number of seconds to wait.
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
+    #
     #
     # @example
     #   | Click | ajax_login | button |
     #   | See | Welcome back, Marcus | within | 10 | seconds |
     #   | Note | The following uses the Selenium default timeout: |
-    #   | See | How do you feel? | within seconds |
+    #   | See | How do you feel? | within seconds | !{within:terminal} |
     #
     # @since 0.1.1
     #
-    def see_within_seconds(text, seconds=-1)
+    def see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
+      if scope == nil && (seconds.is_a? Hash)
+        scope = seconds
+        seconds = -1
+      end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
-      # This would be better if it worked:
-      # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
+      if scope == nil
+        return pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
+        # This would be better if it worked:
+        # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
+      else
+        selector = loc("css=", '', scope).strip
+        return pass_if !(Integer(seconds)+1).times{ break if (@browser.get_text(selector).include?(text) rescue false); sleep 1 }
+      end
     end
 
     # Ensure that the given text does not appear on the current page, eventually.
@@ -281,6 +316,8 @@ module Rsel
     #   Plain text that should disappear from or not be present on the current page
     # @param [String] seconds
     #   Integer number of seconds to wait.
+    # @param [Hash] scope
+    #   Scoping keywords as understood by {#xpath}
     #
     # @example
     #   | Click | close | button | !{within:popup_ad} |
@@ -288,12 +325,22 @@ module Rsel
     #
     # @since 0.1.1
     #
-    def do_not_see_within_seconds(text, seconds=-1)
+    def do_not_see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
+      if scope == nil && (seconds.is_a? Hash)
+        scope = seconds
+        seconds = -1
+      end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
-      # This would be better if it worked:
-      # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
+      if scope == nil
+        pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+        # This would be better if it worked:
+        # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
+      else
+        selector = loc("css=", '', scope).strip
+        # Re: rescue: If the scope is not found, the text is not seen.
+        return pass_if !(Integer(seconds)+1).times{ break if (!@browser.get_text(selector).include?(text) rescue true); sleep 1 }
+      end
     end
 
 
