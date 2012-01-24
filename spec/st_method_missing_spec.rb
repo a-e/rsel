@@ -21,8 +21,17 @@ describe '#method_missing' do
     end
 
     context "method returning String" do
-      it "returns the String" do
+      it "returns the string" do
         @st.get_text("id=salami_checkbox").should eq("I like salami")
+      end
+    end
+
+    context "method verifying String" do
+      it "verifies the right string" do
+        @st.check_get_text("id=salami_checkbox", "I like salami").should be_true
+      end
+      it "does not verify the wrong string" do
+        @st.check_get_text("id=salami_checkbox", "I like lima beans").should be_false
       end
     end
 

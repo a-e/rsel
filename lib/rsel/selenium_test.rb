@@ -1177,17 +1177,34 @@ module Rsel
     # instance can respond to that method. If so, that method is called
     # instead.
     #
+    # Prefixing a method with "check_" will verify the return string
+    # against the last argument.  This allows checking string values
+    # within an if block.
+    #
     # @since 0.0.6
     #
     def method_missing(method, *args, &block)
       return skip_status if skip_step?
+      do_check = false
+      if(/^check_/ === method.to_s)
+        # This emulates the FitNesse | Check | prefix, without the messy string return.
+        do_check = true
+        method = method.to_s.sub(/^check_/,'').to_sym
+        check_against = args.pop.to_s
+      end
+
       if @browser.respond_to?(method)
         begin
           result = @browser.send(method, *args, &block)
         rescue
           failure "Method #{method} error"
         else
-          # The method call succeeded; did it return true or false?
+          # The method call succeeded
+          # Should we check this against another string?
+          if do_check
+            return pass_if result.to_s == check_against, "Expected '#{check_against}', but got '#{result.to_s}'"
+          end
+          # Did it return true or false?
           return failure if result == false
           # If a string, return that. We might Check or Show it.
           return result if result == true || (result.is_a? String)
@@ -1208,6 +1225,7 @@ module Rsel
     # @since 0.0.6
     #
     def respond_to?(method, include_private=false)
+      method = method.to_s.sub(/^check_/,'').to_sym
       if @browser.respond_to?(method)
         true
       else
