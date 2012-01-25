@@ -240,7 +240,7 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         fail_on_exception do
-          return pass_if @browser.get_text(selector).include?(text), "'#{text}' not found in '#{@browser.get_text(selector)}'"
+          return pass_if selenium_compare(@browser.get_text(selector), text), "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
       end
     end
@@ -264,7 +264,7 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         begin
-          return pass_if !@browser.get_text(selector).include?(text), "'#{text}' found in '#{@browser.get_text(selector)}'"
+          return pass_if !selenium_compare(@browser.get_text(selector), text), "'#{text}' found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
           return true
@@ -306,7 +306,7 @@ module Rsel
         # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        return pass_if !(Integer(seconds)+1).times{ break if (@browser.get_text(selector).include?(text) rescue false); sleep 1 }
+        return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), text) rescue false); sleep 1 }
       end
     end
 
@@ -339,7 +339,7 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         # Re: rescue: If the scope is not found, the text is not seen.
-        return pass_if !(Integer(seconds)+1).times{ break if (!@browser.get_text(selector).include?(text) rescue true); sleep 1 }
+        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), text) rescue true); sleep 1 }
       end
     end
 
