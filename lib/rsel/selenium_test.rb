@@ -116,6 +116,12 @@ module Rsel
     #
     def close_browser(show_errors='')
       @browser.close_current_browser_session
+      if in_conditional?
+        # Note the lack of return.  This just adds an error to the stack if we're in a conditional.
+        failure "If without matching End if"
+        reset_conditionals
+      end
+
       # Show errors in an exception if requested.
       if (!(/not|without/i === show_errors) && @errors.length > 0)
         raise StopTestStepFailed, @errors.join("\n").gsub('<','&lt;')
@@ -1193,6 +1199,8 @@ module Rsel
         check_against = args.pop.to_s
       end
 
+      # Allow methods like "Type" that have Ruby homonyms to be called with a "selenium" prefix.
+      method = method.to_s.sub(/^selenium_/,'').to_sym if /^selenium_/ === method.to_s
       if @browser.respond_to?(method)
         begin
           result = @browser.send(method, *args, &block)
@@ -1224,8 +1232,9 @@ module Rsel
     #
     # @since 0.0.6
     #
-    def respond_to?(method, include_private=false)
-      method = method.to_s.sub(/^check_/,'').to_sym
+    def respond_to?(orgmethod, include_private=false)
+      # Allow methods like "Type" that have Ruby homonyms to be called with a "selenium" prefix.
+      method = orgmethod.sub(/^(check_)?(selenium_)?/,'')
       if @browser.respond_to?(method)
         true
       else
@@ -1306,7 +1315,7 @@ module Rsel
     def end_if
       return false if aborted?
       # If there was no prior matching if, fail.
-      return failure if !in_conditional?
+      return failure "End if without matching if" if !in_conditional?
 
       last_status = @conditional_stack.pop
       # If this end_if is within an un-executed if block, don't execute it.
@@ -1328,7 +1337,7 @@ module Rsel
     def otherwise
       return false if aborted?
       # If there was no prior matching if, fail.
-      return failure if !in_conditional?
+      return failure "Otherwise without matching if" if !in_conditional?
 
       # If this otherwise is within an un-executed if block, don't execute it.
       return nil if in_nil_conditional?
