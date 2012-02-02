@@ -378,6 +378,44 @@ module Rsel
       pass_if !(@browser.get_title == title)
     end
 
+    # Ensure that an alert appears, optionally having the given text, within the
+    # given time or the default timeout.
+    #
+    # @param [String] text
+    #   Text of the alert that you expect to see
+    #
+    # @param [String] seconds
+    #   Integer number of seconds to wait.
+    #
+    # @example
+    #   | see alert within seconds |
+    #     Validates any alert within the default timeout.
+    #
+    # @example
+    #   | see alert | Illegal operation! Authorities have been notified. | within | 15 | seconds |
+    #     Validates that the next alert that appears within the given timeout is as specified.
+    #
+    def see_alert_within_seconds(text=nil, seconds=-1)
+      return skip_status if skip_step?
+      # Handle the case of being given seconds, but not text.
+      if seconds == -1
+        begin
+          if Integer(text.to_s).to_s == text.to_s
+            seconds = text.to_s
+            text = nil
+          end
+        rescue
+        end
+      end
+      seconds = @browser.default_timeout_in_seconds if seconds == -1
+      alert_text = nil
+      if !(Integer(seconds)+1).times{ break if ((alert_text=@browser.get_alert) rescue false); sleep 1 }
+        return true if text == nil
+        return pass_if text == alert_text, "Expected alert '#{text}', but got '#{alert_text}'!"
+      else
+        return failure
+      end
+    end
 
     # Ensure that a link exists on the page.
     #

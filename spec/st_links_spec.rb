@@ -32,6 +32,7 @@ describe 'links' do
       it "link exists in table row" do
         @st.visit("/table")
         @st.click_link("Edit", :in_row => "Marcus").should be_true
+        @st.page_loads_in_seconds_or_less(10).should be_true
         @st.see_title("Editing Marcus").should be_true
       end
     end
