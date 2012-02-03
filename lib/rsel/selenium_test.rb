@@ -411,7 +411,7 @@ module Rsel
       alert_text = nil
       if !(Integer(seconds)+1).times{ break if ((alert_text=@browser.get_alert) rescue false); sleep 1 }
         return true if text == nil
-        return pass_if text == alert_text, "Expected alert '#{text}', but got '#{alert_text}'!"
+        return pass_if selenium_compare(alert_text, text), "Expected alert '#{text}', but got '#{alert_text}'!"
       else
         return failure
       end
@@ -1248,7 +1248,7 @@ module Rsel
           # The method call succeeded
           # Should we check this against another string?
           if do_check
-            return pass_if result.to_s == check_against, "Expected '#{check_against}', but got '#{result.to_s}'"
+            return pass_if selenium_compare(result.to_s, check_against), "Expected '#{check_against}', but got '#{result.to_s}'"
           end
           # Did it return true or false?
           return failure if result == false
