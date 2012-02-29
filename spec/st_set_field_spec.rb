@@ -12,6 +12,8 @@ describe "#set_field" do
           it "exists" do
             @st.set_field("First name", "Eric").should be_true
             @st.set_field("Last name", "Pierce").should be_true
+            @st.field_contains("First name", "Eric").should be_true
+            @st.field_contains("Last name", "Pierce").should be_true
           end
           it "exists within scope" do
             @st.set_field("First name", "Eric", :within => 'person_form').should be_true
@@ -23,6 +25,8 @@ describe "#set_field" do
           it "exists" do
             @st.set_field("first_name", "Eric").should be_true
             @st.set_field("last_name", "Pierce").should be_true
+            @st.field_contains("first_name", "Eric").should be_true
+            @st.field_contains("last_name", "Pierce").should be_true
           end
         end
 
@@ -30,6 +34,7 @@ describe "#set_field" do
           it "exists" do
             @st.set_field("Life story", "Blah blah blah").should be_true
             @st.set_field("Life story", "Jibber jabber").should be_true
+            @st.field_contains("Life story", "Jibber jabber").should be_true
           end
         end
 
@@ -37,7 +42,13 @@ describe "#set_field" do
           it "exists" do
             @st.set_field("biography", "Blah blah blah").should be_true
             @st.set_field("biography", "Jibber jabber").should be_true
+            @st.field_contains("biography", "Jibber jabber").should be_true
           end
+        end
+
+        it "clears a field" do
+          @st.set_field("secret","").should be_true
+          @st.field_contains("secret", "").should be_true
         end
       end
 

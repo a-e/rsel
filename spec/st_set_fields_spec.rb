@@ -22,6 +22,11 @@ describe "#set_fields" do
         @st.field_contains("Last name", "Brazier").should be_true
         @st.field_contains("Life story", "story: I get testy").should be_true
       end
+
+      it "clears a field" do
+        @st.set_fields("secret" => "").should be_true
+        @st.field_contains("secret", "").should be_true
+      end
     end
   end
 

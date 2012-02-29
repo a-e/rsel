@@ -42,6 +42,10 @@ describe "#set_fields_among" do
         @st.field_contains("Life story", "testy").should be_true
       end
     end
+    it "clears a field" do
+      @st.set_fields_among({"secret" => ""},"").should be_true
+      @st.field_contains("secret", "").should be_true
+    end
   end
 
   context "fails when" do
