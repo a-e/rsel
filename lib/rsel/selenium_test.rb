@@ -245,6 +245,8 @@ module Rsel
         return pass_if @browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
+        # Default selenium_compare does not allow text around a glob.  Allow such text.
+        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
         fail_on_exception do
           return pass_if selenium_compare(@browser.get_text(selector), text), "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
@@ -270,6 +272,8 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         begin
+          # Default selenium_compare does not allow text around a glob.  Allow such text.
+          text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
           return pass_if !selenium_compare(@browser.get_text(selector), text), "'#{text}' found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
@@ -312,6 +316,8 @@ module Rsel
         # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
+        # Default selenium_compare does not allow text around a glob.  Allow such text.
+        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
         return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), text) rescue false); sleep 1 }
       end
     end
@@ -344,6 +350,8 @@ module Rsel
         # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
+        # Default selenium_compare does not allow text around a glob.  Allow such text.
+        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
         # Re: rescue: If the scope is not found, the text is not seen.
         return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), text) rescue true); sleep 1 }
       end
