@@ -46,6 +46,14 @@ describe "#set_field" do
           end
         end
 
+        context "text field with name but duplicate id" do
+          it "exists" do
+            @st.set_field("second_duplicate", "Jibber jabber").should be_true
+            @st.field_contains("first_duplicate", "").should be_true
+            @st.field_contains("second_duplicate", "Jibber jabber").should be_true
+          end
+        end
+
         it "clears a field" do
           @st.set_field("secret","").should be_true
           @st.field_contains("secret", "").should be_true

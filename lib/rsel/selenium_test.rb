@@ -940,6 +940,8 @@ module Rsel
           loceval = loc(locator, 'link_or_button', scope)
           mytagname = tagname(loceval)
         end
+        #puts "My tag name is #{mytagname}\n"
+        #puts "My loceval is #{loceval}\n" #if /^id=/ === loceval
         case mytagname
         when 'input.text', /^textarea\./
           return type_into_field(value, loceval)
@@ -1461,16 +1463,23 @@ module Rsel
     end
 
     # Use Javascript to determine the type of field referenced by loceval.
+    # Also turns loceval into an id= locator if possible.
     #
     # @param [String] loceval
     #   Selenium-style locator
+    #   Warning: This parameter is effectively passed by reference!
+    #   We attempt to replace an xpath locator with an id=.
     #
     # @since 0.1.1
     #
     def tagname(loceval)
-      return @browser.get_eval(
-        'var loceval=this.browserbot.findElement("' +
-        loceval + '");loceval.tagName+"."+loceval.type').downcase
+      tname = @browser.get_eval(
+        'var ev=this.browserbot.findElement("' +
+        loceval + '");ev.tagName+"."+ev.type+";"+((ev.id != "" && window.document.getElementById(ev.id)==ev)?ev.id:"")').downcase
+      tname = tname.split(';',2)
+      # This modifies loceval in-place.
+      loceval[0,loceval.length] = "id=#{tname[1]}" if tname[1] != ''
+      return tname[0]
     end
 
     # Execute the given block, and return false if it raises an exception.
