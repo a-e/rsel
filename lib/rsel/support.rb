@@ -267,6 +267,16 @@ module Rsel
         return File.fnmatch(expected, text)
       end
     end
+
+    # Default selenium_compare does not allow text around a glob.  Allow such text.
+    # TODO: Document/test this
+    def allow_text_in_glob(text)
+      if /^(exact|regexpi?):/ === text
+        return text
+      else
+        return text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*')
+      end
+    end
   end
 end
 
