@@ -5,8 +5,7 @@ require 'rspec/core/rake_task'
 
 ROOT_DIR = File.expand_path(File.dirname(__FILE__))
 TEST_APP = File.join(ROOT_DIR, 'test', 'app.rb')
-#SELENIUM_RC_JAR = File.join(ROOT_DIR, 'test', 'server', 'selenium-server-1.0.3-SNAPSHOT-standalone.jar')
-SELENIUM_RC_JAR = File.join(ROOT_DIR, 'test', 'server', 'selenium-server-standalone-2.4.0.jar')
+SELENIUM_RC_JAR = File.join(ROOT_DIR, 'test', 'server', 'selenium-server-standalone-2.20.0.jar')
 SELENIUM_RC_LOG = File.join(ROOT_DIR, 'selenium-rc.log')
 
 namespace 'testapp' do
