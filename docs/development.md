@@ -39,6 +39,7 @@ gets broken. You can do this with a single `rake` command:
 
 This will do the following:
 
+- Download an official selenium-server `.jar` into `test/server` (if needed)
 - Start the Sinatra test application (code in `test/app.rb` and `test/views/*.erb`)
 - Start the Selenium server (the `.jar` file in `test/server`)
 - Run RSpec

@@ -5,8 +5,10 @@ require 'rspec/core/rake_task'
 
 ROOT_DIR = File.expand_path(File.dirname(__FILE__))
 TEST_APP = File.join(ROOT_DIR, 'test', 'app.rb')
-SELENIUM_RC_JAR = File.join(ROOT_DIR, 'test', 'server', 'selenium-server-standalone-2.20.0.jar')
-SELENIUM_RC_LOG = File.join(ROOT_DIR, 'selenium-rc.log')
+SELENIUM_JAR = 'selenium-server-standalone-2.20.0.jar'
+SELENIUM_DOWNLOAD_URL = 'http://selenium.googlecode.com/files/' + SELENIUM_JAR
+SELENIUM_JAR_PATH = File.join(ROOT_DIR, 'test', 'server', SELENIUM_JAR)
+SELENIUM_LOG_PATH = File.join(ROOT_DIR, 'selenium-rc.log')
 
 namespace 'testapp' do
   desc "Start the test webapp in the background"
@@ -27,13 +29,25 @@ namespace 'testapp' do
   end
 end
 
+namespace 'selenium' do
+  desc "Download the official selenium-server jar file"
+  task :download do
+    if File.exist?(SELENIUM_JAR_PATH)
+      puts "#{SELENIUM_JAR_PATH} already exists. Skipping download."
+    else
+      puts "Downloading #{SELENIUM_JAR_PATH} (this may take a minute)..."
+      system("wget #{SELENIUM_DOWNLOAD_URL} --output-document=#{SELENIUM_JAR_PATH}")
+    end
+  end
+end
+
 Selenium::Rake::RemoteControlStartTask.new do |rc|
-  rc.jar_file = SELENIUM_RC_JAR
+  rc.jar_file = SELENIUM_JAR_PATH
   rc.port = 4444
   rc.background = true
   rc.timeout_in_seconds = 60
   rc.wait_until_up_and_running = true
-  rc.log_to = SELENIUM_RC_LOG
+  rc.log_to = SELENIUM_LOG_PATH
 end
 
 Selenium::Rake::RemoteControlStopTask.new do |rc|
@@ -78,6 +92,7 @@ end
 namespace 'servers' do
   desc "Start the Selenium and testapp servers"
   task :start do
+    Rake::Task['selenium:download'].invoke
     Rake::Task['testapp:start'].invoke
     Rake::Task['selenium:rc:start'].invoke
   end
