@@ -1,4 +1,4 @@
-require 'spec/spec_helper'
+require 'spec/st_spec_helper'
 
 describe 'browser window' do
   describe "#open_browser" do
@@ -14,7 +14,7 @@ describe 'browser window' do
       #st = Rsel::SeleniumTest.new('localhost', :browser => '*iexplore')
       #st.open_browser
     #end
-    
+
     it "reports failure to connect to a bogus Selenium server" do
       st = Rsel::SeleniumTest.new('http://localhost:8070', { :host => 'localhost', :port => '8070' })
       lambda do

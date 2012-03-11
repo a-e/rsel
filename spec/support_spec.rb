@@ -233,12 +233,12 @@ describe Rsel::Support do
   describe "#selenium_compare" do
     context "returns true when" do
       it "gets most identical strings" do
-        selenium_compare("","").should be_true
-        selenium_compare("This","This").should be_true
+        selenium_compare("", "").should be_true
+        selenium_compare("This", "This").should be_true
       end
       it "gets exact:ly identical strings" do
-        selenium_compare("","exact:").should be_true
-        selenium_compare("This","exact:This").should be_true
+        selenium_compare("", "exact:").should be_true
+        selenium_compare("This", "exact:This").should be_true
       end
       it "gets matching globs" do
         selenium_compare("", "*").should be_true
@@ -263,14 +263,15 @@ describe Rsel::Support do
 
     context "returns false when" do
       it "gets most differing strings" do
-        selenium_compare("","!").should be_false
-        selenium_compare("&","").should be_false
-        selenium_compare("This","That").should be_false
+        selenium_compare("", "!").should be_false
+        selenium_compare("&", "").should be_false
+        selenium_compare("This", "That").should be_false
       end
       it "gets exact:ly different strings" do
-        selenium_compare("","exact:!").should be_false
-        selenium_compare("&","exact:").should be_false
-        selenium_compare("This","exact:That").should be_false
+        selenium_compare("", "exact:!").should be_false
+        selenium_compare("!!", "exact:!").should be_false
+        selenium_compare("&", "exact:").should be_false
+        selenium_compare("This", "exact:That").should be_false
       end
       it "gets non-matching globs" do
         selenium_compare("No", "?").should be_false

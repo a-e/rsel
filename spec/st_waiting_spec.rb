@@ -1,4 +1,4 @@
-require 'spec/spec_helper'
+require 'spec/st_spec_helper'
 
 describe 'waiting' do
   before(:each) do

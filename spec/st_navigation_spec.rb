@@ -1,4 +1,4 @@
-require 'spec/spec_helper'
+require 'spec/st_spec_helper'
 
 describe 'navigation' do
   before(:each) do

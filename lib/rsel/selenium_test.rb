@@ -245,9 +245,8 @@ module Rsel
         return pass_if @browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
-        text = allow_text_in_glob(text)
         fail_on_exception do
-          return pass_if selenium_compare(@browser.get_text(selector), text), "'#{text}' not found in '#{@browser.get_text(selector)}'"
+          return pass_if selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)), "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
       end
     end
@@ -271,8 +270,7 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         begin
-          text = allow_text_in_glob(text)
-          return pass_if !selenium_compare(@browser.get_text(selector), text), "'#{text}' found in '#{@browser.get_text(selector)}'"
+          return pass_if !selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)), "'#{text}' found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
           return true
@@ -314,8 +312,7 @@ module Rsel
         # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        text = allow_text_in_glob(text)
-        return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), text) rescue false); sleep 1 }
+        return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)) rescue false); sleep 1 }
       end
     end
 
@@ -342,14 +339,13 @@ module Rsel
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
       if scope == nil
-        pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+        return pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
         # This would be better if it worked:
         # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        text = allow_text_in_glob(text)
         # Re: rescue: If the scope is not found, the text is not seen.
-        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), text) rescue true); sleep 1 }
+        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)) rescue true); sleep 1 }
       end
     end
 

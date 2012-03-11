@@ -248,9 +248,9 @@ module Rsel
     end
 
     # Compare values like Selenium does, with regexpi? and globs.
+    #
     # @param [String] text
     #   A string.
-    #
     # @param [String] expected
     #   Another string.  This one may have glob:, regexp:, etc.
     #
