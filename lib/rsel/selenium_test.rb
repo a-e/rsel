@@ -69,6 +69,13 @@ module Rsel
       end
       @found_failure = false
       @conditional_stack = [ true ]
+      # Study data
+      # @studied: A flag, true if studying is on.
+      @studied = false
+      # @studied_page: The page retrieved from the browser.
+      @studied_page = nil
+      # @fields_study_min: The minimum number of fields to set_fields or fields_equal at once before studying is invoked.
+      @fields_study_min = 10
       # A list of error messages:
       @errors = []
     end
@@ -99,6 +106,8 @@ module Rsel
       # Use javascript-xpath for IE, since it's a lot faster than the default
       if @browser.browser_string == '*iexplore'
         @browser.use_xpath_library('javascript-xpath')
+        # Use studying more too.
+        @fields_study_min = 2
       end
 
       # Make Selenium highlight elements whenever it locates them
@@ -116,6 +125,7 @@ module Rsel
     #
     def close_browser(show_errors='')
       @browser.close_current_browser_session
+      end_study
       if in_conditional?
         # Note the lack of return.  This just adds an error to the stack if we're in a conditional.
         failure "If without matching End if"
@@ -141,6 +151,64 @@ module Rsel
       current_errors = @errors
       @errors = []
       return current_errors.join("\n")
+    end
+
+
+    # Study the current web page, for more efficient parsing and data retrieval
+    # on the Rsel side rather than the Selenium browser side.  Named for the
+    # Perl "study" command.  Like its namesake, begin_study takes some time.
+    #
+    # Warning: When you study, you can learn information more quickly, but you
+    # may not be aware of what's going on around you!  If any action you perform
+    # has side-effects on the web page, you may not notice them while studying
+    # is on.  This is why so many methods call {#end_study} automatically.  But
+    # many cases remain where you could get into trouble if you forget this.
+    def begin_study
+      return skip_status if skip_step?
+      fail_on_exception do
+        @studied_page = Nokogiri::HTML("<html>#{@browser.get_html_source}</html>")
+        @studied = true
+      end
+    end
+
+    # Turn off studying.  Several other methods call this, including:
+    #   * {#click_back}
+    #   * {#close_browser}
+    #   * {#end_scenario}
+    #   * {#page_loads_in_seconds_or_less}
+    #   * {#refresh_page}
+    #   * {#see_within_seconds}
+    #   * {#do_not_see_within_seconds}
+    #   * {#visit}
+    def end_study
+      return skip_status if skip_step?
+      @studied = false
+      return true
+    end
+
+    # If studying is turned off, a flag is set, but the page is not deleted.
+    # This method turns the flag back on, without reloading the web page.
+    # Useful if you called one of the methods that calls {#end_study}, but
+    # you expect that the page (or the relevant part of a page) didn't
+    # actually change.  (Or you just want to verify data on the old page.)
+    def continue_study
+      return skip_status if skip_step?
+      @studied = true unless @studied_page == nil
+      return @studied
+    end
+
+    # Set the minimum number of fields that must appear in a set_fields
+    # before studying is invoked.  0 turns off studying in set_fields
+    # and in fields_equal.
+    #
+    # @param [String] level
+    #   A (parsable) integer
+    def set_fields_study_min(level)
+      return skip_status if skip_step?
+      fail_on_exception do
+        @fields_study_min = Integer(level).abs
+        end_study if @fields_study_min == 0
+      end
     end
 
     # Begin a new scenario, and forget about any previous failures.
@@ -169,6 +237,7 @@ module Rsel
     # @since 0.0.9
     #
     def end_scenario
+      end_study
       return true
     end
 
@@ -185,6 +254,7 @@ module Rsel
     #
     def visit(path_or_url)
       return skip_status if skip_step?
+      end_study
       fail_on_exception do
         @browser.open(strip_tags(path_or_url))
       end
@@ -198,6 +268,7 @@ module Rsel
     #
     def click_back
       return skip_status if skip_step?
+      end_study
       fail_on_exception do
         @browser.go_back
       end
@@ -211,6 +282,7 @@ module Rsel
     #
     def refresh_page
       return skip_status if skip_step?
+      end_study
       fail_on_exception do
         @browser.refresh
       end
@@ -245,8 +317,10 @@ module Rsel
         return pass_if @browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
+        # Default selenium_compare does not allow text around a glob.  Allow such text.
+        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
         fail_on_exception do
-          return pass_if selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)), "'#{text}' not found in '#{@browser.get_text(selector)}'"
+          return pass_if selenium_compare(@browser.get_text(selector), text), "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
       end
     end
@@ -270,7 +344,9 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         begin
-          return pass_if !selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)), "'#{text}' found in '#{@browser.get_text(selector)}'"
+          # Default selenium_compare does not allow text around a glob.  Allow such text.
+          text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
+          return pass_if !selenium_compare(@browser.get_text(selector), text), "'#{text}' found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
           return true
@@ -301,6 +377,7 @@ module Rsel
     #
     def see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
+      end_study
       if scope == nil && (seconds.is_a? Hash)
         scope = seconds
         seconds = -1
@@ -312,7 +389,9 @@ module Rsel
         # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)) rescue false); sleep 1 }
+        # Default selenium_compare does not allow text around a glob.  Allow such text.
+        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
+        return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), text) rescue false); sleep 1 }
       end
     end
 
@@ -333,19 +412,22 @@ module Rsel
     #
     def do_not_see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
+      end_study
       if scope == nil && (seconds.is_a? Hash)
         scope = seconds
         seconds = -1
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
       if scope == nil
-        return pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+        pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
         # This would be better if it worked:
         # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
+        # Default selenium_compare does not allow text around a glob.  Allow such text.
+        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') if !/^(exact|regexpi?):/ === text
         # Re: rescue: If the scope is not found, the text is not seen.
-        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)) rescue true); sleep 1 }
+        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), text) rescue true); sleep 1 }
       end
     end
 
@@ -515,7 +597,6 @@ module Rsel
       return skip_status if skip_step?
       type_into_field(text, locator, scope)
     end
-
 
     # Verify that a text field contains the given text. The field may include
     # additional text, as long as the expected value is in there somewhere.
@@ -886,6 +967,7 @@ module Rsel
     #
     def page_loads_in_seconds_or_less(seconds)
       return skip_status if skip_step?
+      end_study
       fail_on_exception do
         @browser.wait_for_page_to_load(seconds)
       end
@@ -1000,13 +1082,19 @@ module Rsel
       return skip_status if skip_step?
       # FitNesse passes in "" for an empty field. Fix it.
       fields = {} if fields == ""
+
+      last_studied = @studied
+      begin_study if last_studied == false && @fields_study_min != 0 && @fields_study_min <= fields.length
+
       fields.each do |key, value|
         key_esc = escape_for_hash(key.to_s)
         value_esc = escape_for_hash(value.to_s)
         unless set_field(key_esc, value_esc, scope)
+          end_study unless last_studied
           return failure "Failed to set field #{key_esc} to #{value_esc}"
         end
       end
+      end_study unless last_studied
       return true
     end
 
@@ -1052,13 +1140,18 @@ module Rsel
       ids = {} if ids == ""
       fields = {} if fields == ""
 
+      last_studied = @studied
+      begin_study if last_studied == false && @fields_study_min != 0 && @fields_study_min <= fields.length
+
       fields.each do |key, value|
         key_esc = escape_for_hash(key.to_s)
         value_esc = escape_for_hash(value.to_s)
         unless set_field_among(key_esc, value_esc, ids, scope)
+          end_study unless last_studied
           return failure("Failed to set #{key_esc} (#{ids[key_esc]}) to #{value_esc}")
         end
       end
+      end_study unless last_studied
       return true
     end
 
@@ -1162,9 +1255,17 @@ module Rsel
       return skip_status if skip_step?
       # FitNesse passes in "" for an empty field. Fix it.
       fields = {} if fields == ""
+
+      last_studied = @studied
+      begin_study if last_studied == false && @fields_study_min != 0 && 2 <= fields.length
+
       fields.keys.each do |field|
-        return failure unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope)
+        unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope)
+          end_study unless last_studied
+          return failure 
+        end
       end
+      end_study unless last_studied
       return true
     end
 
@@ -1211,9 +1312,16 @@ module Rsel
       ids = {} if ids == ""
       fields = {} if fields == ""
 
+      last_studied = @studied
+      begin_study if last_studied == false && @fields_study_min != 0 && 2 <= fields.length
+
       fields.keys.each do |field|
-        return failure unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope)
+        unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope)
+          end_study unless last_studied
+          return failure 
+        end
       end
+      end_study unless last_studied
       return true
     end
 
@@ -1454,6 +1562,79 @@ module Rsel
       return failure
     end
 
+    # Overrides the support.rb loc() method, allowing searching a studied page
+    # to try simplify a CSS or XPath expression to an id= or name= expression.
+    # 
+    # @param [Boolean] try_study
+    #   Try to use the studied page to simplify the path?  Defaults to true.
+    def loc(locator, kind='', scope={}, try_study=true)
+      locator = super(locator, kind, scope)
+      return locator unless try_study
+      return simplify_studied_xpath(locator)
+    end
+
+    # Actually simplify an xpath (or a css path), based on the studied page
+    # 
+    # @param [Boolean] try_study
+    #   Return a css= path as a last resort?  Defaults to true.
+    def simplify_studied_xpath(xpath, tocss=true)
+      return xpath unless @studied
+
+      # We need a locator using either a css= or xpath= expression.
+      if xpath[0,4] == 'css='
+        studied_node = @studied_page.at_css(xpath[4,xpath.length])
+        # If we're already using a css path, don't bother simplifying it to another css path.
+        tocss = false
+      elsif xpath[0,6] == 'xpath=' || xpath[0,2] == '//'
+        xpath = 'xpath='+xpath if xpath[0,2] == '//'
+        studied_node = @studied_page.at_xpath(xpath[6,xpath.length])
+      else
+        # Some other kind of locator.  Just return it.
+        return xpath
+      end
+      # If the path wasn't found, just return the xpath; maybe the browser will
+      # have better luck.  (Or return a better error message!)
+      return xpath if studied_node == nil
+
+      # Now let's try simplified locators.  First, id.
+      return "id=#{studied_node['id']}" if(studied_node['id'] &&
+                                           @studied_page.at_xpath("//*[@id='#{studied_node['id']}']") == studied_node)
+      # Next, name.  Same pattern.
+      return "name=#{studied_node['name']}" if(studied_node['name'] &&
+                                               @studied_page.at_xpath("//*[@name='#{studied_node['name']}']") == studied_node)
+      # Finally, try a CSS path.  But give up if we were told not to convert to CSS.
+      return xpath unless tocss
+      return "css=#{studied_node.css_path}"
+    end
+
+    # Find a studied node by any type of Selenium locator.
+    # Returning nil should lead to testing the actual web page.
+    def get_studied_node(locator)
+      return nil unless @studied
+      case locator
+      when /^id=/, /^name=/
+        locator = locator.gsub("'","\\\\'").gsub(/([a-z]+)=([^ ]*) */, "[@\\1='\\2']")
+        locator = locator.sub(/\]([^ ]*) */, "][@value='\\1']")
+        return @studied_page.at_xpath("//*#{locator}")
+      when /^link=/
+        # Parse the link through loc (which may simplify it to an id or something).
+        # Then try get_studied_node again.  It should not return to this spot.
+        return get_studied_node(loc(locator[5,locator.length], 'link'))
+      when /^css=/
+        return @studied_page.at_css(locator[4,locator.length])
+      when /^xpath=/, /^\/\//
+        return @studied_page.at_xpath(locator.sub(/^xpath=/,''))
+      when /^dom=/, /^document\./
+        # Can't parse dom=
+        return nil
+      else
+        locator = locator.sub(/^id(entifier)?=/,'')
+        retval = @studied_page.at_xpath("//*[@id='#{locator}']")
+        retval = @studied_page.at_xpath("//*[@name='#{locator}']") unless retval
+        return retval
+      end
+    end
+
     # Use Javascript to determine the type of field referenced by loceval.
     # Also turns loceval into an id= locator if possible.
     #
@@ -1465,9 +1646,17 @@ module Rsel
     # @since 0.1.1
     #
     def tagname(loceval)
+      tname = nil
+      if @studied
+        tname = get_studied_node(loceval)
+        # If we've studied, loceval should have already been converted to an id, or name, etc. So trying to change it again would be pointless.
+        return "#{tname.node_name}.#{tname['type']}" unless tname == nil
+        # If get_studied_node failed, try the old-fashioned way.
+      end
       tname = @browser.get_eval(
         'var ev=this.browserbot.findElement("' +
         loceval + '");ev.tagName+"."+ev.type+";"+((ev.id != "" && window.document.getElementById(ev.id)==ev)?ev.id:"")').downcase
+
       tname = tname.split(';',2)
       # This modifies loceval in-place.
       loceval[0,loceval.length] = "id=#{tname[1]}" if tname[1] != ''
@@ -1488,7 +1677,7 @@ module Rsel
       rescue => e
         #puts e.message
         #puts e.backtrace
-        failure("#{e.message}")
+        failure("#{e.message}:<br>#{e.backtrace.join("\n")}")
       else
         return true
       end
