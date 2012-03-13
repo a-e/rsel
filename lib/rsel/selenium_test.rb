@@ -1434,8 +1434,8 @@ module Rsel
       method = method.to_s.sub(/^selenium_/,'').to_sym if /^selenium_/ === method.to_s
 
       if @browser.respond_to?(method)
-        # Most methods should dirty the study object.
-        @study.dirty unless /^(get|is)_/ === method.to_s
+        # Most methods should dirty the study object.  These include get_eval and get_expression.
+        @study.dirty unless /^(get_(el|[^e])|is_)/ === method.to_s
         begin
           result = @browser.send(method, *args, &block)
         rescue
@@ -1665,7 +1665,7 @@ module Rsel
     # Returns the HTML of the current browser page, for studying.
     # Just to keep this consistent.
     def page_to_study
-      return "<html>#{@browser.get_html_source}</html>"
+      return "<html>#{@browser.get_eval('document.getElementsByTagName(\'html\')[0].innerHTML')}</html>"
     end
 
     # Parse the argument given into a value for @fields_study_min
