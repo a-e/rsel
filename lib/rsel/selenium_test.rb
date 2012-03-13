@@ -43,6 +43,11 @@ module Rsel
     # @option options [String, Boolean] :stop_on_failure
     #   `true` or `'true'` to abort the test when a failure occurs;
     #   `false` or `'false'` to continue execution when failure occurs.
+    # @option options [String, Integer] :study
+    #   How many steps have to be done at once to force studying.  Default
+    #   is 10 for most browsers and 1 for Internet Explorer.  Other accepted
+    #   strings are `Never' (0), `Always' (1), or an integer.  Unrecognized
+    #   strings result in the default.
     # @option options [String, Integer] :timeout
     #   Default timeout in seconds. This determines how long the `open` method
     #   will wait for the page to load.
@@ -73,7 +78,13 @@ module Rsel
       # Study data
       @study = StudyHtml.new()
       # @fields_study_min: The minimum number of fields to set_fields or fields_equal at once before studying is invoked.
-      @fields_study_min = 10
+      if @browser.browser_string == '*iexplore'
+        @default_fields_study_min = 1
+      else
+        @default_fields_study_min = 10
+      end
+      @fields_study_min = parse_fields_study_min(options[:study], @default_fields_study_min)
+      @default_fields_study_min = @fields_study_min
       # @xpath_study_length_min: The minimum number of characters in an xpath before studying is invoked when @fields_study_min == 1.
       @xpath_study_length_min = 100
       # A list of error messages:
@@ -106,8 +117,6 @@ module Rsel
       # Use javascript-xpath for IE, since it's a lot faster than the default
       if @browser.browser_string == '*iexplore'
         @browser.use_xpath_library('javascript-xpath')
-        # Use studying more too. (Always.)
-        @fields_study_min = 1
       end
 
       # Make Selenium highlight elements whenever it locates them
@@ -201,15 +210,17 @@ module Rsel
     end
 
     # Set the minimum number of fields that must appear in a set_fields
-    # before studying is invoked.  0 turns off studying in set_fields
-    # and in fields_equal.
+    # before studying is invoked.  "Never", or 0, turns off studying.
+    # "Always", or 1, turns studying on whenever a long xpath is found.
+    # Any other non-integer string resumes the studying pattern set in
+    # the initial option.
     #
-    # @param [String] level
+    # @param [String or Integer] level
     #   A (parsable) integer
-    def set_fields_study_min(level)
+    def set_fields_study_min(level=nil)
       return skip_status if skip_step?
       fail_on_exception do
-        @fields_study_min = Integer(level).abs
+        @fields_study_min = parse_fields_study_min(level, @default_fields_study_min)
         end_study if @fields_study_min == 0
       end
     end
@@ -1655,6 +1666,29 @@ module Rsel
     # Just to keep this consistent.
     def page_to_study
       return "<html>#{@browser.get_html_source}</html>"
+    end
+
+    # Parse the argument given into a value for @fields_study_min
+    # Returns the value, rather than setting @fields_study_min.
+    def parse_fields_study_min(s, default)
+      begin
+        s = s.downcase.strip
+      rescue
+      end
+
+      case s
+      when 'never'
+        return 0
+      when 'always'
+        return 1
+      else
+        begin
+          return Integer(s.gsub(/[^0-9]/,''))
+        rescue
+          # Default case:
+          return default
+        end
+      end
     end
 
     # Use Javascript to determine the type of field referenced by loceval.
