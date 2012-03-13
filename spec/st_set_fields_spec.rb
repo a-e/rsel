@@ -24,8 +24,8 @@ describe "#set_fields" do
       end
 
       it "clears a field" do
-        @st.set_fields("secret" => "").should be_true
-        @st.field_contains("secret", "").should be_true
+        @st.set_fields("message" => "").should be_true
+        @st.field_contains("message", "").should be_true
       end
     end
   end

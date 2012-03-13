@@ -34,6 +34,7 @@ describe 'navigation' do
       @st.do_not_see("The text is here!").should be_true
       @st.see_within_seconds("The text is here!").should be_true
       @st.refresh_page
+      @st.page_loads_in_seconds_or_less(10)
       @st.do_not_see("The text is here!").should be_true
     end
   end

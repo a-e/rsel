@@ -74,6 +74,8 @@ module Rsel
       @study = StudyHtml.new()
       # @fields_study_min: The minimum number of fields to set_fields or fields_equal at once before studying is invoked.
       @fields_study_min = 10
+      # @xpath_study_length_min: The minimum number of characters in an xpath before studying is invoked when @fields_study_min == 1.
+      @xpath_study_length_min = 100
       # A list of error messages:
       @errors = []
     end
@@ -315,12 +317,19 @@ module Rsel
     def see(text, scope=nil)
       return skip_status if skip_step?
       if scope == nil
+        # Study workaround when possible.
+        bodynode = @study.get_node('xpath=/html/body')
+        return true if bodynode && bodynode.inner_text.include?(text)
         return pass_if @browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
+        @study.undo_last_dirty # This method does not modify the browser page contents.
         # Default selenium_compare does not allow text around a glob.  Allow such text.
         searchtext = text
         searchtext = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
+        # Study workaround when possible.
+        bodynode = @study.get_node(selector)
+        return true if bodynode && selenium_compare(bodynode.inner_text, searchtext)
         fail_on_exception do
           return pass_if selenium_compare(@browser.get_text(selector), searchtext), "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
@@ -342,13 +351,20 @@ module Rsel
     def do_not_see(text, scope=nil)
       return skip_status if skip_step?
       if scope == nil
+        # Study workaround when possible.
+        bodynode = @study.get_node('xpath=/html/body')
+        return true if bodynode && !bodynode.inner_text.include?(text)
         return pass_if !@browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
+        @study.undo_last_dirty # This method does not modify the browser page contents.
         begin
           # Default selenium_compare does not allow text around a glob.  Allow such text.
           searchtext = text
           searchtext = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
+          # Study workaround when possible.
+          bodynode = @study.get_node(selector)
+          return true if @study.clean? && (!bodynode || !selenium_compare(bodynode.inner_text, searchtext))
           return pass_if !selenium_compare(@browser.get_text(selector), searchtext), "'#{text}' found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
@@ -446,6 +462,9 @@ module Rsel
     #
     def see_title(title)
       return skip_status if skip_step?
+      # Study workaround when possible.  (Probably won't happen a lot, but possible.)
+      bodynode = @study.get_node('xpath=/html/head/title')
+      return true if bodynode && bodynode.inner_text.strip == title
       pass_if @browser.get_title == title, "Page title is '#{@browser.get_title}', not '#{title}'"
     end
 
@@ -517,7 +536,13 @@ module Rsel
     #
     def link_exists(locator, scope={})
       return skip_status if skip_step?
-      pass_if @browser.element?(loc(locator, 'link', scope))
+      locator = loc(locator, 'link', scope)
+      @study.undo_last_dirty # This method does not modify the browser page contents.
+
+      # Study workaround when possible.
+      bodynode = @study.get_node(locator)
+      return true if bodynode
+      pass_if @browser.element?(locator)
     end
 
 
@@ -536,7 +561,13 @@ module Rsel
     #
     def button_exists(locator, scope={})
       return skip_status if skip_step?
-      pass_if @browser.element?(loc(locator, 'button', scope))
+      locator = loc(locator, 'button', scope)
+      @study.undo_last_dirty # This method does not modify the browser page contents.
+
+      # Study workaround when possible.
+      bodynode = @study.get_node(locator)
+      return true if bodynode
+      pass_if @browser.element?(locator)
     end
 
 
@@ -555,7 +586,12 @@ module Rsel
     #
     def row_exists(cells)
       return skip_status if skip_step?
-      pass_if @browser.element?("xpath=#{xpath_row_containing(cells.split(/, */).map{|s| escape_for_hash(s)})}")
+      locator = ("xpath=#{xpath_row_containing(cells.split(/, */).map{|s| escape_for_hash(s)})}")
+
+      # Study workaround when possible.
+      bodynode = @study.get_node(locator)
+      return true if bodynode
+      pass_if @browser.element?(locator)
     end
 
     #
@@ -616,6 +652,7 @@ module Rsel
       return skip_status if skip_step?
       begin
         field = @browser.field(loc(locator, 'field', scope))
+        @study.undo_last_dirty # This method does not modify the browser page contents.
       rescue
         failure "Can't identify field #{locator}"
       else
@@ -640,6 +677,7 @@ module Rsel
       return skip_status if skip_step?
       begin
         field = @browser.field(loc(locator, 'field', scope))
+        @study.undo_last_dirty # This method does not modify the browser page contents.
       rescue
         failure "Can't identify field #{locator}"
       else
@@ -768,6 +806,7 @@ module Rsel
     def checkbox_is_enabled(locator, scope={})
       return skip_status if skip_step?
       xp = loc(locator, 'checkbox', scope)
+      @study.undo_last_dirty # This method does not modify the browser page contents.
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -794,6 +833,7 @@ module Rsel
     def radio_is_enabled(locator, scope={})
       return skip_status if skip_step?
       xp = loc(locator, 'radio_button', scope)
+      @study.undo_last_dirty # This method does not modify the browser page contents.
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -818,6 +858,7 @@ module Rsel
     def checkbox_is_disabled(locator, scope={})
       return skip_status if skip_step?
       xp = loc(locator, 'checkbox', scope)
+      @study.undo_last_dirty # This method does not modify the browser page contents.
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -844,6 +885,7 @@ module Rsel
     def radio_is_disabled(locator, scope={})
       return skip_status if skip_step?
       xp = loc(locator, 'radio_button', scope)
+      @study.undo_last_dirty # This method does not modify the browser page contents.
       begin
         enabled = @browser.checked?(xp)
       rescue
@@ -914,8 +956,11 @@ module Rsel
       # TODO: Apply scope
       dropdown = XPath::HTML.select(locator)
       opt = dropdown[XPath::HTML.option(option)]
-      opt_str = opt.to_s
-      pass_if @browser.element?("xpath=#{opt_str}")
+      opt_str = "xpath=#{opt.to_s}"
+      # Study workaround when possible.
+      bodynode = @study.get_node(opt_str)
+      return true if bodynode
+      pass_if @browser.element?(opt_str)
     end
 
 
@@ -935,6 +980,7 @@ module Rsel
       return skip_status if skip_step?
       begin
         selected = @browser.get_selected_label(loc(locator, 'select', scope))
+        @study.undo_last_dirty # This method does not modify the browser page contents.
       rescue
         failure "Can't identify dropdown #{locator}"
       else
@@ -1199,6 +1245,7 @@ module Rsel
       return skip_status if skip_step?
       fail_on_exception do
         loceval = loc(locator, 'field', scope)
+        @study.undo_last_dirty # This method does not modify the browser page contents.
         case tagname(loceval)
         when 'input.text', /^textarea\./
           return field_equals(loceval, value)
@@ -1280,8 +1327,10 @@ module Rsel
           return failure 
         end
       end
-      end_study if method_study
-      # TODO: @study.undo_last_dirty when auto-dirtying is set up.
+      if method_study
+        end_study 
+        @study.undo_last_dirty
+      end
       return true
     end
 
@@ -1341,8 +1390,10 @@ module Rsel
           return failure 
         end
       end
-      end_study if method_study
-      # TODO: @study.undo_last_dirty when auto-dirtying is set up.
+      if method_study
+        end_study 
+        @study.undo_last_dirty
+      end
       return true
     end
 
@@ -1370,7 +1421,10 @@ module Rsel
 
       # Allow methods like "Type" that have Ruby homonyms to be called with a "selenium" prefix.
       method = method.to_s.sub(/^selenium_/,'').to_sym if /^selenium_/ === method.to_s
+
       if @browser.respond_to?(method)
+        # Most methods should dirty the study object.
+        @study.dirty unless /^(get|is)_/ === method.to_s
         begin
           result = @browser.send(method, *args, &block)
         rescue
@@ -1591,8 +1645,10 @@ module Rsel
     def loc(locator, kind='', scope={}, try_study=true)
       locator = super(locator, kind, scope)
       return locator unless try_study
-      # TODO: @study.dirty after simplify_xpath.
-      return @study.simplify_locator(locator)
+      @study.study(page_to_study) if(@fields_study_min == 1 && !@study.clean? && locator[0,6] == 'xpath=' && locator.length >= @xpath_study_length_min)
+      retval = @study.simplify_locator(locator)
+      @study.dirty
+      return retval
     end
 
     # Returns the HTML of the current browser page, for studying.
