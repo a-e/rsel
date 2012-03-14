@@ -6,9 +6,10 @@
       }
     </script>
   </head>
-<body onload="setTimeout(doalert, 3000);">
-  <h1>Alert page</h1>
-  <p id="oldtext">An alert is coming...</p>
-</body>
+  <body>
+    <h1>Alert page</h1>
+    <p><button value="alert_now" onclick="doalert();">Alert me now</button></p>
+    <p><button value="alert_soon" onclick="setTimeout(doalert, 3000);">Alert me soon</button></p>
+  </body>
 </html>
 
