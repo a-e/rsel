@@ -1665,7 +1665,8 @@ module Rsel
     # Returns the HTML of the current browser page, for studying.
     # Just to keep this consistent.
     def page_to_study
-      return "<html>#{@browser.get_eval('document.getElementsByTagName(\'html\')[0].innerHTML')}</html>"
+      #puts "Page to study: <html>#{@browser.get_eval('window.document.getElementsByTagName(\'html\')[0].innerHTML')}</html>"
+      return "<html>#{@browser.get_eval('window.document.getElementsByTagName(\'html\')[0].innerHTML')}</html>"
     end
 
     # Parse the argument given into a value for @fields_study_min
@@ -1708,6 +1709,7 @@ module Rsel
         # If we've studied, loceval should have already been converted to an id, or name, etc. So trying to change it again would be pointless.
         return "#{tname.node_name}.#{tname['type']}" unless tname == nil
         # If get_studied_node failed, try the old-fashioned way.
+        #puts "Studying tagname #{loceval} failed."
       end
       tname = @browser.get_eval(
         'var ev=this.browserbot.findElement("' +
