@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'rubyslim-unofficial'
   s.add_dependency 'xpath', '>= 0.1.4'
   s.add_dependency 'selenium-client'
+  s.add_dependency 'selenium-webdriver'
 
   s.add_development_dependency 'rake', '0.8.7'
   s.add_development_dependency 'sinatra' # For test webapp
