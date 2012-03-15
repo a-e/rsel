@@ -328,9 +328,7 @@ module Rsel
     def see(text, scope=nil)
       return skip_status if skip_step?
       if scope == nil
-        # Study workaround when possible.
-        bodynode = @study.get_node('xpath=/html/body')
-        return true if bodynode && bodynode.inner_text.include?(text)
+        # Can't do a Study workaround - it doesn't know what's visible.
         return pass_if @browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
@@ -338,9 +336,7 @@ module Rsel
         # Default selenium_compare does not allow text around a glob.  Allow such text.
         searchtext = text
         searchtext = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
-        # Study workaround when possible.
-        bodynode = @study.get_node(selector)
-        return true if bodynode && selenium_compare(bodynode.inner_text, searchtext)
+        # Can't do a Study workaround - it doesn't know what's visible.
         fail_on_exception do
           return pass_if selenium_compare(@browser.get_text(selector), searchtext), "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
@@ -362,9 +358,7 @@ module Rsel
     def do_not_see(text, scope=nil)
       return skip_status if skip_step?
       if scope == nil
-        # Study workaround when possible.
-        bodynode = @study.get_node('xpath=/html/body')
-        return true if bodynode && !bodynode.inner_text.include?(text)
+        # Can't do a Study workaround - it doesn't know what's visible.
         return pass_if !@browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
@@ -373,9 +367,7 @@ module Rsel
           # Default selenium_compare does not allow text around a glob.  Allow such text.
           searchtext = text
           searchtext = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
-          # Study workaround when possible.
-          bodynode = @study.get_node(selector)
-          return true if @study.clean? && (!bodynode || !selenium_compare(bodynode.inner_text, searchtext))
+          # Can't do a Study workaround - it doesn't know what's visible.
           return pass_if !selenium_compare(@browser.get_text(selector), searchtext), "'#{text}' found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
@@ -1657,7 +1649,11 @@ module Rsel
       locator = super(locator, kind, scope)
       return locator unless try_study
       @study.study(page_to_study) if(@fields_study_min == 1 && !@study.clean? && locator[0,6] == 'xpath=' && locator.length >= @xpath_study_length_min)
-      retval = @study.simplify_locator(locator)
+      begin
+        retval = @study.simplify_locator(locator)
+      rescue
+        retval = locator
+      end
       @study.dirty
       return retval
     end
