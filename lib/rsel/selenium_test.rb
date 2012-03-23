@@ -1299,7 +1299,13 @@ module Rsel
     #
     def if_i_see(text)
       return false if aborted?
-      return push_conditional(@browser.text?(text))
+      cond = false
+      begin
+        cond = @browser.text?(text)
+      rescue
+        # Something went wrong.  Therefore, I did not see the text.
+      end
+      return push_conditional(cond)
     end
 
     # If the given parameter is "yes" or "true", do the steps until I see an
