@@ -3,6 +3,8 @@
 require 'rubygems'
 require 'xpath'
 require 'selenium/client'
+#require 'selenium-webdriver'
+
 require 'rsel/support'
 require 'rsel/exceptions'
 
@@ -55,12 +57,17 @@ module Rsel
     def initialize(url, options={})
       # Strip HTML tags from URL
       @url = strip_tags(url)
+      @host = options[:host] || 'localhost'
+      @port = options[:port] || 4444
+
       @browser = Selenium::Client::Driver.new(
-        :host => options[:host] || 'localhost',
-        :port => options[:port] || 4444,
-        :browser => options[:browser] || '*firefox',
+        :host => @host,
+        :port => @port,
+        :browser => '*firefox', #'*webdriver',
         :url => @url,
         :default_timeout_in_seconds => options[:timeout] || 300)
+      #@driver = Selenium::WebDriver.for :remote,
+        #:url => "http://#{@host}:#{@port}/wd/hub"
       # Accept Booleans or strings, case-insensitive
       if options[:stop_on_failure].to_s =~ /true/i
         @stop_on_failure = true
@@ -89,6 +96,7 @@ module Rsel
       return true if @browser.session_started?
       begin
         @browser.start_new_browser_session
+        #@browser.start :driver => @driver
       rescue
         raise StopTestCannotConnect,
           "Cannot connect to Selenium server at #{@browser.host}:#{@browser.port}"
