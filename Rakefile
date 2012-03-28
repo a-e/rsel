@@ -85,6 +85,7 @@ namespace 'rcov' do
       '--include-file lib/**/*.rb',
       # Ensure the main .rb file gets included
       '--include-file lib/rsel/selenium_test.rb',
+      '--include-file lib/rsel/webdriver_test.rb',
     ]
   end
 end
