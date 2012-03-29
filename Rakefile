@@ -1,6 +1,6 @@
 require 'rake'
 require 'net/http'
-require 'selenium/rake/tasks'
+require 'selenium/rake/server_task'
 require 'rspec/core/rake_task'
 
 ROOT_DIR = File.expand_path(File.dirname(__FILE__))
@@ -41,22 +41,22 @@ namespace 'selenium' do
   end
 end
 
-Selenium::Rake::RemoteControlStartTask.new do |rc|
-  rc.jar_file = SELENIUM_JAR_PATH
-  rc.port = 4444
-  rc.background = true
-  rc.timeout_in_seconds = 60
-  rc.wait_until_up_and_running = true
-  rc.log_to = SELENIUM_LOG_PATH
-end
-
-Selenium::Rake::RemoteControlStopTask.new do |rc|
-  rc.host = 'localhost'
-  rc.port = 4444
-  rc.timeout_in_seconds = 60
-  rc.wait_until_stopped = true
-end
-
+#Selenium::Rake::RemoteControlStartTask.new do |rc|
+#  rc.jar_file = SELENIUM_JAR_PATH
+#  rc.port = 4444
+#  rc.background = true
+#  rc.timeout_in_seconds = 60
+#  rc.wait_until_up_and_running = true
+#  rc.log_to = SELENIUM_LOG_PATH
+#end
+#
+#Selenium::Rake::RemoteControlStopTask.new do |rc|
+#  rc.host = 'localhost'
+#  rc.port = 4444
+#  rc.timeout_in_seconds = 60
+#  rc.wait_until_stopped = true
+#end
+#
 desc "Run spec tests"
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.pattern = 'spec/**/*_spec.rb'
