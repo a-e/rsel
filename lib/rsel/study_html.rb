@@ -158,6 +158,11 @@ module Rsel
       # Next, name.  Same pattern.
       return "name=#{studied_node['name']}" if(studied_node['name'] &&
                                                @studied_page.at_xpath("//*[@name='#{studied_node['name']}']") == studied_node)
+
+      # Link, perhaps?
+      return "link=#{studied_node.inner_text}" if(studied_node.node_name.downcase == 'a' && 
+                                               @studied_page.at_xpath("//a[text()='#{studied_node.inner_text}']") == studied_node)
+
       # Finally, try a CSS path.  Make that a simple xpath, since nth-of-type doesn't work.  But give up if we were told not to convert to CSS.
       return locator unless tocss
       return "xpath=#{studied_node.path}"

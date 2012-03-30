@@ -1490,6 +1490,7 @@ module Rsel
         cond = @browser.text?(text)
       rescue
         # Something went wrong.  Therefore, I did not see the text.
+        cond = false
       end
       return push_conditional(cond)
     end

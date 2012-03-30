@@ -209,6 +209,12 @@ describe Rsel::StudyHtml do
         @study.simplify_locator('dom=document.links[42]').should eq('dom=document.links[42]')
         @study.simplify_locator('document.links[42]').should eq('document.links[42]')
       end
+      it "an element only accessible by xpath or css from css" do
+        @study.simplify_locator('#spouse_form button').should eq('#spouse_form button')
+      end
+      it "an element only accessible by xpath or css from xpath if ordered not to" do
+        @study.simplify_locator('//button[@value=\'submit_spouse_form\']', false).should eq('xpath=//button[@value=\'submit_spouse_form\']')
+      end
     end
 
     context "simplifies" do
@@ -225,6 +231,18 @@ describe Rsel::StudyHtml do
       end
       it "a css path to a name" do
         @study.simplify_locator('css=#other_form #duplicate').should eq('name=second_duplicate')
+      end
+      it "an xpath to a link" do
+        my_xpath = @study.loc('Home', 'link')
+        @study.simplify_locator(my_xpath).should eq('link=Home')
+      end
+      it "a css path to a link" do
+        @study.simplify_locator('css=a').should eq('link=Home')
+      end
+      it "an element only accessible by xpath or css from an xpath" do
+        my_xpath = @study.loc('Submit spouse form', 'button')
+        @study.simplify_locator(my_xpath).should eq('xpath=/html/body/div[2]/form/p[4]/button')
+        @study.simplify_locator('//button[@value=\'submit_spouse_form\']').should eq('xpath=/html/body/div[2]/form/p[4]/button')
       end
       # TODO: Simplify an xpath to a css.
     end
