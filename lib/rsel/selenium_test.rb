@@ -44,7 +44,9 @@ module Rsel
     #   `false` or `'false'` to continue execution when failure occurs.
     # @option options [String, Integer] :timeout
     #   Default timeout in seconds. This determines how long the `open` method
-    #   will wait for the page to load.
+    #   will wait for the page to load, as well as the default timeout for
+    #   methods like `see_within_seconds`, `do_not_see_within_seconds`, and
+    #   `see_alert_within_seconds`.
     #
     # @example
     #   | script | selenium test | http://site.to.test/ |
@@ -285,8 +287,8 @@ module Rsel
     #
     # @param [String] text
     #   Plain text that should be appear on or visible on the current page
-    # @param [String] seconds
-    #   Integer number of seconds to wait.
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to wait, or `-1` to use the default timeout.
     # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
@@ -307,12 +309,16 @@ module Rsel
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
       if scope == nil
-        return pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
+        return pass_if result_within(seconds) {
+          @browser.text?(text)
+        }
         # This would be better if it worked:
         # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)) rescue false); sleep 1 }
+        return pass_if result_within(seconds) {
+          selenium_compare(@browser.get_text(selector), allow_text_in_glob(text))
+        }
       end
     end
 
@@ -320,8 +326,8 @@ module Rsel
     #
     # @param [String] text
     #   Plain text that should disappear from or not be present on the current page
-    # @param [String] seconds
-    #   Integer number of seconds to wait.
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to wait, or `-1` to use the default timeout.
     # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
@@ -339,7 +345,9 @@ module Rsel
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
       if scope == nil
-        return pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+        return pass_if result_within(seconds) {
+          !@browser.text?(text)
+        }
         # This would be better if it worked:
         # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
       else
@@ -384,8 +392,8 @@ module Rsel
     # @param [String] text
     #   Text of the alert that you expect to see
     #
-    # @param [String] seconds
-    #   Integer number of seconds to wait.
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to wait, or `-1` to use the default timeout.
     #
     # @example
     #   | see alert within seconds |
@@ -408,8 +416,10 @@ module Rsel
         end
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      alert_text = nil
-      if !(Integer(seconds)+1).times{ break if ((alert_text=@browser.get_alert) rescue false); sleep 1 }
+      alert_text = result_within(seconds) {
+        @browser.get_alert
+      }
+      if alert_text
         return true if text == nil
         return pass_if selenium_compare(alert_text, text), "Expected alert '#{text}', but got '#{alert_text}'!"
       else

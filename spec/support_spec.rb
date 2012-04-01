@@ -316,5 +316,67 @@ describe Rsel::Support do
       result.should == %Q{//tr[contains(., 'abc') and contains(., 'def')]}
     end
   end
+
+  describe "#result_within" do
+    context "returns the result when" do
+      it "block evaluates to true immediately" do
+        result_within(3) do
+          true
+        end.should == true
+      end
+
+      it "block evaluates to a non-false value immediately" do
+        result_within(3) do
+          foo = 'foo'
+        end.should == 'foo'
+      end
+
+      it "block evaluates to false initially, but true within the timeout" do
+        @first_run = true
+        result_within(3) do
+          if @first_run
+            @first_run = false
+            false
+          else
+            true
+          end
+        end.should == true
+      end
+
+      it "block raises an exception, but evaluates true within the timeout" do
+        @first_run = true
+        result_within(3) do
+          if @first_run
+            @first_run = false
+            raise RuntimeError
+          else
+            true
+          end
+        end.should == true
+      end
+    end
+
+    context "returns false when" do
+      it "block evaluates as false every time" do
+        result_within(3) do
+          false
+        end.should be_nil
+      end
+
+      it "block evaluates as nil every time" do
+        result_within(3) do
+          nil
+        end.should be_nil
+      end
+
+      it "block raises an exception every time" do
+        result_within(3) do
+          raise RuntimeError
+        end.should be_nil
+      end
+
+      it "block does not return within the timeout"
+    end
+  end
 end
 

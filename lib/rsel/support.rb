@@ -277,6 +277,35 @@ module Rsel
         return text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*')
       end
     end
+
+
+    # Execute the given block statement once per second, until it returns a
+    # value that evaluates as true (meaning anything other than `false` or
+    # `nil`), or until the `seconds` timeout is reached. If the block evaluates
+    # as true within the timeout, return the block result. Otherwise, return
+    # `nil`.
+    #
+    # If the block never returns a value other than `false` or `nil`, then
+    # return `nil`. If the block raises an exception (*any* exception), that's
+    # considered a false result, and the block will be retried until a true
+    # result is returned, or the `seconds` timeout is reached.
+    #
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to keep retrying the block
+    # @param [Block] block
+    #   Any block of code that might evaluate to a non-false value
+    #
+    # TODO: Return false if the block takes too long to execute (and exceeds
+    # the timeout)
+    #
+    def result_within(seconds, &block)
+      (seconds.to_i + 1).times do
+        result = yield rescue nil
+        return result if result
+        sleep 1
+      end
+      return nil
+    end
   end
 end
 
