@@ -47,6 +47,8 @@ describe 'temporal visibility' do
         @st.see_within_seconds("The text is here!", 1).should be_false
       end
       it "text appears too late in an id" do
+        # FIXME: This test occasionally fails for no apparent reason
+        # (the text is found within the timeout)
         @st.see_within_seconds("The text is here!", 1, :within => 'newtext').should be_false
       end
       it "text never appears" do

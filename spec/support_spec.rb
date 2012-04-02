@@ -400,5 +400,60 @@ describe Rsel::Support do
       it "block does not return within the timeout"
     end
   end
+
+
+  describe "#failed_within" do
+    context "returns true when" do
+      it "block evaluates to false immediately" do
+        failed_within(3) do
+          false
+        end.should be_true
+      end
+
+      it "block evaluates to nil immediately" do
+        failed_within(3) do
+          nil
+        end.should be_true
+      end
+
+      it "block evaluates to true initially, but false within the timeout" do
+        @first_run = true
+        failed_within(3) do
+          if @first_run
+            @first_run = false
+            true
+          else
+            false
+          end
+        end.should be_true
+      end
+
+      it "block evaluates to true initially, but raises an exception within the timeout" do
+        @first_run = true
+        failed_within(3) do
+          if @first_run
+            @first_run = false
+            true
+          else
+            raise RuntimeError
+          end
+        end.should be_true
+      end
+    end
+
+    context "returns false when" do
+      it "block evaluates as true every time" do
+        failed_within(3) do
+          true
+        end.should be_false
+      end
+
+      it "block evaluates as true-ish every time" do
+        failed_within(3) do
+          'foo'
+        end.should be_false
+      end
+    end
+  end
 end
 

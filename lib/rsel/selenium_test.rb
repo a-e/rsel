@@ -356,9 +356,9 @@ module Rsel
         # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        # Re: rescue: If the scope is not found, the text is not seen.
-        # TODO: Find a way to make this work with `result_within`
-        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), globify(text)) rescue true); sleep 1 }
+        return pass_if failed_within(seconds) {
+          selenium_compare(@browser.get_text(selector), globify(text))
+        }
       end
     end
 

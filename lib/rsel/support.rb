@@ -285,8 +285,10 @@ module Rsel
     end
 
 
-    # Execute the given block statement once per second, until it returns a
-    # value that evaluates as true (meaning anything other than `false` or
+    # Ensure that a given block gets a result within a timeout.
+    #
+    # This executes the given block statement once per second, until it returns
+    # a value that evaluates as true (meaning anything other than `false` or
     # `nil`), or until the `seconds` timeout is reached. If the block evaluates
     # as true within the timeout, return the block result. Otherwise, return
     # `nil`.
@@ -301,6 +303,10 @@ module Rsel
     # @param [Block] block
     #   Any block of code that might evaluate to a non-false value
     #
+    # @return
+    #   Result of the block if it evaluated true-ish within the timeout, nil
+    #   if the block always evaluated as false or raised an exception.
+    #
     # TODO: Return false if the block takes too long to execute (and exceeds
     # the timeout)
     #
@@ -311,6 +317,35 @@ module Rsel
         sleep 1
       end
       return nil
+    end
+
+
+    # Ensure that a given block fails within a timeout.
+    #
+    # This is a kind of counterpart to {#result_within}
+    #
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to keep retrying the block
+    # @param [Block] block
+    #   Any block of code that might evaluate to a false value,
+    #   or raise an exception, within the timeout.
+    #
+    # @return [Boolean]
+    #   true if the block failed (returned false/nil or raised an exception)
+    #   within the timeout, false if the block never failed within the timeout.
+    #
+    def failed_within(seconds, &block)
+      (seconds.to_i + 1).times do
+        begin
+          result = yield
+        rescue
+          return true
+        else
+          return true if !result
+        end
+        sleep 1
+      end
+      return false
     end
   end
 end
