@@ -7,6 +7,20 @@ describe 'buttons' do
 
   describe "#click_button" do
     context "passes when" do
+      context "studying and " do 
+        it "button exists and is enabled" do
+          @st.begin_study
+          @st.click_button("Submit person form").should be_true
+          @st.end_study
+        end
+
+        it "button exists within scope" do
+          @st.begin_study
+          @st.click_button("Submit person form", :within => "person_form").should be_true
+          @st.end_study
+        end
+      end
+
       it "button exists and is enabled" do
         @st.click_button("Submit person form").should be_true
       end
