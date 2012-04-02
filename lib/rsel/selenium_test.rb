@@ -243,7 +243,7 @@ module Rsel
     #
     def see(text, scope=nil)
       return skip_status if skip_step?
-      if scope == nil
+      if scope.nil?
         return pass_if @browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
@@ -267,7 +267,7 @@ module Rsel
     #
     def do_not_see(text, scope=nil)
       return skip_status if skip_step?
-      if scope == nil
+      if scope.nil?
         return pass_if !@browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
@@ -303,12 +303,12 @@ module Rsel
     #
     def see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
-      if scope == nil && (seconds.is_a? Hash)
+      if scope.nil? && (seconds.is_a? Hash)
         scope = seconds
         seconds = -1
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      if scope == nil
+      if scope.nil?
         return pass_if result_within(seconds) {
           @browser.text?(text)
         }
@@ -339,12 +339,12 @@ module Rsel
     #
     def do_not_see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
-      if scope == nil && (seconds.is_a? Hash)
+      if scope.nil? && (seconds.is_a? Hash)
         scope = seconds
         seconds = -1
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      if scope == nil
+      if scope.nil?
         return pass_if result_within(seconds) {
           !@browser.text?(text)
         }
@@ -420,7 +420,7 @@ module Rsel
         @browser.get_alert
       }
       if alert_text
-        return true if text == nil
+        return true if text.nil?
         return pass_if selenium_compare(alert_text, text), "Expected alert '#{text}', but got '#{alert_text}'!"
       else
         return failure
@@ -1375,7 +1375,7 @@ module Rsel
 
       last_status = @conditional_stack.pop
       # If this end_if is within an un-executed if block, don't execute it.
-      return nil if last_status == nil
+      return nil if last_status.nil?
       return true
     end
 
@@ -1432,7 +1432,7 @@ module Rsel
     # @since 0.1.2
     #
     def in_nil_conditional?
-      return in_conditional? && @conditional_stack.last == nil
+      return in_conditional? && @conditional_stack.last.nil?
     end
 
     # Return true if we're inside a conditional block that was skipped,
