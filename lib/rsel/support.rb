@@ -276,6 +276,8 @@ module Rsel
     # @param [String] text
     #   Text to globify
     #
+    # @since 0.1.2
+    #
     def globify(text)
       if /^(exact|regexpi?):/ === text
         return text
@@ -307,6 +309,8 @@ module Rsel
     #   Result of the block if it evaluated true-ish within the timeout, nil
     #   if the block always evaluated as false or raised an exception.
     #
+    # @since 0.1.2
+    #
     # TODO: Return false if the block takes too long to execute (and exceeds
     # the timeout)
     #
@@ -333,6 +337,8 @@ module Rsel
     # @return [Boolean]
     #   true if the block failed (returned false/nil or raised an exception)
     #   within the timeout, false if the block never failed within the timeout.
+    #
+    # @since 0.1.2
     #
     def failed_within(seconds, &block)
       (seconds.to_i + 1).times do
