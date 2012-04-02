@@ -502,6 +502,8 @@ module Rsel
     #   | see alert | Illegal operation! Authorities have been notified. | within | 15 | seconds |
     #     Validates that the next alert that appears within the given timeout is as specified.
     #
+    # @since 0.1.2
+    #
     def see_alert_within_seconds(text=nil, seconds=-1)
       return skip_status if skip_step?
       # Handle the case of being given seconds, but not text.
