@@ -317,6 +317,28 @@ describe Rsel::Support do
     end
   end
 
+  describe "#globify" do
+    it "leaves `exact:text` unchanged" do
+      globify('exact:text').should == 'exact:text'
+    end
+
+    it "leaves `regexp:text` unchanged" do
+      globify('regexp:text').should == 'regexp:text'
+    end
+
+    it "leaves `regexpi:text` unchanged" do
+      globify('regexpi:text').should == 'regexpi:text'
+    end
+
+    it "converts `glob:text` to `*text*`" do
+      globify('glob:text').should == '*text*'
+    end
+
+    it "adds *...* to text" do
+      globify('text').should == '*text*'
+    end
+  end
+
   describe "#result_within" do
     context "returns the result when" do
       it "block evaluates to true immediately" do

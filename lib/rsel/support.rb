@@ -268,9 +268,15 @@ module Rsel
       end
     end
 
-    # Default selenium_compare does not allow text around a glob.  Allow such text.
-    # TODO: Document/test this
-    def allow_text_in_glob(text)
+    # Return `text` with glob markers `*` on each end, unless the text
+    # begins with `exact:`, `regexp:`, or `regexpi:`. This effectively
+    # allows normal text to match as a "contains" search instead of
+    # matching the entire string.
+    #
+    # @param [String] text
+    #   Text to globify
+    #
+    def globify(text)
       if /^(exact|regexpi?):/ === text
         return text
       else

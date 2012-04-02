@@ -248,7 +248,9 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         fail_on_exception do
-          return pass_if selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)), "'#{text}' not found in '#{@browser.get_text(selector)}'"
+          match = selenium_compare(@browser.get_text(selector), globify(text))
+          return pass_if match,
+            "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
       end
     end
@@ -272,7 +274,9 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         begin
-          return pass_if !selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)), "'#{text}' found in '#{@browser.get_text(selector)}'"
+          match = selenium_compare(@browser.get_text(selector), globify(text))
+          return pass_if !match,
+            "'#{text}' not expected, but found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
           return true
@@ -317,7 +321,7 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         return pass_if result_within(seconds) {
-          selenium_compare(@browser.get_text(selector), allow_text_in_glob(text))
+          selenium_compare(@browser.get_text(selector), globify(text))
         }
       end
     end
@@ -353,7 +357,8 @@ module Rsel
       else
         selector = loc("css=", '', scope).strip
         # Re: rescue: If the scope is not found, the text is not seen.
-        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), allow_text_in_glob(text)) rescue true); sleep 1 }
+        # TODO: Find a way to make this work with `result_within`
+        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), globify(text)) rescue true); sleep 1 }
       end
     end
 
@@ -369,7 +374,8 @@ module Rsel
     #
     def see_title(title)
       return skip_status if skip_step?
-      pass_if @browser.get_title == title, "Page title is '#{@browser.get_title}', not '#{title}'"
+      pass_if @browser.get_title == title,
+        "Page title is '#{@browser.get_title}', not '#{title}'"
     end
 
 
@@ -421,7 +427,8 @@ module Rsel
       }
       if alert_text
         return true if text.nil?
-        return pass_if selenium_compare(alert_text, text), "Expected alert '#{text}', but got '#{alert_text}'!"
+        return pass_if selenium_compare(alert_text, text),
+          "Expected alert '#{text}', but got '#{alert_text}'!"
       else
         return failure
       end
@@ -480,7 +487,8 @@ module Rsel
     #
     def row_exists(cells)
       return skip_status if skip_step?
-      pass_if @browser.element?("xpath=#{xpath_row_containing(cells.split(/, */).map{|s| escape_for_hash(s)})}")
+      cells = cells.split(/, */).map { |s| escape_for_hash(s) }
+      pass_if @browser.element?("xpath=#{xpath_row_containing(cells)}")
     end
 
     #
@@ -1260,7 +1268,8 @@ module Rsel
           # The method call succeeded
           # Should we check this against another string?
           if do_check
-            return pass_if selenium_compare(result.to_s, check_against), "Expected '#{check_against}', but got '#{result.to_s}'"
+            return pass_if selenium_compare(result.to_s, check_against),
+              "Expected '#{check_against}', but got '#{result.to_s}'"
           end
           # Did it return true or false?
           return failure if result == false

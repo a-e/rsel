@@ -64,7 +64,7 @@ describe 'visibility' do
       it "sees text within an id" do
         @st.errors
         @st.do_not_see("About this site", :within => 'header').should be_false
-        @st.errors.should eq("'About this site' found in 'About this site'")
+        @st.errors.should eq("'About this site' not expected, but found in 'About this site'")
       end
     end
 
