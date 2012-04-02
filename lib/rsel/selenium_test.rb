@@ -45,9 +45,9 @@ module Rsel
     #   `false` or `'false'` to continue execution when failure occurs.
     # @option options [String, Integer] :study
     #   How many steps have to be done at once to force studying.  Default
-    #   is 10 for most browsers and 1 for Internet Explorer.  Other accepted
-    #   strings are `Never' (0), `Always' (1), or an integer.  Unrecognized
-    #   strings result in the default.
+    #   is `Never` (0).  Other accepted strings are `Always' (1), `Auto(matic)`
+    #   (10 for most browsers and 1 for Internet Explorer), or an integer.
+    #   Unrecognized strings result in the default.
     # @option options [String, Integer] :timeout
     #   Default timeout in seconds. This determines how long the `open` method
     #   will wait for the page to load.
@@ -78,12 +78,8 @@ module Rsel
       # Study data
       @study = StudyHtml.new()
       # @fields_study_min: The minimum number of fields to set_fields or fields_equal at once before studying is invoked.
-      if @browser.browser_string == '*iexplore'
-        @default_fields_study_min = 1
-      else
-        @default_fields_study_min = 10
-      end
-      @fields_study_min = parse_fields_study_min(options[:study], @default_fields_study_min)
+      # To be on the safe side, studying is turned off by default, unless you set another value.
+      @fields_study_min = parse_fields_study_min(options[:study], 0)
       @default_fields_study_min = @fields_study_min
       # @xpath_study_length_min: The minimum number of characters in an xpath before studying is invoked when @fields_study_min == 1.
       @xpath_study_length_min = 100
@@ -1685,6 +1681,12 @@ module Rsel
         return 0
       when 'always'
         return 1
+      when /^auto/
+        if @browser.browser_string == '*iexplore'
+          @default_fields_study_min = 1
+        else
+          @default_fields_study_min = 10
+        end
       else
         begin
           return Integer(s.gsub(/[^0-9]/,''))
