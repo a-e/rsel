@@ -24,10 +24,34 @@ describe 'visibility' do
         @st.see("Some bogus text").should be_false
         @st.errors.should eq('')
       end
+      it "text is present, but invisible" do
+        @st.errors
+        @st.see("unseen").should be_false
+        @st.errors.should eq('')
+      end
+      it "text is present, but invisible, using studying" do
+        @st.errors
+        @st.begin_study
+        @st.see("unseen").should be_false
+        @st.end_study
+        @st.errors.should eq('')
+      end
       it "text is present, but not within the scope" do
         @st.errors
         @st.see("This is a Sinatra webapp", :within => 'header').should be_false
         @st.errors.should eq("'This is a Sinatra webapp' not found in 'About this site'")
+      end
+      it "text is present, within scope, but invisible" do
+        @st.errors
+        @st.see("unseen", :within => 'header').should be_false
+        @st.errors.should eq("'unseen' not found in 'About this site'")
+      end
+      it "text is present, studied within scope, but invisible" do
+        @st.errors
+        @st.begin_study
+        @st.see("unseen", :within => 'header').should be_false
+        @st.end_study
+        @st.errors.should eq("'unseen' not found in 'About this site'")
       end
       it "scope is not present" do
         @st.see("This is a Sinatra webapp", :within => 'bogus_id').should be_false
@@ -46,8 +70,32 @@ describe 'visibility' do
         @st.do_not_see("Nonexistent").should be_true
         @st.do_not_see("Some bogus text").should be_true
       end
+      it "text is present, but invisible" do
+        @st.errors
+        @st.do_not_see("unseen").should be_true
+        @st.errors.should eq('')
+      end
+      it "text is present, but invisible, using studying" do
+        @st.errors
+        @st.begin_study
+        @st.do_not_see("unseen").should be_true
+        @st.end_study
+        @st.errors.should eq('')
+      end
       it "text is present, but not within the scope" do
         @st.do_not_see("This is a Sinatra webapp", :within => 'header').should be_true
+      end
+      it "text is present, within scope, but invisible" do
+        @st.errors
+        @st.do_not_see("unseen", :within => 'header').should be_true
+        @st.errors.should eq('')
+      end
+      it "text is present, studied within scope, but invisible" do
+        @st.errors
+        @st.begin_study
+        @st.do_not_see("unseen", :within => 'header').should be_true
+        @st.end_study
+        @st.errors.should eq('')
       end
       it "scope is not present" do
         @st.do_not_see("This is a Sinatra webapp", :within => 'bogus_id').should be_true
