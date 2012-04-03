@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
     Rsel provides a Slim fixture for running Selenium tests, with
     step methods written in Ruby.
   EOS
-  s.authors = ["Marcus French", "Dale Straw", "Eric Pierce"]
+  s.authors = ["Ken Brazier", "Marcus French", "Dale Straw", "Eric Pierce"]
   s.email = "epierce@automation-excellence.com"
   s.homepage = "http://github.com/a-e/rsel"
   s.platform = Gem::Platform::RUBY
