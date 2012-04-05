@@ -45,7 +45,7 @@ module Rsel
     #   `false` or `'false'` to continue execution when failure occurs.
     # @option options [String, Integer] :study
     #   How many steps have to be done at once to force studying.  Default
-    #   is `Never` (0).  Other accepted strings are `Always' (1), `Auto(matic)`
+    #   is `Never` (0).  Other accepted strings are `Always` (1), `Auto` (matic)
     #   (10 for most browsers and 1 for Internet Explorer), or an integer.
     #   Unrecognized strings result in the default.
     # @option options [String, Integer] :timeout
@@ -59,6 +59,7 @@ module Rsel
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3} |
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3, port:4445} |
     #   | script | selenium test | http://site.to.test/ | !{stop_on_failure:true} |
+    #   | script | selenium test | http://site.to.test/ | !{study:Auto} |
     #
     def initialize(url, options={})
       # Strip HTML tags from URL
