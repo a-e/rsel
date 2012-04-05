@@ -44,10 +44,10 @@ module Rsel
     #   `true` or `'true'` to abort the test when a failure occurs;
     #   `false` or `'false'` to continue execution when failure occurs.
     # @option options [String, Integer] :study
-    #   How many steps have to be done at once to force studying.  Default
-    #   is `Never` (0).  Other accepted strings are `Always` (1), `Auto` (matic)
-    #   (10 for most browsers and 1 for Internet Explorer), or an integer.
-    #   Unrecognized strings result in the default.
+    #   How many steps have to be done at once to force studying.  Default is
+    #   `'Never'` (0).  Other accepted strings are `'Always'` (1), `'Auto'`
+    #   (matic) (10 for most browsers and 1 for Internet Explorer), or an
+    #   integer. Unrecognized strings result in the default.
     # @option options [String, Integer] :timeout
     #   Default timeout in seconds. This determines how long the `open` method
     #   will wait for the page to load, as well as the default timeout for
