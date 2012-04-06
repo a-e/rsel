@@ -1,11 +1,21 @@
 Rsel History
 ============
 
+0.1.2
+-----
+
+- Studying: customizable optimization to improve performance
+- More scoping (see, do_not_see, see_within_seconds, do_not_see_within_seconds)
+- Alert verification (see_alert_within_seconds)
+- Glob and regex can now be used in more places (selenium_compare)
+
+
+
 0.1.1
 -----
 
 - Conditional expressions (if_is, if_i_see, if_parameter, otherwise, end_if)
-- Temporal visibility (see|do_not_see)_within_seconds
+- Temporal visibility (see_within_seconds, do_not_see_within_seconds)
 - Generic field equality (generic_field_equals)
 - Generic field fill-in (set_field, set_field_among)
 - Hash-based field fill-in (set_fields, sef_fields_among)

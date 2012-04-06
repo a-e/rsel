@@ -175,6 +175,8 @@ module Rsel
     # Normalize the given hash of name => locator mappings.
     # Converts all keys to lowercase and calls {#escape_for_hash} on them.
     #
+    # @since 0.1.1
+    #
     def normalize_ids(ids)
       ids = {} unless ids.is_a? Hash
       ids.keys.each do |key|
@@ -202,10 +204,11 @@ module Rsel
       return text.gsub(/<\/?[^>]*>/, '')
     end
 
-    # This module defines helper methods for building XPath expressions
-    # copied from Kelp::XPaths
     # Return an XPath for any table row containing all strings in `texts`,
     # within the current context.
+    #
+    # @since 0.1.1
+    #
     def xpath_row_containing(texts)
       texts = [texts] if texts.class == String
       conditions = texts.collect do |text|
@@ -222,6 +225,8 @@ module Rsel
     #   xpath_sanitize("Bob's")
     #   # => concat('Bob', "'", 's')
     #
+    # @since 0.1.1
+    #
     def xpath_sanitize(text)
       # If there's nothing to escape, just wrap text in single-quotes
       if !text.include?("'")
@@ -234,6 +239,7 @@ module Rsel
 
     # Convert a string like "yes", "true", "1", etc.
     # Values currently recognized as true, case-insensitive:
+    #
     # * [empty string]
     # * 1
     # * Check
@@ -243,6 +249,9 @@ module Rsel
     # * Selected
     # * True
     # * Yes
+    #
+    # @since 0.1.1
+    #
     def string_is_true?(s)
       return /^(?:yes|true|on|(?:check|select)(?:ed)?|1|)$/i === s
     end
@@ -253,6 +262,8 @@ module Rsel
     #   A string.
     # @param [String] expected
     #   Another string.  This one may have glob:, regexp:, etc.
+    #
+    # @since 0.1.1
     #
     def selenium_compare(text, expected)
       if expected.sub!(/^regexp:/, '')

@@ -48,10 +48,10 @@ module Rsel
     #   little disk space you may want to avoid this.  Screenshots may not
     #   be displayed in Internet Explorer.
     # @option options [String, Integer] :study
-    #   How many steps have to be done at once to force studying.  Default
-    #   is `Never` (0).  Other accepted strings are `Always' (1), `Auto(matic)`
-    #   (10 for most browsers and 1 for Internet Explorer), or an integer.
-    #   Unrecognized strings result in the default.
+    #   How many steps have to be done at once to force studying.  Default is
+    #   `'Never'` (0).  Other accepted strings are `'Always'` (1), `'Auto'`
+    #   (matic) (10 for most browsers and 1 for Internet Explorer), or an
+    #   integer. Unrecognized strings result in the default.
     # @option options [String, Integer] :timeout
     #   Default timeout in seconds. This determines how long the `open` method
     #   will wait for the page to load, as well as the default timeout for
@@ -66,6 +66,7 @@ module Rsel
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3} |
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3, port:4445} |
     #   | script | selenium test | http://site.to.test/ | !{stop_on_failure:true} |
+    #   | script | selenium test | http://site.to.test/ | !{study:Auto} |
     #
     def initialize(url, options={})
       # Strip HTML tags from URL
@@ -523,6 +524,8 @@ module Rsel
     # @example
     #   | see alert | Illegal operation! Authorities have been notified. | within | 15 | seconds |
     #     Validates that the next alert that appears within the given timeout is as specified.
+    #
+    # @since 0.1.2
     #
     def see_alert_within_seconds(text=nil, seconds=-1)
       return skip_status if skip_step?
