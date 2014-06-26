@@ -2,7 +2,7 @@ require_relative 'st_spec_helper'
 
 describe 'scenarios' do
   before(:each) do
-    @st.visit('/').should be true
+    expect(@st.visit('/')).to be true
   end
 
   describe "#begin_scenario" do

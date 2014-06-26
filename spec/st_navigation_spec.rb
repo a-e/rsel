@@ -2,13 +2,13 @@ require_relative 'st_spec_helper'
 
 describe 'navigation' do
   before(:each) do
-    @st.visit("/").should be true
+    expect(@st.visit("/")).to be true
   end
 
   describe "#visit" do
     context "passes when" do
       it "page exists" do
-        @st.visit("/about").should be true
+        expect(@st.visit("/about")).to be true
       end
     end
 
@@ -16,26 +16,26 @@ describe 'navigation' do
     # when a 404 or 500 error is raised
     #context "fails when" do
       #it "page gets a 404 error" do
-        #@st.visit("/404").should be false
+        #expect(@st.visit("/404")).to be false
       #end
       #it "page gets a 500 error" do
-        #@st.visit("/500").should be false
+        #expect(@st.visit("/500")).to be false
       #end
     #end
   end
 
   describe "#refresh_page" do
     before(:each) do
-      @st.visit("/slowtext").should be true
+      expect(@st.visit("/slowtext")).to be true
     end
 
     it "reloads the page" do
-      @st.see("The text is coming...").should be true
-      @st.do_not_see("The text is here!").should be true
-      @st.see_within_seconds("The text is here!").should be true
+      expect(@st.see("The text is coming...")).to be true
+      expect(@st.do_not_see("The text is here!")).to be true
+      expect(@st.see_within_seconds("The text is here!")).to be true
       @st.refresh_page
       @st.page_loads_in_seconds_or_less(10)
-      @st.do_not_see("The text is here!").should be true
+      expect(@st.do_not_see("The text is here!")).to be true
     end
   end
 
@@ -44,7 +44,7 @@ describe 'navigation' do
       @st.visit("/about")
       @st.visit("/")
       @st.click_back.should be true
-      @st.see_title("About this site").should be true
+      expect(@st.see_title("About this site")).to be true
     end
 
     #it "fails when there is no previous page in the history" do
