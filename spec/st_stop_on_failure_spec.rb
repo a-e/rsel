@@ -1,4 +1,4 @@
-require 'spec/st_spec_helper'
+require_relative 'st_spec_helper'
 
 describe 'stop on failure' do
   before(:each) do

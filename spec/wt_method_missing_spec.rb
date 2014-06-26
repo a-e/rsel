@@ -1,4 +1,4 @@
-require 'spec/wt_spec_helper'
+require_relative 'wt_spec_helper'
 
 describe '#method_missing' do
   context "method is defined in Selenium::Client::Driver" do

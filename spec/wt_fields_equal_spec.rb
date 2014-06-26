@@ -1,4 +1,4 @@
-require 'spec/wt_spec_helper'
+require_relative 'wt_spec_helper'
 
 describe "#fields_equal" do
   context "without studying" do

@@ -1,4 +1,4 @@
-require 'spec/st_spec_helper'
+require_relative 'st_spec_helper'
 
 describe "#set_fields_among" do
   before(:each) do

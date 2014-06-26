@@ -1,4 +1,4 @@
-require 'spec/wt_spec_helper'
+require_relative 'wt_spec_helper'
 
 describe 'conditionals' do
   before(:each) do

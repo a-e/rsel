@@ -1,4 +1,4 @@
-require 'spec/spec_helper'
+require_relative 'spec_helper'
 
 require 'rsel/support'
 require 'rsel/study_html'
@@ -26,7 +26,7 @@ describe Rsel::StudyHtml do
       @study.get_node('xpath=/html/head/title').should eq(nil)
     end
   end
-  
+
   describe "#study" do
     it "succeeds when reading html" do
       @study.study(IO.read('test/views/form.erb'), true)
@@ -50,7 +50,7 @@ describe Rsel::StudyHtml do
     before(:all) do
       @study.study(IO.read('test/views/form.erb'))
     end
-    
+
     it "dirties a page" do
       @study.clean?.should be_true
       @study.dirty
@@ -61,7 +61,7 @@ describe Rsel::StudyHtml do
     before(:all) do
       @study.study(IO.read('test/views/form.erb'))
     end
-    
+
     it "undirties a page dirtied once" do
       @study.clean?.should be_true
       @study.dirty
@@ -93,7 +93,7 @@ describe Rsel::StudyHtml do
     before(:all) do
       @study.study(IO.read('test/views/form.erb'))
     end
-    
+
     it "undirties a page dirtied once" do
       @study.clean?.should be_true
       @study.dirty
@@ -120,7 +120,7 @@ describe Rsel::StudyHtml do
       @study.clean?.should be_false
     end
   end
-  
+
   describe "#keep_clean" do
     it "prevents dirty from working when used in study" do
       @study.study(IO.read('test/views/form.erb'), true)
@@ -148,7 +148,7 @@ describe Rsel::StudyHtml do
       @study.clean?.should be_true
     end
   end
-  
+
   describe "#begin_section" do
     it "studies a new page" do
       lambda do
@@ -177,7 +177,7 @@ describe Rsel::StudyHtml do
       @study.get_node('xpath=/html/head/title').inner_text.should eq('Rsel Test Forms')
     end
   end
-  
+
   describe "#end_section" do
     it "works like keep_clean(false) if it runs out of stack parameters" do
       @study.study(IO.read('test/views/form.erb'), true)

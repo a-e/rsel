@@ -1,4 +1,4 @@
-require 'spec/wt_spec_helper'
+require_relative 'wt_spec_helper'
 
 describe 'alerts' do
   describe "#see_alert_within_seconds" do

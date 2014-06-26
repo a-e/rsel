@@ -1,4 +1,4 @@
-require 'spec/st_spec_helper'
+require_relative 'st_spec_helper'
 
 # TODO: Add test cases with scopes to the next three functions described.
 describe "#set_field_among" do

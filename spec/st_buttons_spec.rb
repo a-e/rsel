@@ -1,4 +1,4 @@
-require 'spec/st_spec_helper'
+require_relative 'st_spec_helper'
 
 describe 'buttons' do
   before(:each) do
@@ -7,7 +7,7 @@ describe 'buttons' do
 
   describe "#click_button" do
     context "passes when" do
-      context "studying and " do 
+      context "studying and " do
         it "button exists and is enabled" do
           @st.begin_study
           @st.click_button("Submit person form").should be_true

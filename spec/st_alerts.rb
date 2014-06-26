@@ -1,4 +1,4 @@
-require 'spec/st_spec_helper'
+require_relative 'st_spec_helper'
 
 describe 'alerts' do
   describe "#see_alert_within_seconds" do

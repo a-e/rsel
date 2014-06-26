@@ -1,4 +1,4 @@
-require 'spec/st_spec_helper'
+require_relative 'st_spec_helper'
 
 describe '#method_missing' do
   context "method is defined in Selenium::Client::Driver" do

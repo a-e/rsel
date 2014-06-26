@@ -2,7 +2,7 @@
 # WebdriverTest class. Include this file in your spec test if you need to use
 # a WebdriverTest browser session (@wt).
 
-require 'spec/spec_helper'
+require_relative 'spec_helper'
 
 RSpec.configure do |config|
   config.before(:suite) do
