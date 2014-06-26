@@ -5,7 +5,7 @@ require 'rspec/core/rake_task'
 
 ROOT_DIR = File.expand_path(File.dirname(__FILE__))
 TEST_APP = File.join(ROOT_DIR, 'test', 'app.rb')
-SELENIUM_JAR = 'selenium-server-standalone-2.20.0.jar'
+SELENIUM_JAR = 'selenium-server-standalone-2.42.2.jar'
 SELENIUM_DOWNLOAD_URL = 'http://selenium.googlecode.com/files/' + SELENIUM_JAR
 SELENIUM_JAR_PATH = File.join(ROOT_DIR, 'test', 'server', SELENIUM_JAR)
 SELENIUM_LOG_PATH = File.join(ROOT_DIR, 'selenium-rc.log')
@@ -41,52 +41,10 @@ namespace 'selenium' do
   end
 end
 
-#Selenium::Rake::RemoteControlStartTask.new do |rc|
-#  rc.jar_file = SELENIUM_JAR_PATH
-#  rc.port = 4444
-#  rc.background = true
-#  rc.timeout_in_seconds = 60
-#  rc.wait_until_up_and_running = true
-#  rc.log_to = SELENIUM_LOG_PATH
-#end
-#
-#Selenium::Rake::RemoteControlStopTask.new do |rc|
-#  rc.host = 'localhost'
-#  rc.port = 4444
-#  rc.timeout_in_seconds = 60
-#  rc.wait_until_stopped = true
-#end
-#
 desc "Run spec tests"
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.pattern = 'spec/**/*_spec.rb'
   t.rspec_opts = ['--color', '--format doc']
-end
-
-namespace 'rcov' do
-  desc "Run support spec tests with coverage analysis"
-  RSpec::Core::RakeTask.new(:support) do |t|
-    t.pattern = 'spec/support_spec.rb'
-    t.rspec_opts = ['--color', '--format doc']
-    t.rcov = true
-    t.rcov_opts = [
-      '--exclude /.gem/,/gems/,spec',
-      '--include-file lib/**/*.rb',
-    ]
-  end
-
-  desc "Run all spec tests with coverage analysis"
-  RSpec::Core::RakeTask.new(:all) do |t|
-    t.pattern = 'spec/**/*.rb'
-    t.rspec_opts = ['--color', '--format doc']
-    t.rcov = true
-    t.rcov_opts = [
-      '--exclude /.gem/,/gems/,spec',
-      '--include-file lib/**/*.rb',
-      # Ensure the main .rb file gets included
-      '--include-file lib/rsel/selenium_test.rb',
-    ]
-  end
 end
 
 namespace 'servers' do
@@ -94,12 +52,10 @@ namespace 'servers' do
   task :start do
     Rake::Task['selenium:download'].invoke
     Rake::Task['testapp:start'].invoke
-    Rake::Task['selenium:rc:start'].invoke
   end
 
   desc "Stop the Selenium and testapp servers"
   task :stop do
-    Rake::Task['selenium:rc:stop'].invoke
     Rake::Task['testapp:stop'].invoke
   end
 end
