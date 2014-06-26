@@ -35,8 +35,10 @@ describe "#set_fields_among" do
       end
 
       it "sets many fields, some from a hash" do
-        @st.set_fields_among({"Faust\\;name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
-                             {"Faust\\;Name" => "First name", :LOST => "Last name"}).should be true
+        expect(@st.set_fields_among(
+          {"Faust\\;name" => "Ken", :Lost => "Brazier", "Life story" => "I get testy a lot."},
+          {"Faust\\;Name" => "First name", :LOST => "Last name"})
+        ).to be true
         expect(@st.field_contains("First name", "Ken")).to be true
         expect(@st.field_contains("Last name", "Brazier")).to be true
         expect(@st.field_contains("Life story", "testy")).to be true
@@ -60,13 +62,17 @@ describe "#set_fields_among" do
     end
     context "text fields with labels in a hash" do
       it "cant find the first field" do
-        @st.set_fields_among({"Faust name" => "Ken", "Lost name" => "Brazier"},
-                             {"Faust Name" => "Lost name", "Lost name" => "Last name"}).should be false
+        expect(@st.set_fields_among(
+          {"Faust name" => "Ken", "Lost name" => "Brazier"},
+          {"Faust Name" => "Lost name", "Lost name" => "Last name"})
+        ).to be false
       end
 
       it "cant find the last field" do
-        @st.set_fields_among({"Faust name" => "Ken", "Lost name" => "Brazier"},
-                             {"Faust Name" => "First name", "Lost name" => "Faust name"}).should be false
+        expect(@st.set_fields_among(
+          {"Faust name" => "Ken", "Lost name" => "Brazier"},
+          {"Faust Name" => "First name", "Lost name" => "Faust name"})
+        ).to be false
       end
     end
   end

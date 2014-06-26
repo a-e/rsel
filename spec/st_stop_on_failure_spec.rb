@@ -30,7 +30,7 @@ describe 'stop on failure' do
       # Would pass, but previous step failed
       expect(@st.see_title("Rsel Test Site")).to be false
       # Should see one and only one error.
-      @st.errors.should eq("Page title is 'Rsel Test Site', not 'Wrong Title'")
+      expect(@st.errors).to eq("Page title is 'Rsel Test Site', not 'Wrong Title'")
     end
 
     it "when #do_not_see_title fails" do

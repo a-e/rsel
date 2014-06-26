@@ -43,7 +43,7 @@ describe 'navigation' do
     it "passes and loads the correct URL" do
       @st.visit("/about")
       @st.visit("/")
-      @st.click_back.should be true
+      expect(@st.click_back).to be true
       expect(@st.see_title("About this site")).to be true
     end
 

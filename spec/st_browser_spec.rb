@@ -4,9 +4,9 @@ describe 'browser window' do
   describe "#open_browser" do
     it "raises StopTestCannotConnect if the connection fails" do
       st = Rsel::SeleniumTest.new('bogus_host')
-      lambda do
+      expect {
         st.open_browser
-      end.should raise_error(Rsel::StopTestCannotConnect)
+      }.to raise_error(Rsel::StopTestCannotConnect)
     end
 
     # TODO: Find a cross-platform way of testing this
@@ -17,9 +17,9 @@ describe 'browser window' do
 
     it "reports failure to connect to a bogus Selenium server" do
       st = Rsel::SeleniumTest.new('http://localhost:8070', { :host => 'localhost', :port => '8070' })
-      lambda do
+      expect {
         st.open_browser
-      end.should raise_error(Rsel::StopTestCannotConnect)
+      }.to raise_error(Rsel::StopTestCannotConnect)
     end
 
   end
@@ -28,7 +28,7 @@ describe 'browser window' do
     it "returns true" do
       st = Rsel::SeleniumTest.new('http://localhost:8070')
       st.open_browser
-      st.maximize_browser.should be true
+      expect(st.maximize_browser).to be true
       st.close_browser
     end
   end
@@ -40,19 +40,19 @@ describe 'browser window' do
     end
 
     it "returns true if there are no errors" do
-      @st_temp.close_browser('and show errors').should be true
+      expect(@st_temp.close_browser('and show errors')).to be true
     end
 
     it "returns true if there are errors, but show_errors is unset" do
       @st_temp.field_equals("Nonexistent field", "Nonexistent words")
-      @st_temp.close_browser('without showing errors').should be true
+      expect(@st_temp.close_browser('without showing errors')).to be true
     end
 
     it "raises StopTestStepFailed if there are errors and show_errors is set" do
       @st_temp.field_equals("Nonexistent field", "Nonexistent words")
-      lambda do
+      expect {
         @st_temp.close_browser('and show errors')
-      end.should raise_error(Rsel::StopTestStepFailed)
+      }.to raise_error(Rsel::StopTestStepFailed)
     end
   end
 end

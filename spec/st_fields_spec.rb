@@ -47,8 +47,8 @@ describe 'fields' do
       end
 
       it "field exists, but not within scope" do
-        @st.type_into_field("Long story", "Life story",
-                            :within => 'spouse_form').should be false
+        expect(@st.type_into_field("Long story", "Life story",
+                            :within => 'spouse_form')).to be false
       end
 
       it "field exists, but is read-only" do
@@ -124,8 +124,8 @@ describe 'fields' do
         it "equals the text, and is within scope" do
           @st.fill_in_with("Life story", "Blah dee blah",
                            :within => "person_form")
-          @st.field_equals("Life story", "Blah dee blah",
-                           :within => "person_form").should be true
+          expect(@st.field_equals("Life story", "Blah dee blah",
+                           :within => "person_form")).to be true
         end
 
         it "equals the text, and is in table row" do

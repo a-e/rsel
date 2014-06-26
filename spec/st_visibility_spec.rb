@@ -22,36 +22,36 @@ describe 'visibility' do
         @st.errors
         expect(@st.see("Nonexistent")).to be false
         expect(@st.see("Some bogus text")).to be false
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "text is present, but invisible" do
         @st.errors
         expect(@st.see("unseen")).to be false
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "text is present, but invisible, using studying" do
         @st.errors
         @st.begin_study
         expect(@st.see("unseen")).to be false
         @st.end_study
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "text is present, but not within the scope" do
         @st.errors
         expect(@st.see("This is a Sinatra webapp", :within => 'header')).to be false
-        @st.errors.should eq("'This is a Sinatra webapp' not found in 'About this site'")
+        expect(@st.errors).to eq("'This is a Sinatra webapp' not found in 'About this site'")
       end
       it "text is present, within scope, but invisible" do
         @st.errors
         expect(@st.see("unseen", :within => 'header')).to be false
-        @st.errors.should eq("'unseen' not found in 'About this site'")
+        expect(@st.errors).to eq("'unseen' not found in 'About this site'")
       end
       it "text is present, studied within scope, but invisible" do
         @st.errors
         @st.begin_study
         expect(@st.see("unseen", :within => 'header')).to be false
         @st.end_study
-        @st.errors.should eq("'unseen' not found in 'About this site'")
+        expect(@st.errors).to eq("'unseen' not found in 'About this site'")
       end
       it "scope is not present" do
         expect(@st.see("This is a Sinatra webapp", :within => 'bogus_id')).to be false
@@ -73,14 +73,14 @@ describe 'visibility' do
       it "text is present, but invisible" do
         @st.errors
         expect(@st.do_not_see("unseen")).to be true
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "text is present, but invisible, using studying" do
         @st.errors
         @st.begin_study
         expect(@st.do_not_see("unseen")).to be true
         @st.end_study
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "text is present, but not within the scope" do
         expect(@st.do_not_see("This is a Sinatra webapp", :within => 'header')).to be true
@@ -88,14 +88,14 @@ describe 'visibility' do
       it "text is present, within scope, but invisible" do
         @st.errors
         expect(@st.do_not_see("unseen", :within => 'header')).to be true
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "text is present, studied within scope, but invisible" do
         @st.errors
         @st.begin_study
         expect(@st.do_not_see("unseen", :within => 'header')).to be true
         @st.end_study
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "scope is not present" do
         expect(@st.do_not_see("This is a Sinatra webapp", :within => 'bogus_id')).to be true
@@ -107,12 +107,12 @@ describe 'visibility' do
         @st.errors
         expect(@st.do_not_see("Welcome")).to be false
         expect(@st.do_not_see("This is a Sinatra webapp")).to be false
-        @st.errors.should eq('')
+        expect(@st.errors).to eq('')
       end
       it "sees text within an id" do
         @st.errors
         expect(@st.do_not_see("About this site", :within => 'header')).to be false
-        @st.errors.should eq("'About this site' not expected, but found in 'About this site'")
+        expect(@st.errors).to eq("'About this site' not expected, but found in 'About this site'")
       end
     end
 

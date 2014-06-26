@@ -68,8 +68,8 @@ describe "#set_field" do
         end
 
         it "field exists, but not within scope" do
-          @st.set_field("Life story", "Long story",
-                        :within => 'spouse_form').should be false
+          expect(@st.set_field("Life story", "Long story",
+                        :within => 'spouse_form')).to be false
         end
 
         it "field exists, but is read-only" do
@@ -150,8 +150,8 @@ describe "#set_field" do
           it "equals the text, and is within scope" do
             @st.set_field("Life story", "Blah dee blah",
                           :within => "person_form")
-            @st.generic_field_equals("Life story", "Blah dee blah",
-                             :within => "person_form").should be true
+            expect(@st.generic_field_equals("Life story", "Blah dee blah",
+                             :within => "person_form")).to be true
           end
 
           it "equals the text, and is in table row" do

@@ -9,7 +9,7 @@ describe 'alerts' do
     context "passes when" do
       it "sees a generic alert" do
         @st.click("Alert me now")
-        @st.see_alert_within_seconds.should be true
+        expect(@st.see_alert_within_seconds).to be true
       end
       it "sees a generic alert in time" do
         @st.click("Alert me now")

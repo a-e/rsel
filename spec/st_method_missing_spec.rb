@@ -37,7 +37,7 @@ describe '#method_missing' do
 
     context "method not returning Boolean or String" do
       it "passes if method doesn't raise an exception" do
-        @st.get_title.should be true
+        expect(@st.get_title).to be true
         expect(@st.mouse_over("id=first_name")).to be true
       end
 
@@ -50,9 +50,9 @@ describe '#method_missing' do
 
   context "method is not defined in Selenium::Client::Driver" do
     it "raises an exception" do
-      lambda do
+      expect {
         @st.really_undefined_method
-      end.should raise_error
+      }.to raise_error
     end
   end
 end
