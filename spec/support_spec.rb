@@ -215,17 +215,17 @@ describe Rsel::Support do
   describe "#string_is_true?" do
     it "returns true for true strings" do
       ["", "1", "check", "checked", "on", "select", "selected", "true", "yes"].each do |s|
-        string_is_true?(s).should be_true
+        string_is_true?(s).should be true
       end
     end
     it "is case-insensitive" do
       ["Check", "Checked", "On", "Select", "Selected", "True", "Yes"].each do |s|
-        string_is_true?(s).should be_true
+        string_is_true?(s).should be true
       end
     end
     it "returns false for other strings" do
       ["False", "WRONG!", "NoNSEnSe$%$@^@!^!%", "0", "null"].each do |s|
-        string_is_true?(s).should be_false
+        string_is_true?(s).should be false
       end
     end
   end
@@ -233,62 +233,62 @@ describe Rsel::Support do
   describe "#selenium_compare" do
     context "returns true when" do
       it "gets most identical strings" do
-        selenium_compare("", "").should be_true
-        selenium_compare("This", "This").should be_true
+        selenium_compare("", "").should be true
+        selenium_compare("This", "This").should be true
       end
       it "gets exact:ly identical strings" do
-        selenium_compare("", "exact:").should be_true
-        selenium_compare("This", "exact:This").should be_true
+        selenium_compare("", "exact:").should be true
+        selenium_compare("This", "exact:This").should be true
       end
       it "gets matching globs" do
-        selenium_compare("", "*").should be_true
-        selenium_compare("anything", "*").should be_true
-        selenium_compare("Neffing", "Nef*").should be_true
+        selenium_compare("", "*").should be true
+        selenium_compare("anything", "*").should be true
+        selenium_compare("Neffing", "Nef*").should be true
       end
       it "gets matching labeled globs" do
-        selenium_compare("", "glob:*").should be_true
-        selenium_compare("anything", "glob:*").should be_true
-        selenium_compare("Neffing", "glob:Nef*").should be_true
+        selenium_compare("", "glob:*").should be true
+        selenium_compare("anything", "glob:*").should be true
+        selenium_compare("Neffing", "glob:Nef*").should be true
       end
       it "gets matching regexes" do
-        selenium_compare("", "regexp:.*").should be_true
-        selenium_compare("anything", "regexp:.*").should be_true
-        selenium_compare("Neffing", "regexp:^Nef[a-z]*$").should be_true
+        selenium_compare("", "regexp:.*").should be true
+        selenium_compare("anything", "regexp:.*").should be true
+        selenium_compare("Neffing", "regexp:^Nef[a-z]*$").should be true
       end
       it "gets matching case-insensitive regexes" do
-        selenium_compare("", "regexpi:.*").should be_true
-        selenium_compare("Neffing", "regexpi:^nef[A-Z]*$").should be_true
+        selenium_compare("", "regexpi:.*").should be true
+        selenium_compare("Neffing", "regexpi:^nef[A-Z]*$").should be true
       end
     end
 
     context "returns false when" do
       it "gets most differing strings" do
-        selenium_compare("", "!").should be_false
-        selenium_compare("&", "").should be_false
-        selenium_compare("This", "That").should be_false
+        selenium_compare("", "!").should be false
+        selenium_compare("&", "").should be false
+        selenium_compare("This", "That").should be false
       end
       it "gets exact:ly different strings" do
-        selenium_compare("", "exact:!").should be_false
-        selenium_compare("!!", "exact:!").should be_false
-        selenium_compare("&", "exact:").should be_false
-        selenium_compare("This", "exact:That").should be_false
+        selenium_compare("", "exact:!").should be false
+        selenium_compare("!!", "exact:!").should be false
+        selenium_compare("&", "exact:").should be false
+        selenium_compare("This", "exact:That").should be false
       end
       it "gets non-matching globs" do
-        selenium_compare("No", "?").should be_false
-        selenium_compare("Netting", "Nef*").should be_false
+        selenium_compare("No", "?").should be false
+        selenium_compare("Netting", "Nef*").should be false
       end
       it "gets non-matching labeled globs" do
-        selenium_compare("No", "glob:?").should be_false
-        selenium_compare("Netting", "glob:Nef*").should be_false
+        selenium_compare("No", "glob:?").should be false
+        selenium_compare("Netting", "glob:Nef*").should be false
       end
       it "gets non-matching regexes" do
-        selenium_compare("1", "regexp:^[a-z]*$").should be_false
-        selenium_compare("Netting", "regexp:^Nef[a-z]*$").should be_false
-        selenium_compare("Neffing", "regexp:^nef[A-Z]*$").should be_false
+        selenium_compare("1", "regexp:^[a-z]*$").should be false
+        selenium_compare("Netting", "regexp:^Nef[a-z]*$").should be false
+        selenium_compare("Neffing", "regexp:^nef[A-Z]*$").should be false
       end
       it "gets non-matching case-insensitive regexes" do
-        selenium_compare("1", "regexpi:^[a-z]*$").should be_false
-        selenium_compare("Netting", "regexpi:^nef[A-Z]*$").should be_false
+        selenium_compare("1", "regexpi:^[a-z]*$").should be false
+        selenium_compare("Netting", "regexpi:^nef[A-Z]*$").should be false
       end
     end
   end
@@ -407,13 +407,13 @@ describe Rsel::Support do
       it "block evaluates to false immediately" do
         failed_within(3) do
           false
-        end.should be_true
+        end.should be true
       end
 
       it "block evaluates to nil immediately" do
         failed_within(3) do
           nil
-        end.should be_true
+        end.should be true
       end
 
       it "block evaluates to true initially, but false within the timeout" do
@@ -425,7 +425,7 @@ describe Rsel::Support do
           else
             false
           end
-        end.should be_true
+        end.should be true
       end
 
       it "block evaluates to true initially, but raises an exception within the timeout" do
@@ -437,7 +437,7 @@ describe Rsel::Support do
           else
             raise RuntimeError
           end
-        end.should be_true
+        end.should be true
       end
     end
 
@@ -445,13 +445,13 @@ describe Rsel::Support do
       it "block evaluates as true every time" do
         failed_within(3) do
           true
-        end.should be_false
+        end.should be false
       end
 
       it "block evaluates as true-ish every time" do
         failed_within(3) do
           'foo'
-        end.should be_false
+        end.should be false
       end
     end
   end
