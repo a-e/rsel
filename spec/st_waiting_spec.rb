@@ -29,8 +29,8 @@ describe 'waiting' do
 
   describe "#pause_seconds" do
     it "returns true" do
-      expect(@st.pause_seconds(0)).to == true
-      expect(@st.pause_seconds(1)).to == true
+      expect(@st.pause_seconds(0)).to be true
+      expect(@st.pause_seconds(1)).to be true
     end
   end
 end
