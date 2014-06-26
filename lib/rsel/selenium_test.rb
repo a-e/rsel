@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'xpath'
 require 'selenium/client'
+require 'selenium/webdriver'
 require 'rsel/support'
 require 'rsel/exceptions'
 require 'rsel/study_html'
@@ -64,18 +65,18 @@ module Rsel
     def initialize(url, options={})
       # Strip HTML tags from URL
       @url = strip_tags(url)
-      @host = options[:host] || 'localhost'
-      @port = options[:port] || 4444
+      @ss_host = options[:host] || 'localhost'
+      @ss_port = options[:port] || 4444
 
       # Use WebDriver-backed Selenium
       @browser = Selenium::Client::Driver.new(
-        :host => @host,
-        :port => @port,
-        :browser => '*webdriver',
         :url => @url,
+        :host => @ss_host,
+        :port => @ss_port,
+        :browser => '*webdriver',
         :default_timeout_in_seconds => options[:timeout] || 300)
       @driver = Selenium::WebDriver.for :remote,
-        :url => "http://#{@host}:#{@port}/wd/hub"
+        :url => "http://#{@ss_host}:#{@ss_port}/wd/hub"
       # Accept Booleans or strings, case-insensitive
       if options[:stop_on_failure].to_s =~ /true/i
         @stop_on_failure = true
@@ -86,11 +87,13 @@ module Rsel
       @conditional_stack = [ true ]
       # Study data
       @study = StudyHtml.new()
-      # @fields_study_min: The minimum number of fields to set_fields or fields_equal at once before studying is invoked.
-      # To be on the safe side, studying is turned off by default, unless you set another value.
+      # @fields_study_min: The minimum number of fields to set_fields or
+      # fields_equal at once before studying is invoked. To be on the safe
+      # side, studying is turned off by default, unless you set another value.
       @fields_study_min = parse_fields_study_min(options[:study], 0)
       @default_fields_study_min = @fields_study_min
-      # @xpath_study_length_min: The minimum number of characters in an xpath before studying is invoked when @fields_study_min == 1.
+      # @xpath_study_length_min: The minimum number of characters in an xpath
+      # before studying is invoked when @fields_study_min == 1.
       @xpath_study_length_min = 100
       # A list of error messages:
       @errors = []
