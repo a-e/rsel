@@ -2,48 +2,48 @@ require_relative 'st_spec_helper'
 
 describe 'dropdowns' do
   before(:each) do
-    @st.visit("/form").should be_true
+    @st.visit("/form").should be true
   end
 
   context "#select_from_dropdown" do
     context "passes when" do
       it "option exists in the dropdown" do
-        @st.select_from_dropdown("Tall", "Height").should be_true
-        @st.select_from_dropdown("Medium", "Weight").should be_true
+        @st.select_from_dropdown("Tall", "Height").should be true
+        @st.select_from_dropdown("Medium", "Weight").should be true
       end
 
       it "option exists in the dropdown within scope" do
-        @st.select_from_dropdown("Tall", "Height", :within => "spouse_form").should be_true
+        @st.select_from_dropdown("Tall", "Height", :within => "spouse_form").should be true
       end
 
       it "option exists in the dropdown in table row" do
         @st.visit("/table")
-        @st.select_from_dropdown("Male", "Gender", :in_row => "Eric").should be_true
+        @st.select_from_dropdown("Male", "Gender", :in_row => "Eric").should be true
       end
     end
 
     context "fails when" do
       it "no such dropdown exists" do
-        @st.select_from_dropdown("Over easy", "Eggs").should be_false
+        @st.select_from_dropdown("Over easy", "Eggs").should be false
       end
 
       it "dropdown exists, but the option doesn't" do
-        @st.select_from_dropdown("Giant", "Height").should be_false
-        @st.select_from_dropdown("Obese", "Weight").should be_false
+        @st.select_from_dropdown("Giant", "Height").should be false
+        @st.select_from_dropdown("Obese", "Weight").should be false
       end
 
       it "dropdown exists, but is read-only" do
-        @st.visit("/readonly_form").should be_true
-        @st.select_from_dropdown("Tall", "Height").should be_false
+        @st.visit("/readonly_form").should be true
+        @st.select_from_dropdown("Tall", "Height").should be false
       end
 
       it "dropdown exists, but not within scope" do
-        @st.select_from_dropdown("Medium", "Weight", :within => "spouse_form").should be_false
+        @st.select_from_dropdown("Medium", "Weight", :within => "spouse_form").should be false
       end
 
       it "dropdown exists, but not in table row" do
         @st.visit("/table")
-        @st.select_from_dropdown("Female", "Gender", :in_row => "First name").should be_false
+        @st.select_from_dropdown("Female", "Gender", :in_row => "First name").should be false
       end
     end
   end
@@ -51,24 +51,24 @@ describe 'dropdowns' do
   context "#dropdown_includes" do
     context "passes when" do
       it "option exists in the dropdown" do
-        @st.dropdown_includes("Height", "Tall").should be_true
-        @st.dropdown_includes("Weight", "Medium").should be_true
+        @st.dropdown_includes("Height", "Tall").should be true
+        @st.dropdown_includes("Weight", "Medium").should be true
       end
 
       it "option exists in a read-only dropdown" do
-        @st.visit("/readonly_form").should be_true
-        @st.dropdown_includes("Height", "Tall").should be_true
+        @st.visit("/readonly_form").should be true
+        @st.dropdown_includes("Height", "Tall").should be true
       end
     end
 
     context "fails when" do
       it "dropdown exists, but the option doesn't" do
-        @st.dropdown_includes("Height", "Giant").should be_false
-        @st.dropdown_includes("Weight", "Obese").should be_false
+        @st.dropdown_includes("Height", "Giant").should be false
+        @st.dropdown_includes("Weight", "Obese").should be false
       end
 
       it "no such dropdown exists" do
-        @st.dropdown_includes("Eggs", "Over easy").should be_false
+        @st.dropdown_includes("Eggs", "Over easy").should be false
       end
     end
   end
@@ -78,19 +78,19 @@ describe 'dropdowns' do
       it "option is selected in the dropdown" do
         ["Short", "Average", "Tall"].each do |height|
           @st.select_from_dropdown(height, "Height")
-          @st.dropdown_equals("Height", height).should be_true
+          @st.dropdown_equals("Height", height).should be true
         end
       end
 
       it "option is selected in a read-only dropdown" do
-        @st.visit("/readonly_form").should be_true
-        @st.dropdown_equals("Height", "Average").should be_true
+        @st.visit("/readonly_form").should be true
+        @st.dropdown_equals("Height", "Average").should be true
       end
 
       it "option is selected in the dropdown, within scope" do
         ["Short", "Average", "Tall"].each do |height|
           @st.select_from_dropdown(height, "Height", :within => "spouse_form")
-          @st.dropdown_equals("Height", height, :within => "spouse_form").should be_true
+          @st.dropdown_equals("Height", height, :within => "spouse_form").should be true
         end
       end
 
@@ -105,34 +105,34 @@ describe 'dropdowns' do
 
     context "fails when" do
       it "no such dropdown exists" do
-        @st.dropdown_equals("Eggs", "Over easy").should be_false
+        @st.dropdown_equals("Eggs", "Over easy").should be false
       end
 
       it "dropdown exists, but the option is not selected" do
         @st.select_from_dropdown("Short", "Height")
-        @st.dropdown_equals("Height", "Average").should be_false
-        @st.dropdown_equals("Height", "Tall").should be_false
+        @st.dropdown_equals("Height", "Average").should be false
+        @st.dropdown_equals("Height", "Tall").should be false
 
         @st.select_from_dropdown("Average", "Height")
-        @st.dropdown_equals("Height", "Short").should be_false
-        @st.dropdown_equals("Height", "Tall").should be_false
+        @st.dropdown_equals("Height", "Short").should be false
+        @st.dropdown_equals("Height", "Tall").should be false
 
         @st.select_from_dropdown("Tall", "Height")
-        @st.dropdown_equals("Height", "Short").should be_false
-        @st.dropdown_equals("Height", "Average").should be_false
+        @st.dropdown_equals("Height", "Short").should be false
+        @st.dropdown_equals("Height", "Average").should be false
       end
 
       it "dropdown exists, and option is selected, but not within scope" do
         @st.select_from_dropdown("Tall", "Height", :within => "person_form")
         @st.select_from_dropdown("Short", "Height", :within => "spouse_form")
-        @st.dropdown_equals("Height", "Tall", :within => "spouse_form").should be_false
+        @st.dropdown_equals("Height", "Tall", :within => "spouse_form").should be false
       end
 
       it "dropdown exists, and option is selected, but not in table row" do
         @st.visit("/table")
         @st.select_from_dropdown("Female", "Gender", :in_row => "Eric")
         @st.select_from_dropdown("Male", "Gender", :in_row => "Marcus")
-        @st.dropdown_equals("Gender", "Female", :in_row => "Marcus").should be_false
+        @st.dropdown_equals("Gender", "Female", :in_row => "Marcus").should be false
       end
     end
   end

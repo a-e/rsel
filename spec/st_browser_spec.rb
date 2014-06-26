@@ -28,7 +28,7 @@ describe 'browser window' do
     it "returns true" do
       st = Rsel::SeleniumTest.new('http://localhost:8070')
       st.open_browser
-      st.maximize_browser.should be_true
+      st.maximize_browser.should be true
       st.close_browser
     end
   end
@@ -40,12 +40,12 @@ describe 'browser window' do
     end
 
     it "returns true if there are no errors" do
-      @st_temp.close_browser('and show errors').should be_true
+      @st_temp.close_browser('and show errors').should be true
     end
 
     it "returns true if there are errors, but show_errors is unset" do
       @st_temp.field_equals("Nonexistent field", "Nonexistent words")
-      @st_temp.close_browser('without showing errors').should be_true
+      @st_temp.close_browser('without showing errors').should be true
     end
 
     it "raises StopTestStepFailed if there are errors and show_errors is set" do

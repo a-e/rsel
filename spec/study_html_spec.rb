@@ -11,8 +11,8 @@ describe Rsel::StudyHtml do
   describe "#initialize" do
     it "succeeds when reading html" do
       @study = Rsel::StudyHtml.new(IO.read('test/views/form.erb'))
-      @study.clean?.should be_true
-      @study.keeping_clean?.should be_false
+      @study.clean?.should be true
+      @study.keeping_clean?.should be false
       @study.get_node('xpath=/html/head/title').inner_text.should eq('Rsel Test Forms')
     end
 
@@ -21,8 +21,8 @@ describe Rsel::StudyHtml do
         @study = Rsel::StudyHtml.new(42)
       end.should raise_error
 
-      @study.clean?.should be_false
-      @study.keeping_clean?.should be_false
+      @study.clean?.should be false
+      @study.keeping_clean?.should be false
       @study.get_node('xpath=/html/head/title').should eq(nil)
     end
   end
@@ -30,8 +30,8 @@ describe Rsel::StudyHtml do
   describe "#study" do
     it "succeeds when reading html" do
       @study.study(IO.read('test/views/form.erb'), true)
-      @study.clean?.should be_true
-      @study.keeping_clean?.should be_true
+      @study.clean?.should be true
+      @study.keeping_clean?.should be true
       @study.get_node('xpath=/html/head/title').inner_text.should eq('Rsel Test Forms')
     end
 
@@ -40,8 +40,8 @@ describe Rsel::StudyHtml do
         @study.study(42, true)
       end.should raise_error
 
-      @study.clean?.should be_false
-      @study.keeping_clean?.should be_false
+      @study.clean?.should be false
+      @study.keeping_clean?.should be false
       @study.get_node('xpath=/html/head/title').should eq(nil)
     end
   end
@@ -52,9 +52,9 @@ describe Rsel::StudyHtml do
     end
 
     it "dirties a page" do
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
-      @study.clean?.should be_false
+      @study.clean?.should be false
     end
   end
   describe "#undo_last_dirty" do
@@ -63,20 +63,20 @@ describe Rsel::StudyHtml do
     end
 
     it "undirties a page dirtied once" do
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
-      @study.clean?.should be_false
+      @study.clean?.should be false
       @study.undo_last_dirty
-      @study.clean?.should be_true
+      @study.clean?.should be true
     end
 
     it "does not undirty a page dirtied twice" do
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
       @study.dirty
-      @study.clean?.should be_false
+      @study.clean?.should be false
       @study.undo_last_dirty
-      @study.clean?.should be_false
+      @study.clean?.should be false
     end
 
     it "does not undirty a page whose load failed" do
@@ -85,7 +85,7 @@ describe Rsel::StudyHtml do
       end.should raise_error
 
       @study.undo_last_dirty
-      @study.clean?.should be_false
+      @study.clean?.should be false
     end
   end
 
@@ -95,20 +95,20 @@ describe Rsel::StudyHtml do
     end
 
     it "undirties a page dirtied once" do
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
-      @study.clean?.should be_false
+      @study.clean?.should be false
       @study.undo_all_dirties
-      @study.clean?.should be_true
+      @study.clean?.should be true
     end
 
     it "undirties a page dirtied twice" do
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
       @study.dirty
-      @study.clean?.should be_false
-      @study.undo_all_dirties.should be_true
-      @study.clean?.should be_true
+      @study.clean?.should be false
+      @study.undo_all_dirties.should be true
+      @study.clean?.should be true
     end
 
     it "does not undirty a page whose load failed" do
@@ -116,36 +116,36 @@ describe Rsel::StudyHtml do
         @study.study(42)
       end.should raise_error
 
-      @study.undo_all_dirties.should be_false
-      @study.clean?.should be_false
+      @study.undo_all_dirties.should be false
+      @study.clean?.should be false
     end
   end
 
   describe "#keep_clean" do
     it "prevents dirty from working when used in study" do
       @study.study(IO.read('test/views/form.erb'), true)
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
-      @study.clean?.should be_true
+      @study.clean?.should be true
     end
     it "prevents dirty from working when used after study" do
       @study.study(IO.read('test/views/form.erb'))
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
-      @study.clean?.should be_false
+      @study.clean?.should be false
       @study.keep_clean(true)
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.dirty
-      @study.clean?.should be_true
+      @study.clean?.should be true
     end
     it "stops working when turned off" do
       @study.study(IO.read('test/views/form.erb'), true)
-      @study.keeping_clean?.should be_true
+      @study.keeping_clean?.should be true
       @study.keep_clean(false)
-      @study.keeping_clean?.should be_false
-      @study.clean?.should be_false
-      @study.undo_all_dirties.should be_true
-      @study.clean?.should be_true
+      @study.keeping_clean?.should be false
+      @study.clean?.should be false
+      @study.undo_all_dirties.should be true
+      @study.clean?.should be true
     end
   end
 
@@ -166,14 +166,14 @@ describe Rsel::StudyHtml do
       @study.begin_section {42}
       @study.get_node('xpath=/html/head/title').inner_text.should eq('Rsel Test Forms')
       @study.end_section
-      @study.clean?.should be_false
+      @study.clean?.should be false
     end
     it "maintains studying after a new section" do
       @study.study(IO.read('test/views/form.erb'), true)
       @study.begin_section {42}
       @study.get_node('xpath=/html/head/title').inner_text.should eq('Rsel Test Forms')
       @study.end_section
-      @study.clean?.should be_true
+      @study.clean?.should be true
       @study.get_node('xpath=/html/head/title').inner_text.should eq('Rsel Test Forms')
     end
   end
@@ -181,12 +181,12 @@ describe Rsel::StudyHtml do
   describe "#end_section" do
     it "works like keep_clean(false) if it runs out of stack parameters" do
       @study.study(IO.read('test/views/form.erb'), true)
-      @study.keeping_clean?.should be_true
+      @study.keeping_clean?.should be true
       @study.end_section
-      @study.keeping_clean?.should be_false
-      @study.clean?.should be_false
-      @study.undo_all_dirties.should be_true
-      @study.clean?.should be_true
+      @study.keeping_clean?.should be false
+      @study.clean?.should be false
+      @study.undo_all_dirties.should be true
+      @study.clean?.should be true
     end
   end
 

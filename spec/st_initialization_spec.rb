@@ -16,16 +16,16 @@ describe 'initialization' do
   context "stop_on_failure option" do
     it "can be initialized with a string" do
       st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => 'true')
-      st.stop_on_failure.should be_true
+      st.stop_on_failure.should be true
       st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => 'FALSE')
-      st.stop_on_failure.should be_false
+      st.stop_on_failure.should be false
     end
 
     it "can be initialized with a boolean" do
       st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => true)
-      st.stop_on_failure.should be_true
+      st.stop_on_failure.should be true
       st = Rsel::SeleniumTest.new('localhost', :stop_on_failure => false)
-      st.stop_on_failure.should be_false
+      st.stop_on_failure.should be false
     end
   end
 
