@@ -36,6 +36,6 @@ end
 
 
 if __FILE__ == $0
-  Rack::Handler::Mongrel.run TestApp, :Port => 8070
+  TestApp.run! :port => 8070
 end
 
