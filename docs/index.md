@@ -10,6 +10,7 @@ Rsel is a [Selenium](http://seleniumhq.org) wrapper for
 - [FitNesse](fitnesse.md)
 - [Locators](locators.md)
 - [Scoping](scoping.md)
+- [Studying](studying.md)
 - [Examples](examples.md)
 - [Customization](custom.md)
 - [Scenarios](scenarios.md)

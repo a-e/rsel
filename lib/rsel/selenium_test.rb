@@ -44,19 +44,22 @@ module Rsel
     #   `true` or `'true'` to abort the test when a failure occurs;
     #   `false` or `'false'` to continue execution when failure occurs.
     # @option options [String, Integer] :study
-    #   How many steps have to be done at once to force studying.  Default
-    #   is 10 for most browsers and 1 for Internet Explorer.  Other accepted
-    #   strings are `Never' (0), `Always' (1), or an integer.  Unrecognized
-    #   strings result in the default.
+    #   How many steps have to be done at once to force studying.  Default is
+    #   `'Never'` (0).  Other accepted strings are `'Always'` (1), `'Auto'`
+    #   (matic) (10 for most browsers and 1 for Internet Explorer), or an
+    #   integer. Unrecognized strings result in the default.
     # @option options [String, Integer] :timeout
     #   Default timeout in seconds. This determines how long the `open` method
-    #   will wait for the page to load.
+    #   will wait for the page to load, as well as the default timeout for
+    #   methods like `see_within_seconds`, `do_not_see_within_seconds`, and
+    #   `see_alert_within_seconds`.
     #
     # @example
     #   | script | selenium test | http://site.to.test/ |
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3} |
     #   | script | selenium test | http://site.to.test/ | !{host:192.168.0.3, port:4445} |
     #   | script | selenium test | http://site.to.test/ | !{stop_on_failure:true} |
+    #   | script | selenium test | http://site.to.test/ | !{study:Auto} |
     #
     def initialize(url, options={})
       # Strip HTML tags from URL
@@ -78,12 +81,8 @@ module Rsel
       # Study data
       @study = StudyHtml.new()
       # @fields_study_min: The minimum number of fields to set_fields or fields_equal at once before studying is invoked.
-      if @browser.browser_string == '*iexplore'
-        @default_fields_study_min = 1
-      else
-        @default_fields_study_min = 10
-      end
-      @fields_study_min = parse_fields_study_min(options[:study], @default_fields_study_min)
+      # To be on the safe side, studying is turned off by default, unless you set another value.
+      @fields_study_min = parse_fields_study_min(options[:study], 0)
       @default_fields_study_min = @fields_study_min
       # @xpath_study_length_min: The minimum number of characters in an xpath before studying is invoked when @fields_study_min == 1.
       @xpath_study_length_min = 100
@@ -327,18 +326,17 @@ module Rsel
     #
     def see(text, scope=nil)
       return skip_status if skip_step?
-      if scope == nil
+      if scope.nil?
         # Can't do a Study workaround - it doesn't know what's visible.
         return pass_if @browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
         @study.undo_last_dirty # This method does not modify the browser page contents.
-        # Default selenium_compare does not allow text around a glob.  Allow such text.
-        searchtext = text
-        searchtext = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
         # Can't do a Study workaround - it doesn't know what's visible.
         fail_on_exception do
-          return pass_if selenium_compare(@browser.get_text(selector), searchtext), "'#{text}' not found in '#{@browser.get_text(selector)}'"
+          match = selenium_compare(@browser.get_text(selector), globify(text))
+          return pass_if match,
+            "'#{text}' not found in '#{@browser.get_text(selector)}'"
         end
       end
     end
@@ -357,18 +355,17 @@ module Rsel
     #
     def do_not_see(text, scope=nil)
       return skip_status if skip_step?
-      if scope == nil
+      if scope.nil?
         # Can't do a Study workaround - it doesn't know what's visible.
         return pass_if !@browser.text?(text)
       else
         selector = loc("css=", '', scope).strip
         @study.undo_last_dirty # This method does not modify the browser page contents.
         begin
-          # Default selenium_compare does not allow text around a glob.  Allow such text.
-          searchtext = text
-          searchtext = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
           # Can't do a Study workaround - it doesn't know what's visible.
-          return pass_if !selenium_compare(@browser.get_text(selector), searchtext), "'#{text}' found in '#{@browser.get_text(selector)}'"
+          match = selenium_compare(@browser.get_text(selector), globify(text))
+          return pass_if !match,
+            "'#{text}' not expected, but found in '#{@browser.get_text(selector)}'"
         rescue
           # Do not see the selector, so do not see the text within it.
           return true
@@ -383,8 +380,8 @@ module Rsel
     #
     # @param [String] text
     #   Plain text that should be appear on or visible on the current page
-    # @param [String] seconds
-    #   Integer number of seconds to wait.
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to wait, or `-1` to use the default timeout.
     # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
@@ -400,20 +397,22 @@ module Rsel
     def see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
       end_study
-      if scope == nil && (seconds.is_a? Hash)
+      if scope.nil? && (seconds.is_a? Hash)
         scope = seconds
         seconds = -1
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      if scope == nil
-        return pass_if !(Integer(seconds)+1).times{ break if (@browser.text?(text) rescue false); sleep 1 }
+      if scope.nil?
+        return pass_if result_within(seconds) {
+          @browser.text?(text)
+        }
         # This would be better if it worked:
         # pass_if @browser.wait_for(:text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        # Default selenium_compare does not allow text around a glob.  Allow such text.
-        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
-        return pass_if !(Integer(seconds)+1).times{ break if (selenium_compare(@browser.get_text(selector), text) rescue false); sleep 1 }
+        return pass_if result_within(seconds) {
+          selenium_compare(@browser.get_text(selector), globify(text))
+        }
       end
     end
 
@@ -421,8 +420,8 @@ module Rsel
     #
     # @param [String] text
     #   Plain text that should disappear from or not be present on the current page
-    # @param [String] seconds
-    #   Integer number of seconds to wait.
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to wait, or `-1` to use the default timeout.
     # @param [Hash] scope
     #   Scoping keywords as understood by {#xpath}
     #
@@ -435,21 +434,22 @@ module Rsel
     def do_not_see_within_seconds(text, seconds=-1, scope=nil)
       return skip_status if skip_step?
       end_study
-      if scope == nil && (seconds.is_a? Hash)
+      if scope.nil? && (seconds.is_a? Hash)
         scope = seconds
         seconds = -1
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      if scope == nil
-        pass_if !(Integer(seconds)+1).times{ break if (!@browser.text?(text) rescue false); sleep 1 }
+      if scope.nil?
+        return pass_if result_within(seconds) {
+          !@browser.text?(text)
+        }
         # This would be better if it worked:
         # pass_if @browser.wait_for(:no_text => text, :timeout_in_seconds => seconds);
       else
         selector = loc("css=", '', scope).strip
-        # Default selenium_compare does not allow text around a glob.  Allow such text.
-        text = text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*') unless /^(exact|regexpi?):/ === text
-        # Re: rescue: If the scope is not found, the text is not seen.
-        return pass_if !(Integer(seconds)+1).times{ break if (!selenium_compare(@browser.get_text(selector), text) rescue true); sleep 1 }
+        return pass_if failed_within(seconds) {
+          selenium_compare(@browser.get_text(selector), globify(text))
+        }
       end
     end
 
@@ -468,7 +468,8 @@ module Rsel
       # Study workaround when possible.  (Probably won't happen a lot, but possible.)
       bodynode = @study.get_node('xpath=/html/head/title')
       return true if bodynode && bodynode.inner_text.strip == title
-      pass_if @browser.get_title == title, "Page title is '#{@browser.get_title}', not '#{title}'"
+      pass_if @browser.get_title == title,
+        "Page title is '#{@browser.get_title}', not '#{title}'"
     end
 
 
@@ -491,8 +492,8 @@ module Rsel
     # @param [String] text
     #   Text of the alert that you expect to see
     #
-    # @param [String] seconds
-    #   Integer number of seconds to wait.
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to wait, or `-1` to use the default timeout.
     #
     # @example
     #   | see alert within seconds |
@@ -501,6 +502,8 @@ module Rsel
     # @example
     #   | see alert | Illegal operation! Authorities have been notified. | within | 15 | seconds |
     #     Validates that the next alert that appears within the given timeout is as specified.
+    #
+    # @since 0.1.2
     #
     def see_alert_within_seconds(text=nil, seconds=-1)
       return skip_status if skip_step?
@@ -515,10 +518,13 @@ module Rsel
         end
       end
       seconds = @browser.default_timeout_in_seconds if seconds == -1
-      alert_text = nil
-      if !(Integer(seconds)+1).times{ break if ((alert_text=@browser.get_alert) rescue false); sleep 1 }
-        return true if text == nil
-        return pass_if selenium_compare(alert_text, text), "Expected alert '#{text}', but got '#{alert_text}'!"
+      alert_text = result_within(seconds) {
+        @browser.get_alert
+      }
+      if alert_text
+        return true if text.nil?
+        return pass_if selenium_compare(alert_text, text),
+          "Expected alert '#{text}', but got '#{alert_text}'!"
       else
         return failure
       end
@@ -589,7 +595,8 @@ module Rsel
     #
     def row_exists(cells)
       return skip_status if skip_step?
-      locator = ("xpath=#{xpath_row_containing(cells.split(/, */).map{|s| escape_for_hash(s)})}")
+      cells = cells.split(/, */).map { |s| escape_for_hash(s) }
+      locator = "xpath=#{xpath_row_containing(cells)}"
 
       # Study workaround when possible.
       bodynode = @study.get_node(locator)
@@ -1327,11 +1334,11 @@ module Rsel
       fields.keys.each do |field|
         unless generic_field_equals(escape_for_hash(field.to_s), escape_for_hash(fields[field]), scope)
           end_study if method_study
-          return failure 
+          return failure
         end
       end
       if method_study
-        end_study 
+        end_study
         @study.undo_last_dirty
       end
       return true
@@ -1390,11 +1397,11 @@ module Rsel
       fields.keys.each do |field|
         unless field_equals_among(escape_for_hash(field.to_s), escape_for_hash(fields[field]), ids, scope)
           end_study if method_study
-          return failure 
+          return failure
         end
       end
       if method_study
-        end_study 
+        end_study
         @study.undo_last_dirty
       end
       return true
@@ -1436,7 +1443,8 @@ module Rsel
           # The method call succeeded
           # Should we check this against another string?
           if do_check
-            return pass_if selenium_compare(result.to_s, check_against), "Expected '#{check_against}', but got '#{result.to_s}'"
+            return pass_if selenium_compare(result.to_s, check_against),
+              "Expected '#{check_against}', but got '#{result.to_s}'"
           end
           # Did it return true or false?
           return failure if result == false
@@ -1490,6 +1498,7 @@ module Rsel
         cond = @browser.text?(text)
       rescue
         # Something went wrong.  Therefore, I did not see the text.
+        cond = false
       end
       return push_conditional(cond)
     end
@@ -1551,7 +1560,7 @@ module Rsel
 
       last_status = @conditional_stack.pop
       # If this end_if is within an un-executed if block, don't execute it.
-      return nil if last_status == nil
+      return nil if last_status.nil?
       return true
     end
 
@@ -1608,7 +1617,7 @@ module Rsel
     # @since 0.1.2
     #
     def in_nil_conditional?
-      return in_conditional? && @conditional_stack.last == nil
+      return in_conditional? && @conditional_stack.last.nil?
     end
 
     # Return true if we're inside a conditional block that was skipped,
@@ -1648,7 +1657,7 @@ module Rsel
 
     # Overrides the support.rb loc() method, allowing searching a studied page
     # to try simplify a CSS or XPath expression to an id= or name= expression.
-    # 
+    #
     # @param [Boolean] try_study
     #   Try to use the studied page to simplify the path?  Defaults to true.
     def loc(locator, kind='', scope={}, try_study=true)
@@ -1684,6 +1693,12 @@ module Rsel
         return 0
       when 'always'
         return 1
+      when /^auto/
+        if @browser.browser_string == '*iexplore'
+          @default_fields_study_min = 1
+        else
+          @default_fields_study_min = 10
+        end
       else
         begin
           return Integer(s.gsub(/[^0-9]/,''))

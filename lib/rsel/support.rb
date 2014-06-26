@@ -175,6 +175,8 @@ module Rsel
     # Normalize the given hash of name => locator mappings.
     # Converts all keys to lowercase and calls {#escape_for_hash} on them.
     #
+    # @since 0.1.1
+    #
     def normalize_ids(ids)
       ids = {} unless ids.is_a? Hash
       ids.keys.each do |key|
@@ -202,10 +204,11 @@ module Rsel
       return text.gsub(/<\/?[^>]*>/, '')
     end
 
-    # This module defines helper methods for building XPath expressions
-    # copied from Kelp::XPaths
     # Return an XPath for any table row containing all strings in `texts`,
     # within the current context.
+    #
+    # @since 0.1.1
+    #
     def xpath_row_containing(texts)
       texts = [texts] if texts.class == String
       conditions = texts.collect do |text|
@@ -222,6 +225,8 @@ module Rsel
     #   xpath_sanitize("Bob's")
     #   # => concat('Bob', "'", 's')
     #
+    # @since 0.1.1
+    #
     def xpath_sanitize(text)
       # If there's nothing to escape, just wrap text in single-quotes
       if !text.include?("'")
@@ -234,6 +239,7 @@ module Rsel
 
     # Convert a string like "yes", "true", "1", etc.
     # Values currently recognized as true, case-insensitive:
+    #
     # * [empty string]
     # * 1
     # * Check
@@ -243,6 +249,9 @@ module Rsel
     # * Selected
     # * True
     # * Yes
+    #
+    # @since 0.1.1
+    #
     def string_is_true?(s)
       return /^(?:yes|true|on|(?:check|select)(?:ed)?|1|)$/i === s
     end
@@ -253,6 +262,8 @@ module Rsel
     #   A string.
     # @param [String] expected
     #   Another string.  This one may have glob:, regexp:, etc.
+    #
+    # @since 0.1.1
     #
     def selenium_compare(text, expected)
       if expected.sub!(/^regexp:/, '')
@@ -268,14 +279,90 @@ module Rsel
       end
     end
 
-    # Default selenium_compare does not allow text around a glob.  Allow such text.
-    # TODO: Document/test this
-    def allow_text_in_glob(text)
+    # Return `text` with glob markers `*` on each end, unless the text
+    # begins with `exact:`, `regexp:`, or `regexpi:`. This effectively
+    # allows normal text to match as a "contains" search instead of
+    # matching the entire string.
+    #
+    # @param [String] text
+    #   Text to globify
+    #
+    # @since 0.1.2
+    #
+    def globify(text)
       if /^(exact|regexpi?):/ === text
         return text
       else
         return text.sub(/^(glob:)?\*?/, '*').sub(/\*?$/, '*')
       end
+    end
+
+
+    # Ensure that a given block gets a result within a timeout.
+    #
+    # This executes the given block statement once per second, until it returns
+    # a value that evaluates as true (meaning anything other than `false` or
+    # `nil`), or until the `seconds` timeout is reached. If the block evaluates
+    # as true within the timeout, return the block result. Otherwise, return
+    # `nil`.
+    #
+    # If the block never returns a value other than `false` or `nil`, then
+    # return `nil`. If the block raises an exception (*any* exception), that's
+    # considered a false result, and the block will be retried until a true
+    # result is returned, or the `seconds` timeout is reached.
+    #
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to keep retrying the block
+    # @param [Block] block
+    #   Any block of code that might evaluate to a non-false value
+    #
+    # @return
+    #   Result of the block if it evaluated true-ish within the timeout, nil
+    #   if the block always evaluated as false or raised an exception.
+    #
+    # @since 0.1.2
+    #
+    # TODO: Return false if the block takes too long to execute (and exceeds
+    # the timeout)
+    #
+    def result_within(seconds, &block)
+      (seconds.to_i + 1).times do
+        result = yield rescue nil
+        return result if result
+        sleep 1
+      end
+      return nil
+    end
+
+
+    # Ensure that a given block fails within a timeout.
+    #
+    # This is a kind of counterpart to {#result_within}
+    #
+    # @param [Integer, String] seconds
+    #   Integer number of seconds to keep retrying the block
+    # @param [Block] block
+    #   Any block of code that might evaluate to a false value,
+    #   or raise an exception, within the timeout.
+    #
+    # @return [Boolean]
+    #   true if the block failed (returned false/nil or raised an exception)
+    #   within the timeout, false if the block never failed within the timeout.
+    #
+    # @since 0.1.2
+    #
+    def failed_within(seconds, &block)
+      (seconds.to_i + 1).times do
+        begin
+          result = yield
+        rescue
+          return true
+        else
+          return true if !result
+        end
+        sleep 1
+      end
+      return false
     end
   end
 end

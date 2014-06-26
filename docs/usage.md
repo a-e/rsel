@@ -12,7 +12,7 @@ Here is a simple example of a Ruby script that uses Rsel to login to a website:
     require 'rsel/selenium_test'
 
     # Custom test class
-    class MyTest < SeleniumTest
+    class MyTest < Rsel::SeleniumTest
       def login
         visit "/login"
         fill_in_with "Username", "admin"
