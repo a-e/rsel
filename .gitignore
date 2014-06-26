@@ -1,6 +1,8 @@
 Gemfile.lock
 .yardoc/*
 .rvmrc
+.ruby-version
+.ruby-gemset
 selenium-rc.log
 pkg/*
 *~
