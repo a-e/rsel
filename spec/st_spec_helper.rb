@@ -4,8 +4,14 @@
 
 require_relative 'spec_helper'
 
+require 'selenium/server'
+require 'selenium/client'
+require 'selenium/webdriver'
+
 RSpec.configure do |config|
   config.before(:suite) do
+    @server = Selenium::Server.new('test/server/selenium-server-standalone-2.42.2.jar', :background => true)
+    @server.start
     # For some reason, RSpec runs this twice; work around possible duplicate
     # browser windows by only intializing @@st if it hasn't been already
     @@st ||= Rsel::SeleniumTest.new('http://localhost:8070')
@@ -13,7 +19,12 @@ RSpec.configure do |config|
   end
 
   config.after(:suite) do
-    @@st.close_browser('without showing errors')
+    if !@@st.nil?
+      @@st.close_browser('without showing errors')
+    end
+    if !@server.nil?
+      @server.stop
+    end
   end
 
   config.before(:all) do
@@ -28,8 +39,8 @@ module Selenium
   module Client
     module Protocol
       def http_post(data)
-        start = Time.now
-        called_from = caller.detect{|line| line !~ /(selenium-client|vendor|usr\/lib\/ruby|\(eval\))/i}
+        #start = Time.now
+        #called_from = caller.detect{|line| line !~ /(selenium-client|vendor|usr\/lib\/ruby|\(eval\))/i}
         http = Net::HTTP.new(@host, @port)
         http.open_timeout = default_timeout_in_seconds
         http.read_timeout = default_timeout_in_seconds
