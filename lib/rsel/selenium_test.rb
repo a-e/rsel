@@ -44,6 +44,10 @@ module Rsel
     # @option options [String, Boolean] :stop_on_failure
     #   `true` or `'true'` to abort the test when a failure occurs;
     #   `false` or `'false'` to continue execution when failure occurs.
+    #   `screenshot`, `sshot`, or `ss` to abort the test when a failure occurs
+    #   and take a screenshot.  Screenshots can be large; if your server has
+    #   little disk space you may want to avoid this.  Screenshots may not
+    #   be displayed in Internet Explorer.
     # @option options [String, Integer] :study
     #   How many steps have to be done at once to force studying.  Default is
     #   `'Never'` (0).  Other accepted strings are `'Always'` (1), `'Auto'`
@@ -54,6 +58,9 @@ module Rsel
     #   will wait for the page to load, as well as the default timeout for
     #   methods like `see_within_seconds`, `do_not_see_within_seconds`, and
     #   `see_alert_within_seconds`.
+    # @option options [String, Boolean] :debug_errors
+    #   `true` or `'true'` to print some errors more verbosely.
+    #   `false` or `'false'` to print errors as default.
     #
     # @example
     #   | script | selenium test | http://site.to.test/ |
@@ -77,12 +84,24 @@ module Rsel
         :default_timeout_in_seconds => options[:timeout] || 300)
       @driver = Selenium::WebDriver.for :remote,
         :url => "http://#{@ss_host}:#{@ss_port}/wd/hub"
+      @screenshot_on_failure = false
       # Accept Booleans or strings, case-insensitive
-      if options[:stop_on_failure].to_s =~ /true/i
+      if options[:stop_on_failure].to_s =~ /s(creen)?s(hot)?/i
+        # Turn on stop_on_failure, but also turn on screenshot_on_failure.
+        @screenshot_on_failure = true
+        @stop_on_failure = true
+      elsif options[:stop_on_failure].to_s =~ /true/i
         @stop_on_failure = true
       else
         @stop_on_failure = false
       end
+
+      if options[:debug_errors].to_s =~ /true/i
+        @debug_errors = true
+      else
+        @debug_errors = false
+      end
+
       @found_failure = false
       @conditional_stack = [ true ]
       # Study data
@@ -99,8 +118,8 @@ module Rsel
       @errors = []
     end
 
-    attr_reader :url, :browser, :stop_on_failure, :found_failure
-    attr_writer :stop_on_failure, :found_failure
+    attr_reader :url, :browser, :stop_on_failure, :found_failure, :screenshot_on_failure
+    attr_writer :stop_on_failure, :found_failure, :screenshot_on_failure
 
 
     # Start the session and open a browser to the URL defined at the start of
@@ -150,8 +169,11 @@ module Rsel
       end
 
       # Show errors in an exception if requested.
-      if (!(/not|without/i === show_errors) && @errors.length > 0)
-        raise StopTestStepFailed, @errors.join("\n").gsub('<','&lt;')
+      if (!(/not|without/i === show_errors))
+        errors = ''
+        errors += '<img src="data:image/png;base64,' + @screenshot + '" />' if @screenshot
+        errors += @errors.join("\n").gsub('<','&lt;') if @errors.length > 0
+        raise StopTestStepFailed, errors unless errors == ''
       end
       return true
     end
@@ -1759,9 +1781,9 @@ module Rsel
       begin
         yield
       rescue => e
-        #puts e.message
-        #puts e.backtrace
-        failure("#{e.message}:<br>#{e.backtrace.join("\n")}")
+        emsg = e.message
+        emsg += ":\n#{e.backtrace.join("\n")}" if @debug_errors
+        failure(emsg)
       else
         return true
       end
@@ -1792,6 +1814,7 @@ module Rsel
     # @since 0.0.6
     #
     def failure(reason='')
+      @screenshot = @browser.capture_screenshot_to_string() if !@found_failure && @screenshot_on_failure
       @found_failure = true
       @errors.push(reason) unless (reason == '')
       return false
