@@ -12,7 +12,7 @@ describe Rsel::Support do
         "css=div#foo_bar",
       ]
       locators.each do |locator|
-        loc(locator).should == locator
+        expect(loc(locator)).to eq locator
       end
     end
 
@@ -22,121 +22,111 @@ describe Rsel::Support do
         "first_name",
       ]
       locators.each do |locator|
-        loc(locator, 'field').should =~ /^xpath=/
+        expect(loc(locator, 'field')).to match(/^xpath=/)
       end
     end
 
     it "requires a non-empty locator" do
-      lambda do
-        loc('')
-      end.should raise_error
+      expect { loc('') }.to raise_error
     end
 
     it "requires non-empty element kind for Rsel-style locators" do
-      lambda do
-        loc('foo')
-      end.should raise_error
+      expect { loc('foo') }.to raise_error
     end
 
     it "requires a known element kind for Rsel-style locators" do
-      lambda do
-        loc('foo', 'bogus_kind')
-      end.should raise_error
+      expect { loc('foo', 'bogus_kind') }.to raise_error
     end
 
     it "accepts within for css locators" do
-      loc("css=.boss", '', {:within => "employees"}).should == "css=#employees .boss"
+      expect(loc("css=.boss", '', {:within => "employees"})).to eq "css=#employees .boss"
     end
 
     it "accepts in_row for css locators" do
-      loc("css=td.salary", '', {:in_row => "Eric"}).should == "css=tr:contains(\"Eric\") td.salary"
+      expect(loc("css=td.salary", '', {:in_row => "Eric"})).to eq "css=tr:contains(\"Eric\") td.salary"
     end
   end
 
   describe "#xpath" do
     it "requires a valid, non-empty kind" do
-      lambda do
-        xpath('junk', 'hello')
-      end.should raise_error
+      expect { xpath('junk', 'hello') }.to raise_error
 
-      lambda do
-        xpath('', 'hello')
-      end.should raise_error
+      expect { xpath('', 'hello') }.to raise_error
     end
 
     it "applies within scope" do
       # Quick-and-dirty: Just ensure the scoping phrase appears in the xpath
-      xpath('link', 'Edit', :within => '#first_div').should include('#first_div')
+      expect(xpath('link', 'Edit', :within => '#first_div')).to include('#first_div')
     end
 
     it "applies in_row scope" do
       # Quick-and-dirty: Just ensure the scoping phrase appears in the xpath
-      xpath('link', 'Edit', :in_row => 'Eric').should include('Eric')
+      expect(xpath('link', 'Edit', :in_row => 'Eric')).to include('Eric')
     end
   end
 
   describe "#escape_for_hash" do
     context "escapes when" do
       it "escapes semicolon to colon" do
-        escape_for_hash('\\' + ";").should == ":"
+        expect(escape_for_hash('\\' + ";")).to eq ":"
       end
 
       it "escapes single-quote to comma" do
-        escape_for_hash('\\' + "'").should == ","
+        expect(escape_for_hash('\\' + "'")).to eq ","
       end
 
       it "escapes left-bracket to left-brace" do
-        escape_for_hash('\\' + "[").should == "{"
+        expect(escape_for_hash('\\' + "[")).to eq "{"
       end
 
       it "escapes right-bracket to right-brace" do
-        escape_for_hash('\\' + "]").should == "}"
+        expect(escape_for_hash('\\' + "]")).to eq "}"
       end
 
       it "escapes backslash" do
-        escape_for_hash('\\\\').should == '\\'
+        expect(escape_for_hash('\\\\')).to eq '\\'
       end
 
       it "handles a DOS path" do
-        escape_for_hash('c\\;\\*.bat').should == 'c:\\*.bat'
+        expect(escape_for_hash('c\\;\\*.bat')).to eq 'c:\\*.bat'
       end
     end
 
     context "does not escape when" do
       it "sees a lone semicolon" do
-        escape_for_hash(";").should == ";"
+        expect(escape_for_hash(";")).to eq ";"
       end
 
       it "sees a lone single-quote" do
-        escape_for_hash("'").should == "'"
+        expect(escape_for_hash("'")).to eq "'"
       end
 
       it "sees a lone left-bracket" do
-        escape_for_hash("[").should == "["
+        expect(escape_for_hash("[")).to eq "["
       end
 
       it "sees a lone right-bracket" do
-        escape_for_hash("]").should == "]"
+        expect(escape_for_hash("]")).to eq "]"
       end
 
       it "sees a backslash before semicolon" do
-        escape_for_hash('\\\\' + ";").should == "\\;"
+        expect(escape_for_hash('\\\\' + ";")).to eq "\\;"
       end
 
       it "sees a backslash before single-quote" do
-        escape_for_hash('\\\\' + "'").should == "\\'"
+        expect(escape_for_hash('\\\\' + "'")).to eq "\\'"
       end
 
       it "sees a backslash before left-bracket" do
-        escape_for_hash('\\\\' + "[").should == "\\["
+        expect(escape_for_hash('\\\\' + "[")).to eq "\\["
       end
 
       it "sees a backslash before right-bracket" do
-        escape_for_hash('\\\\' + "]").should == "\\]"
+        expect(escape_for_hash('\\\\' + "]")).to eq "\\]"
       end
 
       it "handles a single backslash" do
-        escape_for_hash('\\').should == '\\'
+        expect(escape_for_hash('\\')).to eq '\\'
       end
     end
 
@@ -149,10 +139,10 @@ describe Rsel::Support do
         "PIN" => "123",
       }
       normalize_ids(ids)
-      ids.should == {
+      expect(ids).to eq({
         "first name" => "Eric",
         "pin" => "123",
-      }
+      })
     end
 
     it "escapes all keys using #escape_for_hash" do
@@ -160,9 +150,9 @@ describe Rsel::Support do
         'with\[brackets\]' => 'Foo',
       }
       normalize_ids(ids)
-      ids.should == {
+      expect(ids).to eq({
         'with{brackets}' => 'Foo',
-      }
+      })
     end
 
     it "escapes values but leaves case alone" do
@@ -170,21 +160,21 @@ describe Rsel::Support do
         'foo' => 'with\;colon',
       }
       normalize_ids(ids)
-      ids.should == {
+      expect(ids).to eq({
         'foo' => 'with:colon',
-      }
+      })
     end
   end
 
   describe "#strip_tags" do
     it "strips anchor tags from links" do
       html = '<a href="http://example.com/">http://example.com</a>'
-      strip_tags(html).should == 'http://example.com'
+      expect(strip_tags(html)).to eq 'http://example.com'
     end
 
     it "leaves plain text alone" do
       html = 'http://example.com'
-      strip_tags(html).should == 'http://example.com'
+      expect(strip_tags(html)).to eq 'http://example.com'
     end
   end
 
@@ -194,12 +184,12 @@ describe Rsel::Support do
       bar = XPath::HTML.option('bar')
       baz = XPath::HTML.option('baz')
       union = XPath::Union.new(foo, bar, baz)
-      xpath_expressions(union).should == [foo, bar, baz]
+      expect(xpath_expressions(union)).to eq [foo, bar, baz]
     end
 
     it "returns [expr] for a single XPath::Expression" do
       foo = XPath::HTML.option('foo')
-      xpath_expressions(foo).should == [foo]
+      expect(xpath_expressions(foo)).to eq [foo]
     end
   end
 
@@ -208,24 +198,24 @@ describe Rsel::Support do
       row = XPath::HTML.send('table_row', 'foo')
       link = XPath::HTML.send('link', 'bar')
       union = XPath::Union.new(row.child(link))
-      apply_scope(row, link).should == union.to_s
+      expect(apply_scope(row, link)).to eq union.to_s
     end
   end
 
   describe "#string_is_true?" do
     it "returns true for true strings" do
       ["", "1", "check", "checked", "on", "select", "selected", "true", "yes"].each do |s|
-        string_is_true?(s).should be true
+        expect(string_is_true?(s)).to be true
       end
     end
     it "is case-insensitive" do
       ["Check", "Checked", "On", "Select", "Selected", "True", "Yes"].each do |s|
-        string_is_true?(s).should be true
+        expect(string_is_true?(s)).to be true
       end
     end
     it "returns false for other strings" do
       ["False", "WRONG!", "NoNSEnSe$%$@^@!^!%", "0", "null"].each do |s|
-        string_is_true?(s).should be false
+        expect(string_is_true?(s)).to be false
       end
     end
   end
@@ -233,62 +223,62 @@ describe Rsel::Support do
   describe "#selenium_compare" do
     context "returns true when" do
       it "gets most identical strings" do
-        selenium_compare("", "").should be true
-        selenium_compare("This", "This").should be true
+        expect(selenium_compare("", "")).to be true
+        expect(selenium_compare("This", "This")).to be true
       end
       it "gets exact:ly identical strings" do
-        selenium_compare("", "exact:").should be true
-        selenium_compare("This", "exact:This").should be true
+        expect(selenium_compare("", "exact:")).to be true
+        expect(selenium_compare("This", "exact:This")).to be true
       end
       it "gets matching globs" do
-        selenium_compare("", "*").should be true
-        selenium_compare("anything", "*").should be true
-        selenium_compare("Neffing", "Nef*").should be true
+        expect(selenium_compare("", "*")).to be true
+        expect(selenium_compare("anything", "*")).to be true
+        expect(selenium_compare("Neffing", "Nef*")).to be true
       end
       it "gets matching labeled globs" do
-        selenium_compare("", "glob:*").should be true
-        selenium_compare("anything", "glob:*").should be true
-        selenium_compare("Neffing", "glob:Nef*").should be true
+        expect(selenium_compare("", "glob:*")).to be true
+        expect(selenium_compare("anything", "glob:*")).to be true
+        expect(selenium_compare("Neffing", "glob:Nef*")).to be true
       end
       it "gets matching regexes" do
-        selenium_compare("", "regexp:.*").should be true
-        selenium_compare("anything", "regexp:.*").should be true
-        selenium_compare("Neffing", "regexp:^Nef[a-z]*$").should be true
+        expect(selenium_compare("", "regexp:.*")).to be true
+        expect(selenium_compare("anything", "regexp:.*")).to be true
+        expect(selenium_compare("Neffing", "regexp:^Nef[a-z]*$")).to be true
       end
       it "gets matching case-insensitive regexes" do
-        selenium_compare("", "regexpi:.*").should be true
-        selenium_compare("Neffing", "regexpi:^nef[A-Z]*$").should be true
+        expect(selenium_compare("", "regexpi:.*")).to be true
+        expect(selenium_compare("Neffing", "regexpi:^nef[A-Z]*$")).to be true
       end
     end
 
     context "returns false when" do
       it "gets most differing strings" do
-        selenium_compare("", "!").should be false
-        selenium_compare("&", "").should be false
-        selenium_compare("This", "That").should be false
+        expect(selenium_compare("", "!")).to be false
+        expect(selenium_compare("&", "")).to be false
+        expect(selenium_compare("This", "That")).to be false
       end
       it "gets exact:ly different strings" do
-        selenium_compare("", "exact:!").should be false
-        selenium_compare("!!", "exact:!").should be false
-        selenium_compare("&", "exact:").should be false
-        selenium_compare("This", "exact:That").should be false
+        expect(selenium_compare("", "exact:!")).to be false
+        expect(selenium_compare("!!", "exact:!")).to be false
+        expect(selenium_compare("&", "exact:")).to be false
+        expect(selenium_compare("This", "exact:That")).to be false
       end
       it "gets non-matching globs" do
-        selenium_compare("No", "?").should be false
-        selenium_compare("Netting", "Nef*").should be false
+        expect(selenium_compare("No", "?")).to be false
+        expect(selenium_compare("Netting", "Nef*")).to be false
       end
       it "gets non-matching labeled globs" do
-        selenium_compare("No", "glob:?").should be false
-        selenium_compare("Netting", "glob:Nef*").should be false
+        expect(selenium_compare("No", "glob:?")).to be false
+        expect(selenium_compare("Netting", "glob:Nef*")).to be false
       end
       it "gets non-matching regexes" do
-        selenium_compare("1", "regexp:^[a-z]*$").should be false
-        selenium_compare("Netting", "regexp:^Nef[a-z]*$").should be false
-        selenium_compare("Neffing", "regexp:^nef[A-Z]*$").should be false
+        expect(selenium_compare("1", "regexp:^[a-z]*$")).to be false
+        expect(selenium_compare("Netting", "regexp:^Nef[a-z]*$")).to be false
+        expect(selenium_compare("Neffing", "regexp:^nef[A-Z]*$")).to be false
       end
       it "gets non-matching case-insensitive regexes" do
-        selenium_compare("1", "regexpi:^[a-z]*$").should be false
-        selenium_compare("Netting", "regexpi:^nef[A-Z]*$").should be false
+        expect(selenium_compare("1", "regexpi:^[a-z]*$")).to be false
+        expect(selenium_compare("Netting", "regexpi:^nef[A-Z]*$")).to be false
       end
     end
   end
@@ -296,164 +286,48 @@ describe Rsel::Support do
   describe "#xpath_sanitize" do
     it "escapes one single-quote" do
       result = xpath_sanitize("Bob's water")
-      result.should == %Q{concat('Bob', "'", 's water')}
+      expect(result).to eq %Q{concat('Bob', "'", 's water')}
     end
 
     it "escapes two single-quotes" do
       result = xpath_sanitize("Bob's on the water's edge")
-      result.should == %Q{concat('Bob', "'", 's on the water', "'", 's edge')}
+      expect(result).to eq %Q{concat('Bob', "'", 's on the water', "'", 's edge')}
     end
 
     it "leaves strings without single-quotes alone" do
       result = xpath_sanitize("bobs in the water")
-      result.should == %Q{'bobs in the water'}
+      expect(result).to eq %Q{'bobs in the water'}
     end
   end
 
   describe "#xpath_row_containing" do
     it "returns an XPath for a table row containing multiple strings" do
       result = xpath_row_containing(['abc', 'def'])
-      result.should == %Q{//tr[contains(., 'abc') and contains(., 'def')]}
+      expect(result).to eq %Q{//tr[contains(., 'abc') and contains(., 'def')]}
     end
   end
 
   describe "#globify" do
     it "leaves `exact:text` unchanged" do
-      globify('exact:text').should == 'exact:text'
+      expect(globify('exact:text')).to eq 'exact:text'
     end
 
     it "leaves `regexp:text` unchanged" do
-      globify('regexp:text').should == 'regexp:text'
+      expect(globify('regexp:text')).to eq 'regexp:text'
     end
 
     it "leaves `regexpi:text` unchanged" do
-      globify('regexpi:text').should == 'regexpi:text'
+      expect(globify('regexpi:text')).to eq 'regexpi:text'
     end
 
     it "converts `glob:text` to `*text*`" do
-      globify('glob:text').should == '*text*'
+      expect(globify('glob:text')).to eq '*text*'
     end
 
     it "adds *...* to text" do
-      globify('text').should == '*text*'
+      expect(globify('text')).to eq '*text*'
     end
   end
 
-  describe "#result_within" do
-    context "returns the result when" do
-      it "block evaluates to true immediately" do
-        result_within(3) do
-          true
-        end.should == true
-      end
-
-      it "block evaluates to a non-false value immediately" do
-        result_within(3) do
-          foo = 'foo'
-        end.should == 'foo'
-      end
-
-      it "block evaluates to false initially, but true within the timeout" do
-        @first_run = true
-        result_within(3) do
-          if @first_run
-            @first_run = false
-            false
-          else
-            true
-          end
-        end.should == true
-      end
-
-      it "block raises an exception, but evaluates true within the timeout" do
-        @first_run = true
-        result_within(3) do
-          if @first_run
-            @first_run = false
-            raise RuntimeError
-          else
-            true
-          end
-        end.should == true
-      end
-    end
-
-    context "returns false when" do
-      it "block evaluates as false every time" do
-        result_within(3) do
-          false
-        end.should be_nil
-      end
-
-      it "block evaluates as nil every time" do
-        result_within(3) do
-          nil
-        end.should be_nil
-      end
-
-      it "block raises an exception every time" do
-        result_within(3) do
-          raise RuntimeError
-        end.should be_nil
-      end
-
-      it "block does not return within the timeout"
-    end
-  end
-
-
-  describe "#failed_within" do
-    context "returns true when" do
-      it "block evaluates to false immediately" do
-        failed_within(3) do
-          false
-        end.should be true
-      end
-
-      it "block evaluates to nil immediately" do
-        failed_within(3) do
-          nil
-        end.should be true
-      end
-
-      it "block evaluates to true initially, but false within the timeout" do
-        @first_run = true
-        failed_within(3) do
-          if @first_run
-            @first_run = false
-            true
-          else
-            false
-          end
-        end.should be true
-      end
-
-      it "block evaluates to true initially, but raises an exception within the timeout" do
-        @first_run = true
-        failed_within(3) do
-          if @first_run
-            @first_run = false
-            true
-          else
-            raise RuntimeError
-          end
-        end.should be true
-      end
-    end
-
-    context "returns false when" do
-      it "block evaluates as true every time" do
-        failed_within(3) do
-          true
-        end.should be false
-      end
-
-      it "block evaluates as true-ish every time" do
-        failed_within(3) do
-          'foo'
-        end.should be false
-      end
-    end
-  end
 end
 
